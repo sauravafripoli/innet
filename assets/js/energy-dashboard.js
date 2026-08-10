@@ -334,7 +334,7 @@
         6
     );
 
-
+    window.INETTEnergyMap = map;
     /*
     |--------------------------------------------------------------------------
     | Base map
@@ -747,15 +747,270 @@
 }
 
 
-    document.addEventListener(
+/* ==========================================================
+   INTELLIGENCE TABS
+========================================================== */
+
+function initEnergyTabs() {
+
+    const buttons = document.querySelectorAll(
+        '[data-energy-tab]'
+    );
+
+    const panels = document.querySelectorAll(
+        '[data-energy-panel]'
+    );
+
+
+    if (!buttons.length || !panels.length) {
+        return;
+    }
+
+
+    function activateTab(
+        tabName,
+        updateUrl = true
+    ) {
+
+        const targetPanel =
+            document.querySelector(
+                `[data-energy-panel="${tabName}"]`
+            );
+
+
+        if (!targetPanel) {
+            return;
+        }
+
+
+        /*
+        ------------------------------------------------------
+        Update tab buttons
+        ------------------------------------------------------
+        */
+
+        buttons.forEach(button => {
+
+            const isActive =
+                button.dataset.energyTab
+                === tabName;
+
+
+            button.classList.toggle(
+                'active',
+                isActive
+            );
+
+
+            button.setAttribute(
+                'aria-selected',
+                isActive
+                    ? 'true'
+                    : 'false'
+            );
+
+        });
+
+
+        /*
+        ------------------------------------------------------
+        Show selected panel
+        ------------------------------------------------------
+        */
+
+        panels.forEach(panel => {
+
+            const isActive =
+                panel.dataset.energyPanel
+                === tabName;
+
+
+            panel.classList.toggle(
+                'active',
+                isActive
+            );
+
+        });
+
+
+        /*
+        ------------------------------------------------------
+        Update URL
+        ------------------------------------------------------
+        */
+
+        if (updateUrl) {
+
+            history.replaceState(
+                null,
+                '',
+                '#' + tabName
+            );
+
+        }
+
+
+        /*
+        ------------------------------------------------------
+        Resize visualisations after tab is visible
+        ------------------------------------------------------
+        */
+
+        requestAnimationFrame(() => {
+
+            /*
+            Leaflet
+            */
+
+            if (
+                tabName === 'geography'
+                && window.INETTEnergyMap
+            ) {
+
+                window.INETTEnergyMap
+                    .invalidateSize();
+
+            }
+
+
+            /*
+            ECharts
+            */
+
+            if (
+                typeof echarts
+                !== 'undefined'
+            ) {
+
+                targetPanel
+                    .querySelectorAll(
+                        '.energy-chart'
+                    )
+                    .forEach(element => {
+
+                        const chart =
+                            echarts
+                                .getInstanceByDom(
+                                    element
+                                );
+
+
+                        if (chart) {
+                            chart.resize();
+                        }
+
+                    });
+
+            }
+
+        });
+
+    }
+
+
+    /*
+    ----------------------------------------------------------
+    Tab clicks
+    ----------------------------------------------------------
+    */
+
+    buttons.forEach(button => {
+
+        button.addEventListener(
+            'click',
+            function () {
+
+                activateTab(
+                    this.dataset.energyTab
+                );
+
+            }
+        );
+
+    });
+
+
+    /*
+    ----------------------------------------------------------
+    Initial tab
+    ----------------------------------------------------------
+    */
+
+    const requestedTab =
+        window.location.hash
+            .replace('#', '')
+            .trim();
+
+
+    const validTab =
+        [...buttons].some(
+            button =>
+                button.dataset.energyTab
+                === requestedTab
+        );
+
+
+    activateTab(
+        validTab
+            ? requestedTab
+            : 'overview',
+        false
+    );
+
+
+    /*
+    ----------------------------------------------------------
+    Browser back / forward / hash changes
+    ----------------------------------------------------------
+    */
+
+    window.addEventListener(
+        'hashchange',
+        function () {
+
+            const tab =
+                window.location.hash
+                    .replace('#', '')
+                    .trim();
+
+
+            activateTab(
+                tab || 'overview',
+                false
+            );
+
+        }
+    );
+
+}
+
+document.addEventListener(
     'DOMContentLoaded',
     function () {
 
+        /*
+        Application navigation
+        */
+
+        initEnergyTabs();
+
+
+        /*
+        Overview charts
+        */
+
         initSubsectorChart();
         initStatusChart();
+
+
+        /*
+        Geography
+        */
+
         initNigeriaMap();
 
     }
 );
+
 
 })();
