@@ -1678,7 +1678,8 @@ window.INETTThemeUrl =
                             </div>
 
 
-                            <div class="energy-list">
+                            <div id="mandate-list"
+                                class="energy-list">
 
                                 <?php foreach (
                                     $mandates
@@ -1688,6 +1689,7 @@ window.INETTThemeUrl =
                                     <div
                                         class="
                                             energy-list-item
+                                            energy-mandate-row
                                         "
                                     >
 
@@ -1728,6 +1730,34 @@ window.INETTThemeUrl =
                                     </div>
 
                                 <?php endforeach; ?>
+
+                            </div>
+                            <div class="energy-pagination">
+
+                                <button
+                                    type="button"
+                                    id="mandate-page-prev"
+                                    class="energy-pagination-button"
+                                >
+                                    Previous
+                                </button>
+
+
+                                <span
+                                    id="mandate-page-info"
+                                    class="energy-pagination-info"
+                                >
+                                    Page 1 of 1
+                                </span>
+
+
+                                <button
+                                    type="button"
+                                    id="mandate-page-next"
+                                    class="energy-pagination-button"
+                                >
+                                    Next
+                                </button>
 
                             </div>
 
@@ -1806,7 +1836,62 @@ window.INETTThemeUrl =
                 </div>
 
             </section>
+            
+            <!-- =========================================================
+                ACTOR DETAIL DRAWER
+            ========================================================== -->
 
+            <div
+                id="actor-drawer-backdrop"
+                class="energy-drawer-backdrop"
+            ></div>
+
+            <aside
+                id="actor-drawer"
+                class="energy-initiative-drawer"
+                aria-hidden="true"
+            >
+
+                <div class="energy-drawer-header">
+
+                    <div>
+
+                        <span class="energy-section-eyebrow">
+                            Actor profile
+                        </span>
+
+                        <h2 id="actor-drawer-title">
+                            Actor
+                        </h2>
+
+                        <span
+                            id="actor-drawer-id"
+                            class="energy-drawer-id"
+                        ></span>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="actor-drawer-close"
+                        class="energy-drawer-close"
+                        aria-label="Close actor profile"
+                    >
+                        &times;
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="actor-drawer-content"
+                    class="energy-drawer-content"
+                >
+                    <!-- JS inserts actor profile here -->
+                </div>
+
+            </aside>
 
         </div>
 

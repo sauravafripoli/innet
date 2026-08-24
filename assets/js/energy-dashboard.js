@@ -1749,6 +1749,185 @@
    ACTORS — ACTIVITY CHART
 ========================================================== */
 
+
+
+    /* ==========================================================
+   MANDATE COVERAGE PAGINATION
+========================================================== */
+
+    let mandatePage = 1;
+
+    const mandatePageSize = 10;
+
+
+    function renderMandatePage() {
+
+        const rows =
+            [
+                ...document.querySelectorAll(
+                    '.energy-mandate-row'
+                )
+            ];
+
+
+        const pageInfo =
+            document.getElementById(
+                'mandate-page-info'
+            );
+
+
+        const previousButton =
+            document.getElementById(
+                'mandate-page-prev'
+            );
+
+
+        const nextButton =
+            document.getElementById(
+                'mandate-page-next'
+            );
+
+
+        if (!rows.length) {
+            return;
+        }
+
+
+        const totalPages =
+            Math.max(
+                1,
+                Math.ceil(
+                    rows.length
+                    / mandatePageSize
+                )
+            );
+
+
+        if (mandatePage > totalPages) {
+            mandatePage = totalPages;
+        }
+
+
+        if (mandatePage < 1) {
+            mandatePage = 1;
+        }
+
+
+        const start =
+            (
+                mandatePage - 1
+            )
+            * mandatePageSize;
+
+
+        const end =
+            start
+            + mandatePageSize;
+
+
+        rows.forEach(
+            (
+                row,
+                index
+            ) => {
+
+                row.style.display =
+                    (
+                        index >= start
+                        && index < end
+                    )
+                        ? ''
+                        : 'none';
+
+            }
+        );
+
+
+        if (pageInfo) {
+
+            pageInfo.textContent =
+                `Page ${mandatePage} of ${totalPages}`;
+
+        }
+
+
+        if (previousButton) {
+
+            previousButton.disabled =
+                mandatePage <= 1;
+
+        }
+
+
+        if (nextButton) {
+
+            nextButton.disabled =
+                mandatePage >= totalPages;
+
+        }
+
+    }
+
+
+
+    function initMandatePagination() {
+
+        const previousButton =
+            document.getElementById(
+                'mandate-page-prev'
+            );
+
+
+        const nextButton =
+            document.getElementById(
+                'mandate-page-next'
+            );
+
+
+        if (previousButton) {
+
+            previousButton.addEventListener(
+                'click',
+                function () {
+
+                    if (mandatePage <= 1) {
+                        return;
+                    }
+
+
+                    mandatePage--;
+
+
+                    renderMandatePage();
+
+                }
+            );
+
+        }
+
+
+        if (nextButton) {
+
+            nextButton.addEventListener(
+                'click',
+                function () {
+
+                    mandatePage++;
+
+
+                    renderMandatePage();
+
+                }
+            );
+
+        }
+
+
+        renderMandatePage();
+
+    }
+
+
     function initActorActivityChart() {
 
         const element =
@@ -1782,7 +1961,9 @@
             chart;
 
 
-        updateActorActivityChart();
+        updateActorActivityChart(
+            data.initiatives || []
+        );
 
 
         window.addEventListener(
@@ -1798,312 +1979,415 @@
 
 
 
-    function updateActorActivityChart() {
+    function updateActorActivityChart(
+    initiatives
+) {
 
-        const chart =
-            window.INETTActorActivityChart;
-
-
-        if (!chart) {
-            return;
-        }
+    const chart =
+        window.INETTActorActivityChart;
 
 
-        /*
-        ----------------------------------------------------------
-        Top actors by initiative participation
-        ----------------------------------------------------------
-        */
-
-        let rows =
-            (data.actors || [])
-                .map(
-                    actor => ({
-
-                        name:
-                            actor.acronym
-                            || actor.organisation_name
-                            || actor.actor_id,
-
-                        organisation:
-                            actor.organisation_name
-                            || '',
-
-                        count:
-                            Number(
-                                actor.initiative_count
-                                || 0
-                            ),
-
-                        states:
-                            Number(
-                                actor.states_reached
-                                || 0
-                            )
-
-                    })
-                )
-                .filter(
-                    actor =>
-                        actor.count > 0
-                )
-                .sort(
-                    (a, b) =>
-                        b.count - a.count
-                )
-                .slice(
-                    0,
-                    10
-                );
+    if (!chart) {
+        return;
+    }
 
 
-        if (!rows.length) {
+    initiatives =
+        initiatives
+        || data.initiatives
+        || [];
 
-            chart.clear();
+
+    /*
+    ----------------------------------------------------------
+    Filtered initiative IDs
+    ----------------------------------------------------------
+    */
+
+    const initiativeIds =
+        new Set(
+            initiatives.map(
+                initiative =>
+                    String(
+                        initiative.initiative_id
+                    )
+            )
+        );
 
 
-            chart.setOption({
+    /*
+    ----------------------------------------------------------
+    Count initiative participation by actor
+    ----------------------------------------------------------
+    */
 
-                title: {
+    const actorActivity = {};
 
-                    text:
-                        'No actor activity data available',
 
-                    left:
-                        'center',
+    (data.initiative_actors || [])
+        .forEach(
+            relationship => {
 
-                    top:
-                        'middle',
+                const initiativeId =
+                    String(
+                        relationship.initiative_id
+                        || ''
+                    );
 
-                    textStyle: {
 
-                        fontSize:
-                            13,
+                const actorId =
+                    String(
+                        relationship.actor_id
+                        || ''
+                    );
 
-                        fontWeight:
-                            400,
 
-                        color:
-                            '#7a817d'
+                if (
+                    !initiativeIds.has(
+                        initiativeId
+                    )
+                    || !actorId
+                ) {
+                    return;
+                }
 
-                    }
+
+                if (!actorActivity[actorId]) {
+
+                    actorActivity[actorId] = {
+                        initiatives: new Set(),
+                        states: new Set()
+                    };
 
                 }
 
-            });
+
+                actorActivity[
+                    actorId
+                ]
+                .initiatives
+                .add(
+                    initiativeId
+                );
 
 
-            return;
+                /*
+                States reached by this actor's
+                currently matching initiatives
+                */
 
-        }
+                const locations =
+                    initiativeLocationsById[
+                        initiativeId
+                    ];
 
 
-        /*
-        ECharts horizontal categories render bottom-up,
-        so reverse for highest actor at the top.
-        */
+                if (locations) {
 
-        rows.reverse();
+                    locations.forEach(
+                        stateCode => {
 
+                            actorActivity[
+                                actorId
+                            ]
+                            .states
+                            .add(
+                                stateCode
+                            );
+
+                        }
+                    );
+
+                }
+
+            }
+        );
+
+
+    /*
+    ----------------------------------------------------------
+    Build chart rows
+    ----------------------------------------------------------
+    */
+
+    let rows =
+        Object.entries(
+            actorActivity
+        )
+        .map(
+            ([actorId, activity]) => {
+
+                const actor =
+                    actorById[
+                        actorId
+                    ];
+
+
+                return {
+
+                    actorId:
+                        actorId,
+
+                    name:
+                        actor
+                            ? (
+                                actor.acronym
+                                || actor.organisation_name
+                                || actorId
+                            )
+                            : actorId,
+
+                    organisation:
+                        actor
+                            ? (
+                                actor.organisation_name
+                                || ''
+                            )
+                            : '',
+
+                    count:
+                        activity
+                            .initiatives
+                            .size,
+
+                    states:
+                        activity
+                            .states
+                            .size
+
+                };
+
+            }
+        )
+        .sort(
+            (a, b) =>
+                b.count - a.count
+        )
+        .slice(
+            0,
+            10
+        );
+
+
+    if (!rows.length) {
 
         chart.clear();
 
 
         chart.setOption({
 
-            animationDuration:
-                350,
+            title: {
 
-
-            tooltip: {
-
-                trigger:
-                    'axis',
-
-                axisPointer: {
-                    type: 'shadow'
-                },
-
-                formatter:
-                    function (params) {
-
-                        const row =
-                            rows[
-                                params[0]
-                                    .dataIndex
-                            ];
-
-
-                        return `
-                            <strong>
-                                ${escapeEnergyHtml(
-                                    row.name
-                                )}
-                            </strong>
-
-                            ${
-                                row.organisation
-                                && row.organisation
-                                    !== row.name
-                                    ? `
-                                        <br>
-                                        ${escapeEnergyHtml(
-                                            row.organisation
-                                        )}
-                                    `
-                                    : ''
-                            }
-
-                            <br><br>
-
-                            ${row.count.toLocaleString()}
-                            initiatives
-
-                            <br>
-
-                            ${row.states.toLocaleString()}
-                            states reached
-                        `;
-
-                    }
-
-            },
-
-
-            grid: {
+                text:
+                    'No actor activity matches these filters',
 
                 left:
-                    20,
-
-                right:
-                    40,
+                    'center',
 
                 top:
-                    10,
+                    'middle',
 
-                bottom:
-                    15,
+                textStyle: {
 
-                containLabel:
-                    true
-
-            },
-
-
-            xAxis: {
-
-                type:
-                    'value',
-
-                minInterval:
-                    1,
-
-                axisLine: {
-                    show: false
-                },
-
-                axisTick: {
-                    show: false
-                },
-
-                splitLine: {
-
-                    lineStyle: {
-                        color: '#edf0ee'
-                    }
+                    fontSize: 13,
+                    fontWeight: 400,
+                    color: '#7a817d'
 
                 }
 
+            }
+
+        });
+
+
+        return;
+    }
+
+
+    rows.reverse();
+
+
+    chart.clear();
+
+
+    chart.setOption({
+
+        animationDuration:
+            350,
+
+
+        tooltip: {
+
+            trigger:
+                'axis',
+
+            axisPointer: {
+                type: 'shadow'
             },
 
+            formatter:
+                function (params) {
 
-            yAxis: {
+                    const row =
+                        rows[
+                            params[0].dataIndex
+                        ];
 
-                type:
-                    'category',
+
+                    return `
+                        <strong>
+                            ${escapeEnergyHtml(
+                                row.name
+                            )}
+                        </strong>
+
+                        ${
+                            row.organisation
+                            && row.organisation !== row.name
+                                ? `
+                                    <br>
+                                    ${escapeEnergyHtml(
+                                        row.organisation
+                                    )}
+                                `
+                                : ''
+                        }
+
+                        <br><br>
+
+                        ${row.count.toLocaleString()}
+                        ${
+                            row.count === 1
+                                ? 'initiative'
+                                : 'initiatives'
+                        }
+
+                        <br>
+
+                        ${row.states.toLocaleString()}
+                        ${
+                            row.states === 1
+                                ? 'state reached'
+                                : 'states reached'
+                        }
+                    `;
+
+                }
+
+        },
+
+
+        grid: {
+
+            left: 20,
+            right: 40,
+            top: 10,
+            bottom: 15,
+
+            containLabel: true
+
+        },
+
+
+        xAxis: {
+
+            type: 'value',
+
+            minInterval: 1,
+
+            axisLine: {
+                show: false
+            },
+
+            axisTick: {
+                show: false
+            },
+
+            splitLine: {
+
+                lineStyle: {
+                    color: '#edf0ee'
+                }
+
+            }
+
+        },
+
+
+        yAxis: {
+
+            type: 'category',
+
+            data:
+                rows.map(
+                    row =>
+                        row.name
+                ),
+
+            axisTick: {
+                show: false
+            },
+
+            axisLine: {
+                show: false
+            },
+
+            axisLabel: {
+                color: '#39413d',
+                fontSize: 11
+            }
+
+        },
+
+
+        series: [
+
+            {
+
+                name: 'Initiatives',
+
+                type: 'bar',
 
                 data:
                     rows.map(
                         row =>
-                            row.name
+                            row.count
                     ),
 
-                axisTick: {
-                    show: false
+                barWidth: 18,
+
+                itemStyle: {
+
+                    color: '#0f6e56',
+
+                    borderRadius:
+                        [0, 5, 5, 0]
+
                 },
 
-                axisLine: {
-                    show: false
-                },
+                label: {
 
-                axisLabel: {
+                    show: true,
 
-                    color:
-                        '#39413d',
+                    position: 'right',
 
-                    fontSize:
-                        11
+                    color: '#39413d',
+
+                    fontSize: 11,
+
+                    fontWeight: 600
 
                 }
 
-            },
+            }
 
+        ]
 
-            series: [
-
-                {
-
-                    name:
-                        'Initiatives',
-
-                    type:
-                        'bar',
-
-                    data:
-                        rows.map(
-                            row =>
-                                row.count
-                        ),
-
-                    barWidth:
-                        18,
-
-                    itemStyle: {
-
-                        color:
-                            '#0f6e56',
-
-                        borderRadius:
-                            [0, 5, 5, 0]
-
-                    },
-
-                    label: {
-
-                        show:
-                            true,
-
-                        position:
-                            'right',
-
-                        color:
-                            '#39413d',
-
-                        fontSize:
-                            11,
-
-                        fontWeight:
-                            600
-
-                    }
-
-                }
-
-            ]
-
-        });
+    });
 
     }
+
+
     /* ==========================================================
    UPDATE OVERVIEW KPIs
 ========================================================== */
@@ -5035,6 +5319,552 @@
 
     }
 
+    /* ==========================================================
+   ACTOR DETAIL DRAWER
+========================================================== */
+
+    function openActorDrawer(
+        actorId
+    ) {
+
+        const actor =
+            actorById[
+                String(actorId)
+            ];
+
+
+        if (!actor) {
+
+            console.warn(
+                'Actor not found:',
+                actorId
+            );
+
+            return;
+
+        }
+
+
+        const drawer =
+            document.getElementById(
+                'actor-drawer'
+            );
+
+
+        const backdrop =
+            document.getElementById(
+                'actor-drawer-backdrop'
+            );
+
+
+        const title =
+            document.getElementById(
+                'actor-drawer-title'
+            );
+
+
+        const idElement =
+            document.getElementById(
+                'actor-drawer-id'
+            );
+
+
+        const content =
+            document.getElementById(
+                'actor-drawer-content'
+            );
+
+
+        if (
+            !drawer
+            || !content
+        ) {
+            return;
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Heading
+        ----------------------------------------------------------
+        */
+
+        if (title) {
+
+            title.textContent =
+                actor.acronym
+                || actor.organisation_name
+                || actor.actor_id;
+
+        }
+
+
+        if (idElement) {
+
+            idElement.textContent =
+                actor.actor_id
+                || '';
+
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Related initiatives
+        ----------------------------------------------------------
+        */
+
+        const relationships =
+            (data.initiative_actors || [])
+                .filter(
+                    relationship =>
+
+                        String(
+                            relationship.actor_id
+                        )
+                        ===
+                        String(
+                            actor.actor_id
+                        )
+                );
+
+
+        const initiativeIds =
+            [
+                ...new Set(
+                    relationships
+                        .map(
+                            relationship =>
+                                String(
+                                    relationship.initiative_id
+                                )
+                        )
+                        .filter(Boolean)
+                )
+            ];
+
+
+        const relatedInitiatives =
+            initiativeIds
+                .map(
+                    initiativeId =>
+                        initiativeById[
+                            initiativeId
+                        ]
+                )
+                .filter(Boolean);
+
+
+        /*
+        ----------------------------------------------------------
+        States reached
+        ----------------------------------------------------------
+        */
+
+        const statesReached =
+            new Set();
+
+
+        relatedInitiatives.forEach(
+            initiative => {
+
+                const locations =
+                    initiativeLocationsById[
+                        initiative.initiative_id
+                    ];
+
+
+                if (!locations) {
+                    return;
+                }
+
+
+                locations.forEach(
+                    stateCode => {
+
+                        statesReached.add(
+                            stateCode
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+        /*
+        ----------------------------------------------------------
+        Subsector coverage
+        ----------------------------------------------------------
+        */
+
+        const subsectors =
+            [
+                ...new Set(
+                    relatedInitiatives
+                        .map(
+                            initiative =>
+                                initiative.primary_subsector
+                        )
+                        .filter(Boolean)
+                )
+            ];
+
+
+        /*
+        ----------------------------------------------------------
+        Render profile
+        ----------------------------------------------------------
+        */
+
+        content.innerHTML = `
+
+            <div class="energy-drawer-badges">
+
+                <span class="energy-drawer-badge">
+                    ${escapeEnergyHtml(
+                        actor.actor_type || 'Actor'
+                    )}
+                </span>
+
+                ${
+                    actor.governance_tier
+                        ? `
+                            <span class="energy-drawer-badge">
+                                ${escapeEnergyHtml(
+                                    actor.governance_tier
+                                )}
+                            </span>
+                        `
+                        : ''
+                }
+
+            </div>
+
+
+            <section class="energy-drawer-section">
+
+                <h3 class="energy-drawer-section-title">
+                    Institution
+                </h3>
+
+
+                <div class="energy-drawer-fields">
+
+                    <div class="energy-drawer-field">
+
+                        <span>
+                            Organisation
+                        </span>
+
+                        <strong>
+                            ${escapeEnergyHtml(
+                                actor.organisation_name
+                                || '—'
+                            )}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="energy-drawer-field">
+
+                        <span>
+                            Acronym
+                        </span>
+
+                        <strong>
+                            ${escapeEnergyHtml(
+                                actor.acronym
+                                || '—'
+                            )}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="energy-drawer-field">
+
+                        <span>
+                            Primary role
+                        </span>
+
+                        <strong>
+                            ${escapeEnergyHtml(
+                                actor.primary_role
+                                || '—'
+                            )}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="energy-drawer-field">
+
+                        <span>
+                            Sub-sector focus
+                        </span>
+
+                        <strong>
+                            ${escapeEnergyHtml(
+                                actor.subsector_focus
+                                || '—'
+                            )}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <section class="energy-drawer-section">
+
+                <h3 class="energy-drawer-section-title">
+                    Mandate
+                </h3>
+
+                <div class="energy-drawer-field">
+
+                    <span>
+                        Mandate summary
+                    </span>
+
+                    <strong>
+                        ${escapeEnergyHtml(
+                            actor.mandate_summary
+                            || '—'
+                        )}
+                    </strong>
+
+                </div>
+
+            </section>
+
+
+            <section class="energy-drawer-section">
+
+                <h3 class="energy-drawer-section-title">
+                    Activity
+                </h3>
+
+
+                <div class="energy-drawer-metrics">
+
+                    <div class="energy-drawer-metric">
+
+                        <span>
+                            Initiatives
+                        </span>
+
+                        <strong>
+                            ${relatedInitiatives.length.toLocaleString()}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="energy-drawer-metric">
+
+                        <span>
+                            States reached
+                        </span>
+
+                        <strong>
+                            ${statesReached.size.toLocaleString()}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <section class="energy-drawer-section">
+
+                <h3 class="energy-drawer-section-title">
+                    Subsector coverage
+                </h3>
+
+
+                <div class="energy-drawer-tags">
+
+                    ${
+                        subsectors.length
+                            ? subsectors
+                                .map(
+                                    subsector => `
+                                        <span class="energy-drawer-tag">
+                                            ${escapeEnergyHtml(
+                                                subsector
+                                            )}
+                                        </span>
+                                    `
+                                )
+                                .join('')
+                            : `
+                                <span class="energy-drawer-tag">
+                                    No subsector activity recorded
+                                </span>
+                            `
+                    }
+
+                </div>
+
+            </section>
+
+
+            <section class="energy-drawer-section">
+
+                <h3 class="energy-drawer-section-title">
+                    Initiative participation
+                </h3>
+
+
+                <div class="energy-drawer-tags">
+
+                    ${
+                        relationships.length
+                            ? relationships
+                                .slice(0, 12)
+                                .map(
+                                    relationship => {
+
+                                        const initiative =
+                                            initiativeById[
+                                                String(
+                                                    relationship.initiative_id
+                                                )
+                                            ];
+
+
+                                        const initiativeName =
+                                            initiative
+                                                ? (
+                                                    initiative.initiative_name
+                                                    || initiative.name
+                                                    || relationship.initiative_id
+                                                )
+                                                : relationship.initiative_id;
+
+
+                                        return `
+                                            <span class="energy-drawer-tag">
+
+                                                ${escapeEnergyHtml(
+                                                    initiativeName
+                                                )}
+
+                                                ${
+                                                    relationship.role
+                                                        ? ' · '
+                                                        + escapeEnergyHtml(
+                                                            relationship.role
+                                                        )
+                                                        : ''
+                                                }
+
+                                            </span>
+                                        `;
+
+                                    }
+                                )
+                                .join('')
+                            : `
+                                <span class="energy-drawer-tag">
+                                    No initiative relationships recorded
+                                </span>
+                            `
+                    }
+
+                </div>
+
+            </section>
+
+        `;
+
+
+        drawer.classList.add(
+            'active'
+        );
+
+
+        drawer.setAttribute(
+            'aria-hidden',
+            'false'
+        );
+
+
+        if (backdrop) {
+
+            backdrop.classList.add(
+                'active'
+            );
+
+        }
+
+    }
+
+
+
+/* ==========================================================
+   CLOSE ACTOR DRAWER
+========================================================== */
+
+    function closeActorDrawer() {
+
+        const drawer =
+            document.getElementById(
+                'actor-drawer'
+            );
+
+
+        const backdrop =
+            document.getElementById(
+                'actor-drawer-backdrop'
+            );
+
+
+        if (
+            drawer
+            && document.activeElement
+            && drawer.contains(
+                document.activeElement
+            )
+        ) {
+
+            document.activeElement.blur();
+
+        }
+
+
+        if (drawer) {
+
+            drawer.classList.remove(
+                'active'
+            );
+
+
+            drawer.setAttribute(
+                'aria-hidden',
+                'true'
+            );
+
+        }
+
+
+        if (backdrop) {
+
+            backdrop.classList.remove(
+                'active'
+            );
+
+        }
+
+    }
 
 
     function renderInitiativeExplorer(
@@ -5894,6 +6724,83 @@
 
 }
 
+/* ==========================================================
+   INIT ACTOR DRAWER
+========================================================== */
+
+    function initActorDrawer() {
+
+        const actorRows =
+            document.querySelectorAll(
+                '.energy-actor-row'
+            );
+
+
+        const closeButton =
+            document.getElementById(
+                'actor-drawer-close'
+            );
+
+
+        const backdrop =
+            document.getElementById(
+                'actor-drawer-backdrop'
+            );
+
+
+        actorRows.forEach(
+            row => {
+
+                row.addEventListener(
+                    'click',
+                    function () {
+
+                        openActorDrawer(
+                            this.dataset.actorId
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+        if (closeButton) {
+
+            closeButton.addEventListener(
+                'click',
+                closeActorDrawer
+            );
+
+        }
+
+
+        if (backdrop) {
+
+            backdrop.addEventListener(
+                'click',
+                closeActorDrawer
+            );
+
+        }
+
+
+        document.addEventListener(
+            'keydown',
+            function (event) {
+
+                if (event.key === 'Escape') {
+
+                    closeActorDrawer();
+
+                }
+
+            }
+        );
+
+    }
+
 
 /* ==========================================================
    PROGRAMMATIC STATE FILTER
@@ -5984,6 +6891,14 @@
                     initiatives
                 );
 
+                                /*
+                Actor intelligence
+                */
+
+                updateActorActivityChart(
+                    initiatives
+                );
+
                 initiativeExplorerPage = 1;
 
                 renderInitiativeExplorer(
@@ -6044,6 +6959,10 @@ document.addEventListener(
         */
 
         initActorActivityChart();
+
+        initMandatePagination();
+
+        initActorDrawer();
 
 
         /*
