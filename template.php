@@ -52,6 +52,18 @@ $allStates =
 
 $actors = $dashboard['actors'] ?? [];
 
+$functions =
+    $dashboard['functions']
+    ?? [];
+
+$actorFunctions =
+    $dashboard['actor_functions']
+    ?? [];
+
+$policyScopes =
+    $dashboard['policy_scopes']
+    ?? [];
+
 $finance = $dashboard['finance'] ?? [];
 
 $financeBySubsector =
@@ -137,6 +149,12 @@ window.INETTEnergyData = <?= json_encode(
         'states' => $allStates,
 
         'actors' => $actors,
+
+        'functions' => $functions,
+
+        'actor_functions' => $actorFunctions,
+
+        'policy_scopes' => $policyScopes,
 
         'finance' => $finance,
 

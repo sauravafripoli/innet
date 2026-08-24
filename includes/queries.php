@@ -328,6 +328,56 @@ function getInitiativeSubsectors(PDO $db): array
     return $stmt->fetchAll();
 }
 
+function getFunctions(PDO $db): array
+{
+    $stmt = $db->query("
+        SELECT
+            function_id,
+            function_name,
+            primary_subsector,
+            typical_value_chain_segment,
+            contestation_note
+        FROM functions
+        ORDER BY function_name
+    ");
+
+    return $stmt->fetchAll();
+}
+
+
+function getActorFunctions(PDO $db): array
+{
+    $stmt = $db->query("
+        SELECT
+            actor_id,
+            function_id,
+            primacy,
+            mandate_policy_id,
+            relationship_note
+        FROM actor_functions
+        ORDER BY actor_id, function_id
+    ");
+
+    return $stmt->fetchAll();
+}
+
+
+function getPolicyScopes(PDO $db): array
+{
+    $stmt = $db->query("
+        SELECT
+            policy_id,
+            subsector,
+            function_id,
+            scope_note
+        FROM policy_scopes
+        ORDER BY policy_id, function_id
+    ");
+
+    return $stmt->fetchAll();
+}
+
+
 
 function getEnergyDashboardData(PDO $db): array
 {
@@ -380,7 +430,24 @@ function getEnergyDashboardData(PDO $db): array
             getInitiativeActors($db),
 
         'initiative_subsectors' =>
-            getInitiativeSubsectors($db)
+            getInitiativeSubsectors($db),
+
+        /*
+        ------------------------------------------------------
+        Institutional network relationships
+        ------------------------------------------------------
+        */
+
+        'functions' =>
+            getFunctions($db),
+
+        'actor_functions' =>
+            getActorFunctions($db),
+
+        'policy_scopes' =>
+            getPolicyScopes($db)
+
+        
     ];
 }
 
