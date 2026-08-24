@@ -246,23 +246,141 @@ function getTargetSummary(PDO $db, int $limit = 8): array
     return $stmt->fetchAll();
 }
 
+function getInitiativeRecords(PDO $db): array
+{
+    $stmt = $db->query("
+        SELECT
+            initiative_id,
+            initiative_name,
+            record_type,
+            primary_subsector,
+            primary_value_chain_segment,
+            primary_technology,
+            grid_relationship,
+            standard_status,
+            status_detail,
+            operational_status,
+            delivery_modality,
+            lead_actor_id,
+            start_year,
+            end_year,
+            total_value_usd,
+            installed_capacity_mw,
+            connections_targeted,
+            connections_verified,
+            scope_type,
+            compact_pillar,
+            etp_linkage,
+            ndc_linkage
+        FROM initiatives
+        ORDER BY initiative_name
+    ");
+
+    return $stmt->fetchAll();
+}
+
+
+function getInitiativeLocations(PDO $db): array
+{
+    $stmt = $db->query("
+        SELECT
+            initiative_id,
+            state_code,
+            coverage_type,
+            scope_type
+        FROM initiative_locations
+    ");
+
+    return $stmt->fetchAll();
+}
+
+
+function getInitiativeActors(PDO $db): array
+{
+    $stmt = $db->query("
+        SELECT
+            ia.initiative_id,
+            ia.actor_id,
+            ia.actor_role,
+            a.organisation_name,
+            a.acronym,
+            a.actor_type
+        FROM initiative_actors ia
+        LEFT JOIN actors a
+            ON a.actor_id = ia.actor_id
+    ");
+
+    return $stmt->fetchAll();
+}
+
+
+function getInitiativeSubsectors(PDO $db): array
+{
+    $stmt = $db->query("
+        SELECT
+            initiative_id,
+            subsector,
+            value_chain_segment,
+            technology
+        FROM initiative_subsectors
+    ");
+
+    return $stmt->fetchAll();
+}
+
 
 function getEnergyDashboardData(PDO $db): array
 {
     return [
         'overview' => getOverviewKpis($db),
-        'subsectors' => getInitiativesBySubsector($db),
-        'statuses' => getInitiativesByStatus($db),
 
-        'states' => getTopStates($db),
-        'all_states' => getAllStates($db),
+        'subsectors' =>
+            getInitiativesBySubsector($db),
 
-        'actors' => getTopActors($db),
-        'finance' => getFinanceSummary($db),
-        'finance_by_subsector' => getFinanceBySubsector($db),
-        'mandates' => getMandateSummary($db),
-        'policies' => getPolicyCoverage($db),
-        'targets' => getTargetSummary($db)
+        'statuses' =>
+            getInitiativesByStatus($db),
+
+        'states' =>
+            getTopStates($db),
+
+        'all_states' =>
+            getAllStates($db),
+
+        'actors' =>
+            getTopActors($db),
+
+        'finance' =>
+            getFinanceSummary($db),
+
+        'finance_by_subsector' =>
+            getFinanceBySubsector($db),
+
+        'mandates' =>
+            getMandateSummary($db),
+
+        'policies' =>
+            getPolicyCoverage($db),
+
+        'targets' =>
+            getTargetSummary($db),
+
+        /*
+        ------------------------------------------------------
+        Client-side analytical relationships
+        ------------------------------------------------------
+        */
+
+        'initiatives' =>
+            getInitiativeRecords($db),
+
+        'initiative_locations' =>
+            getInitiativeLocations($db),
+
+        'initiative_actors' =>
+            getInitiativeActors($db),
+
+        'initiative_subsectors' =>
+            getInitiativeSubsectors($db)
     ];
 }
 

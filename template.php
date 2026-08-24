@@ -140,14 +140,21 @@ window.INETTEnergyData = <?= json_encode(
 
         'finance' => $finance,
 
-        'finance_by_subsector' =>
-            $financeBySubsector,
+        'finance_by_subsector' => $financeBySubsector,
 
         'mandates' => $mandates,
 
         'policies' => $policies,
 
-        'targets' => $targets
+        'targets' => $targets,
+
+        'initiatives' => $dashboard['initiatives'],
+
+        'initiative_locations' => $dashboard['initiative_locations'],
+
+        'initiative_actors' => $dashboard['initiative_actors'],
+
+        'initiative_subsectors' => $dashboard['initiative_subsectors'],
     ],
     JSON_UNESCAPED_UNICODE
     | JSON_UNESCAPED_SLASHES
