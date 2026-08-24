@@ -44,6 +44,8 @@
 
     const actorById = {};
 
+    const initiativeById = {};
+
 
     (data.actors || []).forEach(actor => {
 
@@ -59,6 +61,27 @@
         actorById[actorId] = actor;
 
     });
+
+    
+    (data.initiatives || []).forEach(
+        initiative => {
+
+            const id =
+                String(
+                    initiative.initiative_id || ''
+                ).trim();
+
+
+            if (!id) {
+                return;
+            }
+
+
+            initiativeById[id] =
+                initiative;
+
+        }
+    );
 
 
     /*
@@ -3200,6 +3223,559 @@
     }
 
 
+
+/* ==========================================================
+   BASIC HTML ESCAPING
+========================================================== */
+
+    function escapeEnergyHtml(value) {
+
+        return String(
+            value == null
+                ? ''
+                : value
+        )
+        .replace(
+            /&/g,
+            '&amp;'
+        )
+        .replace(
+            /</g,
+            '&lt;'
+        )
+        .replace(
+            />/g,
+            '&gt;'
+        )
+        .replace(
+            /"/g,
+            '&quot;'
+        )
+        .replace(
+            /'/g,
+            '&#039;'
+        );
+
+    }
+
+    /* ==========================================================
+   INITIATIVE DETAIL DRAWER
+========================================================== */
+
+    function openInitiativeDrawer(
+        initiativeId
+    ) {
+
+        const initiative =
+            initiativeById[
+                String(initiativeId)
+            ];
+
+
+        if (!initiative) {
+
+            console.warn(
+                'Initiative not found:',
+                initiativeId
+            );
+
+            return;
+
+        }
+
+
+        const drawer =
+            document.getElementById(
+                'initiative-drawer'
+            );
+
+
+        const backdrop =
+            document.getElementById(
+                'initiative-drawer-backdrop'
+            );
+
+
+        const title =
+            document.getElementById(
+                'initiative-drawer-title'
+            );
+
+
+        const idElement =
+            document.getElementById(
+                'initiative-drawer-id'
+            );
+
+
+        const content =
+            document.getElementById(
+                'initiative-drawer-content'
+            );
+
+
+        if (
+            !drawer
+            || !content
+        ) {
+            return;
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Heading
+        ----------------------------------------------------------
+        */
+
+        if (title) {
+
+            title.textContent =
+                initiative.initiative_name
+                || initiative.name
+                || initiative.initiative_id;
+
+        }
+
+
+        if (idElement) {
+
+            idElement.textContent =
+                initiative.initiative_id
+                || '';
+
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Related geography
+        ----------------------------------------------------------
+        */
+
+        const locations =
+            (
+                data.initiative_locations
+                || []
+            )
+            .filter(
+                location =>
+
+                    String(
+                        location.initiative_id
+                    )
+                    ===
+                    String(
+                        initiative.initiative_id
+                    )
+            );
+
+
+        const stateCodes =
+            [
+                ...new Set(
+                    locations
+                        .map(
+                            location =>
+                                location.state_code
+                        )
+                        .filter(Boolean)
+                )
+            ];
+
+
+        /*
+        ----------------------------------------------------------
+        Related actors
+        ----------------------------------------------------------
+        */
+
+        const relationships =
+            (
+                data.initiative_actors
+                || []
+            )
+            .filter(
+                relationship =>
+
+                    String(
+                        relationship.initiative_id
+                    )
+                    ===
+                    String(
+                        initiative.initiative_id
+                    )
+            );
+
+
+        /*
+        ----------------------------------------------------------
+        Display values
+        ----------------------------------------------------------
+        */
+
+        const leadActor =
+            getInitiativeLeadActor(
+                initiative
+            );
+
+
+        const projectValue =
+            formatExplorerMoney(
+                initiative.total_value_usd
+            );
+
+
+        /*
+        ----------------------------------------------------------
+        Render
+        ----------------------------------------------------------
+        */
+
+        content.innerHTML = `
+
+            <div class="energy-drawer-badges">
+
+                <span class="energy-drawer-badge">
+                    ${escapeEnergyHtml(
+                        initiative.standard_status || 'Unknown status'
+                    )}
+                </span>
+
+                <span class="energy-drawer-badge">
+                    ${escapeEnergyHtml(
+                        initiative.primary_subsector || 'Unclassified'
+                    )}
+                </span>
+
+            </div>
+
+
+            <section class="energy-drawer-section">
+
+                <h3 class="energy-drawer-section-title">
+                    Overview
+                </h3>
+
+
+                <div class="energy-drawer-fields">
+
+                    <div class="energy-drawer-field">
+                        <span>Technology</span>
+                        <strong>
+                            ${escapeEnergyHtml(
+                                initiative.primary_technology || '—'
+                            )}
+                        </strong>
+                    </div>
+
+
+                    <div class="energy-drawer-field">
+                        <span>Value chain</span>
+                        <strong>
+                            ${escapeEnergyHtml(
+                                initiative.primary_value_chain_segment || '—'
+                            )}
+                        </strong>
+                    </div>
+
+
+                    <div class="energy-drawer-field">
+                        <span>Grid relationship</span>
+                        <strong>
+                            ${escapeEnergyHtml(
+                                initiative.grid_relationship || '—'
+                            )}
+                        </strong>
+                    </div>
+
+
+                    <div class="energy-drawer-field">
+                        <span>Delivery modality</span>
+                        <strong>
+                            ${escapeEnergyHtml(
+                                initiative.delivery_modality || '—'
+                            )}
+                        </strong>
+                    </div>
+
+
+                    <div class="energy-drawer-field">
+                        <span>Lead actor</span>
+                        <strong>
+                            ${escapeEnergyHtml(
+                                leadActor
+                            )}
+                        </strong>
+                    </div>
+
+
+                    <div class="energy-drawer-field">
+                        <span>Period</span>
+                        <strong>
+                            ${escapeEnergyHtml(
+                                initiative.start_year
+                                || initiative.start
+                                || '—'
+                            )}
+                            —
+                            ${escapeEnergyHtml(
+                                initiative.end_year
+                                || initiative.end
+                                || 'Ongoing'
+                            )}
+                        </strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <section class="energy-drawer-section">
+
+                <h3 class="energy-drawer-section-title">
+                    Scale
+                </h3>
+
+
+                <div class="energy-drawer-metrics">
+
+                    <div class="energy-drawer-metric">
+                        <span>Project value</span>
+                        <strong>
+                            ${escapeEnergyHtml(
+                                projectValue
+                            )}
+                        </strong>
+                    </div>
+
+
+                    <div class="energy-drawer-metric">
+                        <span>Installed capacity</span>
+                        <strong>
+                            ${
+                                initiative.installed_capacity_mw
+                                    ? escapeEnergyHtml(
+                                        initiative.installed_capacity_mw
+                                    ) + ' MW'
+                                    : '—'
+                            }
+                        </strong>
+                    </div>
+
+
+                    <div class="energy-drawer-metric">
+                        <span>Connections targeted</span>
+                        <strong>
+                            ${
+                                Number(
+                                    initiative.connections_targeted || 0
+                                )
+                                .toLocaleString()
+                            }
+                        </strong>
+                    </div>
+
+
+                    <div class="energy-drawer-metric">
+                        <span>Connections verified</span>
+                        <strong>
+                            ${
+                                Number(
+                                    initiative.connections_verified || 0
+                                )
+                                .toLocaleString()
+                            }
+                        </strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <section class="energy-drawer-section">
+
+                <h3 class="energy-drawer-section-title">
+                    Geography
+                </h3>
+
+
+                <div class="energy-drawer-tags">
+
+                    ${
+                        stateCodes.length
+                            ? stateCodes
+                                .map(
+                                    code => `
+                                        <span class="energy-drawer-tag">
+                                            ${escapeEnergyHtml(code)}
+                                        </span>
+                                    `
+                                )
+                                .join('')
+                            : `
+                                <span class="energy-drawer-tag">
+                                    No state-level locations recorded
+                                </span>
+                            `
+                    }
+
+                </div>
+
+            </section>
+
+
+            <section class="energy-drawer-section">
+
+                <h3 class="energy-drawer-section-title">
+                    Participation
+                </h3>
+
+
+                <div class="energy-drawer-tags">
+
+                    ${
+                        relationships.length
+                            ? relationships
+                                .map(
+                                    relationship => `
+                                        <span class="energy-drawer-tag">
+                                            ${escapeEnergyHtml(
+                                                relationship.actor_id
+                                            )}
+
+                                            ${
+                                                relationship.role
+                                                    ? ' · '
+                                                    + escapeEnergyHtml(
+                                                        relationship.role
+                                                    )
+                                                    : ''
+                                            }
+                                        </span>
+                                    `
+                                )
+                                .join('')
+                            : `
+                                <span class="energy-drawer-tag">
+                                    ${escapeEnergyHtml(leadActor)}
+                                </span>
+                            `
+                    }
+
+                </div>
+
+            </section>
+
+        `;
+
+
+        /*
+        ----------------------------------------------------------
+        Open
+        ----------------------------------------------------------
+        */
+
+        drawer.classList.add(
+            'active'
+        );
+
+
+        drawer.setAttribute(
+            'aria-hidden',
+            'false'
+        );
+
+
+        if (backdrop) {
+
+            backdrop.classList.add(
+                'active'
+            );
+
+        }
+
+    }
+
+
+/* ==========================================================
+   CLOSE DRAWER
+========================================================== */
+
+    function closeInitiativeDrawer() {
+
+    const drawer =
+        document.getElementById(
+            'initiative-drawer'
+        );
+
+
+    const backdrop =
+        document.getElementById(
+            'initiative-drawer-backdrop'
+        );
+
+
+    /*
+    ----------------------------------------------------------
+    Remove focus from anything inside the drawer first
+    ----------------------------------------------------------
+    */
+
+    if (
+        drawer
+        && document.activeElement
+        && drawer.contains(
+            document.activeElement
+        )
+    ) {
+
+        document.activeElement.blur();
+
+    }
+
+
+    /*
+    ----------------------------------------------------------
+    Close drawer
+    ----------------------------------------------------------
+    */
+
+    if (drawer) {
+
+        drawer.classList.remove(
+            'active'
+        );
+
+
+        drawer.setAttribute(
+            'aria-hidden',
+            'true'
+        );
+
+    }
+
+
+    /*
+    ----------------------------------------------------------
+    Close backdrop
+    ----------------------------------------------------------
+    */
+
+    if (backdrop) {
+
+        backdrop.classList.remove(
+            'active'
+        );
+
+    }
+
+    }
+
+
+
     function renderInitiativeExplorer(
         initiatives
     ) {
@@ -3523,41 +4099,6 @@
 
 
 /* ==========================================================
-   BASIC HTML ESCAPING
-========================================================== */
-
-    function escapeEnergyHtml(value) {
-
-        return String(
-            value == null
-                ? ''
-                : value
-        )
-        .replace(
-            /&/g,
-            '&amp;'
-        )
-        .replace(
-            /</g,
-            '&lt;'
-        )
-        .replace(
-            />/g,
-            '&gt;'
-        )
-        .replace(
-            /"/g,
-            '&quot;'
-        )
-        .replace(
-            /'/g,
-            '&#039;'
-        );
-
-    }
-
-
-/* ==========================================================
    INIT EXPLORER
 ========================================================== */
 
@@ -3640,6 +4181,37 @@
 
         }
 
+        const tableBody =
+            document.getElementById(
+                'initiative-explorer-body'
+            );
+
+
+        if (tableBody) {
+
+            tableBody.addEventListener(
+                'click',
+                function (event) {
+
+                    const row =
+                        event.target.closest(
+                            'tr[data-initiative-id]'
+                        );
+
+
+                    if (!row) {
+                        return;
+                    }
+
+
+                    openInitiativeDrawer(
+                        row.dataset.initiativeId
+                    );
+
+                }
+            );
+
+        }
 
         /*
         Initial full dataset
@@ -3647,6 +4219,50 @@
 
         renderInitiativeExplorer(
             data.initiatives || []
+        );
+
+        const drawerClose =
+            document.getElementById(
+                'initiative-drawer-close'
+            );
+
+
+        const drawerBackdrop =
+            document.getElementById(
+                'initiative-drawer-backdrop'
+            );
+
+
+        if (drawerClose) {
+
+            drawerClose.addEventListener(
+                'click',
+                closeInitiativeDrawer
+            );
+
+        }
+
+
+        if (drawerBackdrop) {
+
+            drawerBackdrop.addEventListener(
+                'click',
+                closeInitiativeDrawer
+            );
+
+        }
+
+        document.addEventListener(
+            'keydown',
+            function (event) {
+
+                if (event.key === 'Escape') {
+
+                    closeInitiativeDrawer();
+
+                }
+
+            }
         );
 
     }

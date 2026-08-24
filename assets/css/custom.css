@@ -787,3 +787,286 @@ button.energy-list-item:hover {
 
     font-size: 12px;
 }
+
+/* ==========================================================
+   INITIATIVE DETAIL DRAWER
+========================================================== */
+
+.energy-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1998;
+
+    background: rgba(13, 27, 22, .35);
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition:
+        opacity .25s ease,
+        visibility .25s ease;
+}
+
+
+.energy-drawer-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+.energy-initiative-drawer {
+    position: fixed;
+
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    z-index: 1999;
+
+    width: min(520px, 92vw);
+
+    background: #fff;
+
+    box-shadow:
+        -15px 0 50px rgba(0, 0, 0, .14);
+
+    transform: translateX(100%);
+
+    transition:
+        transform .3s ease;
+
+    overflow-y: auto;
+}
+
+
+.energy-initiative-drawer.active {
+    transform: translateX(0);
+}
+
+
+.energy-drawer-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+
+    padding: 26px 28px;
+
+    background: #fff;
+
+    border-bottom: 1px solid #e7ebe8;
+}
+
+
+.energy-drawer-header h2 {
+    margin: 4px 0 4px;
+
+    font-size: 24px;
+    line-height: 1.25;
+}
+
+
+.energy-drawer-id {
+    color: #78817c;
+    font-size: 12px;
+}
+
+
+.energy-drawer-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 38px;
+
+    width: 38px;
+    height: 38px;
+
+    padding: 0;
+
+    border: 1px solid #dde3df;
+    border-radius: 50%;
+
+    background: #fff;
+    color: #243029;
+
+    font-size: 25px;
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+
+.energy-drawer-close:hover {
+    background: #f3f6f4;
+}
+
+
+.energy-drawer-content {
+    padding: 26px 28px 50px;
+}
+
+
+/* Drawer sections */
+
+.energy-drawer-section {
+    padding: 22px 0;
+
+    border-bottom: 1px solid #edf0ee;
+}
+
+
+.energy-drawer-section:first-child {
+    padding-top: 0;
+}
+
+
+.energy-drawer-section:last-child {
+    border-bottom: 0;
+}
+
+
+.energy-drawer-section-title {
+    margin: 0 0 14px;
+
+    color: #69736d;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: .07em;
+    text-transform: uppercase;
+}
+
+
+/* Main status badges */
+
+.energy-drawer-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+
+    margin-bottom: 18px;
+}
+
+
+.energy-drawer-badge {
+    display: inline-flex;
+
+    padding: 6px 10px;
+
+    border-radius: 999px;
+
+    background: #e4f0eb;
+    color: #245445;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+/* Key/value fields */
+
+.energy-drawer-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 20px;
+}
+
+
+.energy-drawer-field span {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #7a827e;
+
+    font-size: 11px;
+}
+
+
+.energy-drawer-field strong {
+    display: block;
+
+    color: #242a27;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    line-height: 1.45;
+}
+
+
+/* Larger metric cards */
+
+.energy-drawer-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+
+.energy-drawer-metric {
+    padding: 14px;
+
+    border-radius: 9px;
+
+    background: #f3f7f5;
+}
+
+
+.energy-drawer-metric span {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #737c77;
+
+    font-size: 11px;
+}
+
+
+.energy-drawer-metric strong {
+    font-size: 18px;
+}
+
+
+/* Tags */
+
+.energy-drawer-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+
+.energy-drawer-tag {
+    display: inline-flex;
+
+    padding: 5px 8px;
+
+    border-radius: 6px;
+
+    background: #f0f3f1;
+
+    color: #4c5751;
+
+    font-size: 11px;
+}
+
+
+@media (max-width: 520px) {
+
+    .energy-initiative-drawer {
+        width: 100%;
+    }
+
+    .energy-drawer-fields {
+        grid-template-columns: 1fr;
+    }
+
+}

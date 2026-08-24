@@ -1413,6 +1413,58 @@ window.INETTThemeUrl =
 
             </section>
 
+            <!-- =========================================================
+                INITIATIVE DETAIL DRAWER
+            ========================================================== -->
+
+            <div
+                id="initiative-drawer-backdrop"
+                class="energy-drawer-backdrop"
+            ></div>
+
+            <aside
+                id="initiative-drawer"
+                class="energy-initiative-drawer"
+                aria-hidden="true"
+            >
+
+                <div class="energy-drawer-header">
+
+                    <div>
+                        <span class="energy-section-eyebrow">
+                            Initiative profile
+                        </span>
+
+                        <h2 id="initiative-drawer-title">
+                            Initiative
+                        </h2>
+
+                        <span
+                            id="initiative-drawer-id"
+                            class="energy-drawer-id"
+                        ></span>
+                    </div>
+
+                    <button
+                        type="button"
+                        id="initiative-drawer-close"
+                        class="energy-drawer-close"
+                        aria-label="Close initiative profile"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="initiative-drawer-content"
+                    class="energy-drawer-content"
+                >
+                    <!-- JS inserts initiative details here -->
+                </div>
+
+            </aside>
 
         </div>
 
