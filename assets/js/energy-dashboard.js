@@ -6565,6 +6565,34 @@
 
                 }
 
+                /*
+                    ==================================================
+                    ACTORS / INSTITUTIONAL NETWORK
+                    ==================================================
+                    */
+
+                    if (
+                        tabName === 'actors'
+                    ) {
+
+                        setTimeout(
+                            function () {
+
+                                if (
+                                    !window
+                                        .INETTInstitutionalNetwork
+                                ) {
+
+                                    initInstitutionalNetwork();
+
+                                }
+
+                            },
+                            120
+                        );
+
+                    }
+
 
                 /*
                 ==================================================
@@ -6798,6 +6826,1096 @@
 
             }
         );
+
+    }
+
+    /* ==========================================================
+   INSTITUTIONAL NETWORK — D3
+========================================================== */
+
+    function initInstitutionalNetwork() {
+
+        const container =
+            document.getElementById(
+                'actor-network'
+            );
+
+
+        if (
+            !container
+            || typeof d3 === 'undefined'
+        ) {
+            return;
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Clear previous network
+        ----------------------------------------------------------
+        */
+
+        container.innerHTML = '';
+
+
+        /*
+        ----------------------------------------------------------
+        Build lookup tables
+        ----------------------------------------------------------
+        */
+
+        const functionsById = {};
+
+
+        (data.functions || [])
+            .forEach(
+                func => {
+
+                    functionsById[
+                        String(
+                            func.function_id
+                        )
+                    ] = func;
+
+                }
+            );
+
+
+        /*
+        ----------------------------------------------------------
+        Nodes and links
+        ----------------------------------------------------------
+        */
+
+        const nodeMap =
+            new Map();
+
+
+        const links = [];
+
+
+        function addNode(
+            id,
+            type,
+            label,
+            raw
+        ) {
+
+            if (!nodeMap.has(id)) {
+
+                nodeMap.set(
+                    id,
+                    {
+                        id: id,
+                        type: type,
+                        label: label,
+                        raw: raw || null
+                    }
+                );
+
+            }
+
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Actor → Function
+        ----------------------------------------------------------
+        */
+
+        (data.actor_functions || [])
+            .forEach(
+                relationship => {
+
+                    const actorId =
+                        String(
+                            relationship.actor_id
+                            || ''
+                        );
+
+
+                    const functionId =
+                        String(
+                            relationship.function_id
+                            || ''
+                        );
+
+
+                    if (
+                        !actorId
+                        || !functionId
+                    ) {
+                        return;
+                    }
+
+
+                    const actor =
+                        actorById[
+                            actorId
+                        ];
+
+
+                    const func =
+                        functionsById[
+                            functionId
+                        ];
+
+
+                    const actorLabel =
+                        actor
+                            ? (
+                                actor.acronym
+                                || actor.organisation_name
+                                || actorId
+                            )
+                            : actorId;
+
+
+                    const functionLabel =
+                        func
+                            ? (
+                                func.function_name
+                                || functionId
+                            )
+                            : functionId;
+
+
+                    addNode(
+                        'actor:' + actorId,
+                        'actor',
+                        actorLabel,
+                        actor
+                    );
+
+
+                    addNode(
+                        'function:' + functionId,
+                        'function',
+                        functionLabel,
+                        func
+                    );
+
+
+                    links.push({
+
+                        source:
+                            'actor:' + actorId,
+
+                        target:
+                            'function:' + functionId,
+
+                        type:
+                            'actor-function',
+
+                        primacy:
+                            relationship.primacy
+                            || '',
+
+                        policyId:
+                            relationship.mandate_policy_id
+                            || ''
+
+                    });
+
+                }
+            );
+
+
+        /*
+        ----------------------------------------------------------
+        Policy → Function
+        ----------------------------------------------------------
+        */
+
+        (data.policy_scopes || [])
+            .forEach(
+                scope => {
+
+                    const policyId =
+                        String(
+                            scope.policy_id
+                            || ''
+                        );
+
+
+                    const functionId =
+                        String(
+                            scope.function_id
+                            || ''
+                        );
+
+
+                    if (
+                        !policyId
+                        || !functionId
+                    ) {
+                        return;
+                    }
+
+
+                    const func =
+                        functionsById[
+                            functionId
+                        ];
+
+
+                    const policy =
+                        (data.policies || [])
+                            .find(
+                                item =>
+                                    String(
+                                        item.policy_id
+                                    )
+                                    === policyId
+                            );
+
+
+                    const policyLabel =
+                        policy
+                            ? (
+                                policy.short_name
+                                || policy.instrument_name
+                                || policyId
+                            )
+                            : policyId;
+
+
+                    const functionLabel =
+                        func
+                            ? (
+                                func.function_name
+                                || functionId
+                            )
+                            : functionId;
+
+
+                    addNode(
+                        'policy:' + policyId,
+                        'policy',
+                        policyLabel,
+                        policy
+                    );
+
+
+                    addNode(
+                        'function:' + functionId,
+                        'function',
+                        functionLabel,
+                        func
+                    );
+
+
+                    links.push({
+
+                        source:
+                            'policy:' + policyId,
+
+                        target:
+                            'function:' + functionId,
+
+                        type:
+                            'policy-function',
+
+                        subsector:
+                            scope.subsector
+                            || ''
+
+                    });
+
+                }
+            );
+
+
+        const nodes =
+            Array.from(
+                nodeMap.values()
+            );
+
+
+        /*
+        ----------------------------------------------------------
+        Empty state
+        ----------------------------------------------------------
+        */
+
+        if (!nodes.length) {
+
+            container.innerHTML = `
+                <div class="energy-visual-placeholder">
+                    No institutional relationships available.
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Dimensions
+        ----------------------------------------------------------
+        */
+
+        const width =
+            container.clientWidth
+            || 1000;
+
+
+        const height =
+            container.clientHeight
+            || 620;
+
+
+        /*
+        ----------------------------------------------------------
+        SVG
+        ----------------------------------------------------------
+        */
+
+        const svg =
+            d3.select(
+                container
+            )
+            .append(
+                'svg'
+            )
+            .attr(
+                'viewBox',
+                `0 0 ${width} ${height}`
+            );
+
+
+        /*
+        ----------------------------------------------------------
+        Zoomable canvas
+        ----------------------------------------------------------
+        */
+
+        const canvas =
+            svg.append(
+                'g'
+            );
+
+
+        svg.call(
+
+            d3.zoom()
+                .scaleExtent(
+                    [0.5, 3]
+                )
+                .on(
+                    'zoom',
+                    event => {
+
+                        canvas.attr(
+                            'transform',
+                            event.transform
+                        );
+
+                    }
+                )
+
+        );
+
+
+        /*
+        ----------------------------------------------------------
+        Tooltip
+        ----------------------------------------------------------
+        */
+
+        const tooltip =
+            document.createElement(
+                'div'
+            );
+
+
+        tooltip.className =
+            'energy-network-tooltip';
+
+
+        container.appendChild(
+            tooltip
+        );
+
+
+        /*
+        ----------------------------------------------------------
+        Links
+        ----------------------------------------------------------
+        */
+
+        const link =
+            canvas
+                .append(
+                    'g'
+                )
+                .selectAll(
+                    'line'
+                )
+                .data(
+                    links
+                )
+                .join(
+                    'line'
+                )
+                .attr(
+                    'class',
+                    d =>
+                        d.type
+                        === 'policy-function'
+                            ? 'energy-network-link policy-link'
+                            : 'energy-network-link'
+                );
+
+
+        /*
+        ----------------------------------------------------------
+        Nodes
+        ----------------------------------------------------------
+        */
+
+        const node =
+            canvas
+                .append(
+                    'g'
+                )
+                .selectAll(
+                    'g'
+                )
+                .data(
+                    nodes
+                )
+                .join(
+                    'g'
+                )
+                .attr(
+                    'class',
+                    'energy-network-node'
+                );
+
+
+        /*
+        ----------------------------------------------------------
+        Node circles
+        ----------------------------------------------------------
+        */
+
+        node.append(
+            'circle'
+        )
+        .attr(
+            'r',
+            d => {
+
+                if (
+                    d.type === 'function'
+                ) {
+                    return 12;
+                }
+
+
+                if (
+                    d.type === 'policy'
+                ) {
+                    return 8;
+                }
+
+
+                return 10;
+
+            }
+        )
+        .attr(
+            'fill',
+            d => {
+
+                if (
+                    d.type === 'actor'
+                ) {
+                    return '#0f6e56';
+                }
+
+
+                if (
+                    d.type === 'function'
+                ) {
+                    return '#d79d2a';
+                }
+
+
+                return '#64748b';
+
+            }
+        );
+
+
+        /*
+        ----------------------------------------------------------
+        Labels
+        ----------------------------------------------------------
+        */
+
+        node.append(
+            'text'
+        )
+        .attr(
+            'class',
+            'energy-network-label'
+        )
+        .attr(
+            'x',
+            15
+        )
+        .attr(
+            'y',
+            4
+        )
+        .text(
+            d => {
+
+                const max =
+                    d.type === 'function'
+                        ? 28
+                        : 20;
+
+
+                if (
+                    d.label.length
+                    > max
+                ) {
+
+                    return (
+                        d.label.slice(
+                            0,
+                            max
+                        )
+                        + '…'
+                    );
+
+                }
+
+
+                return d.label;
+
+            }
+        );
+
+
+        /*
+        ----------------------------------------------------------
+        Force simulation
+        ----------------------------------------------------------
+        */
+
+        const simulation =
+            d3.forceSimulation(
+                nodes
+            )
+            .force(
+                'link',
+
+                d3.forceLink(
+                    links
+                )
+                .id(
+                    d => d.id
+                )
+                .distance(
+                    d =>
+                        d.type === 'actor-function'
+                            ? 105
+                            : 85
+                )
+                .strength(
+                    0.45
+                )
+            )
+            .force(
+                'charge',
+
+                d3.forceManyBody()
+                    .strength(
+                        -280
+                    )
+            )
+            .force(
+                'center',
+
+                d3.forceCenter(
+                    width / 2,
+                    height / 2
+                )
+            )
+            .force(
+                'collision',
+
+                d3.forceCollide()
+                    .radius(
+                        d =>
+                            d.type === 'function'
+                                ? 45
+                                : 34
+                    )
+            );
+
+
+        simulation.on(
+            'tick',
+            function () {
+
+                link
+                    .attr(
+                        'x1',
+                        d => d.source.x
+                    )
+                    .attr(
+                        'y1',
+                        d => d.source.y
+                    )
+                    .attr(
+                        'x2',
+                        d => d.target.x
+                    )
+                    .attr(
+                        'y2',
+                        d => d.target.y
+                    );
+
+
+                node.attr(
+                    'transform',
+                    d =>
+                        `translate(${d.x},${d.y})`
+                );
+
+            }
+        );
+
+
+        /*
+        ----------------------------------------------------------
+        Drag
+        ----------------------------------------------------------
+        */
+
+        node.call(
+
+            d3.drag()
+
+                .on(
+                    'start',
+                    function (
+                        event,
+                        d
+                    ) {
+
+                        if (
+                            !event.active
+                        ) {
+
+                            simulation
+                                .alphaTarget(
+                                    0.3
+                                )
+                                .restart();
+
+                        }
+
+
+                        d.fx =
+                            d.x;
+
+
+                        d.fy =
+                            d.y;
+
+                    }
+                )
+
+                .on(
+                    'drag',
+                    function (
+                        event,
+                        d
+                    ) {
+
+                        d.fx =
+                            event.x;
+
+
+                        d.fy =
+                            event.y;
+
+                    }
+                )
+
+                .on(
+                    'end',
+                    function (
+                        event,
+                        d
+                    ) {
+
+                        if (
+                            !event.active
+                        ) {
+
+                            simulation
+                                .alphaTarget(
+                                    0
+                                );
+
+                        }
+
+
+                        d.fx =
+                            null;
+
+
+                        d.fy =
+                            null;
+
+                    }
+                )
+
+        );
+
+
+        /*
+        ----------------------------------------------------------
+        Connected-node highlighting
+        ----------------------------------------------------------
+        */
+
+        function connectedIds(
+            selectedNode
+        ) {
+
+            const ids =
+                new Set(
+                    [
+                        selectedNode.id
+                    ]
+                );
+
+
+            links.forEach(
+                relationship => {
+
+                    const sourceId =
+                        typeof relationship.source
+                        === 'object'
+                            ? relationship.source.id
+                            : relationship.source;
+
+
+                    const targetId =
+                        typeof relationship.target
+                        === 'object'
+                            ? relationship.target.id
+                            : relationship.target;
+
+
+                    if (
+                        sourceId
+                        === selectedNode.id
+                    ) {
+
+                        ids.add(
+                            targetId
+                        );
+
+                    }
+
+
+                    if (
+                        targetId
+                        === selectedNode.id
+                    ) {
+
+                        ids.add(
+                            sourceId
+                        );
+
+                    }
+
+                }
+            );
+
+
+            return ids;
+
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Hover
+        ----------------------------------------------------------
+        */
+
+        node.on(
+            'mouseenter',
+            function (
+                event,
+                d
+            ) {
+
+                const connected =
+                    connectedIds(
+                        d
+                    );
+
+
+                node
+                    .classed(
+                        'dimmed',
+                        item =>
+                            !connected.has(
+                                item.id
+                            )
+                    )
+                    .classed(
+                        'highlighted',
+                        item =>
+                            item.id
+                            === d.id
+                    );
+
+
+                link.classed(
+                    'dimmed',
+                    relationship => {
+
+                        const sourceId =
+                            relationship
+                                .source.id;
+
+
+                        const targetId =
+                            relationship
+                                .target.id;
+
+
+                        return (
+                            sourceId !== d.id
+                            && targetId !== d.id
+                        );
+
+                    }
+                );
+
+
+                tooltip.innerHTML = `
+                    <strong>
+                        ${escapeEnergyHtml(
+                            d.label
+                        )}
+                    </strong>
+
+                    <br>
+
+                    ${
+                        d.type === 'actor'
+                            ? 'Institution'
+                            : d.type === 'function'
+                                ? 'Energy-system function'
+                                : 'Policy'
+                    }
+                `;
+
+
+                tooltip.style.left =
+                    (
+                        event.offsetX
+                        + 15
+                    )
+                    + 'px';
+
+
+                tooltip.style.top =
+                    (
+                        event.offsetY
+                        + 15
+                    )
+                    + 'px';
+
+
+                tooltip.classList.add(
+                    'visible'
+                );
+
+            }
+        );
+
+
+        node.on(
+            'mouseleave',
+            function () {
+
+                node
+                    .classed(
+                        'dimmed',
+                        false
+                    )
+                    .classed(
+                        'highlighted',
+                        false
+                    );
+
+
+                link.classed(
+                    'dimmed',
+                    false
+                );
+
+
+                tooltip.classList.remove(
+                    'visible'
+                );
+
+            }
+        );
+
+
+        /*
+        ----------------------------------------------------------
+        Click actor → open Actor Drawer
+        ----------------------------------------------------------
+        */
+
+        node.on(
+            'click',
+            function (
+                event,
+                d
+            ) {
+
+                event.stopPropagation();
+
+
+                if (
+                    d.type !== 'actor'
+                ) {
+                    return;
+                }
+
+
+                const actorId =
+                    d.id.replace(
+                        'actor:',
+                        ''
+                    );
+
+
+                if (
+                    typeof openActorDrawer
+                    === 'function'
+                ) {
+
+                    openActorDrawer(
+                        actorId
+                    );
+
+                }
+
+            }
+        );
+
+
+        /*
+        ----------------------------------------------------------
+        Legend
+        ----------------------------------------------------------
+        */
+
+        const legend =
+            document.createElement(
+                'div'
+            );
+
+
+        legend.className =
+            'energy-network-legend';
+
+
+        legend.innerHTML = `
+
+            <span class="energy-network-legend-item">
+
+                <span
+                    class="
+                        energy-network-legend-dot
+                        actor
+                    "
+                ></span>
+
+                Actor
+
+            </span>
+
+
+            <span class="energy-network-legend-item">
+
+                <span
+                    class="
+                        energy-network-legend-dot
+                        function
+                    "
+                ></span>
+
+                Function
+
+            </span>
+
+
+            <span class="energy-network-legend-item">
+
+                <span
+                    class="
+                        energy-network-legend-dot
+                        policy
+                    "
+                ></span>
+
+                Policy
+
+            </span>
+
+        `;
+
+
+        container
+            .parentElement
+            .appendChild(
+                legend
+            );
+
+
+        /*
+        ----------------------------------------------------------
+        Store network references
+        ----------------------------------------------------------
+        */
+
+        window.INETTInstitutionalNetwork = {
+
+            simulation:
+                simulation,
+
+            svg:
+                svg,
+
+            nodes:
+                nodes,
+
+            links:
+                links
+
+        };
 
     }
 

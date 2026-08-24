@@ -1838,14 +1838,7 @@ window.INETTThemeUrl =
                             class="energy-network"
                         >
 
-                            <div
-                                class="
-                                    energy-visual-placeholder
-                                "
-                            >
-                                D3 institutional network will
-                                render here.
-                            </div>
+                            
 
                         </div>
 

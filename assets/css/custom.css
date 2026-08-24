@@ -1070,3 +1070,164 @@ button.energy-list-item:hover {
     }
 
 }
+
+/* ==========================================================
+   INSTITUTIONAL NETWORK
+========================================================== */
+
+.energy-network {
+    position: relative;
+
+    width: 100%;
+    height: 620px;
+
+    overflow: hidden;
+
+    border: 1px solid #e5e9e6;
+    border-radius: 10px;
+
+    background: #fafcfb;
+}
+
+
+.energy-network svg {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+}
+
+
+.energy-network-link {
+    stroke: #cbd4cf;
+    stroke-width: 1.2;
+    stroke-opacity: .65;
+}
+
+
+.energy-network-link.policy-link {
+    stroke-dasharray: 4 3;
+}
+
+
+.energy-network-node {
+    cursor: pointer;
+}
+
+
+.energy-network-node circle {
+    stroke: #fff;
+    stroke-width: 2;
+}
+
+
+.energy-network-label {
+    pointer-events: none;
+
+    fill: #39413d;
+
+    font-size: 10px;
+    font-weight: 600;
+}
+
+
+.energy-network-node.dimmed,
+.energy-network-link.dimmed {
+    opacity: .12;
+}
+
+
+.energy-network-node.highlighted circle {
+    stroke: #172f27;
+    stroke-width: 3;
+}
+
+
+.energy-network-tooltip {
+    position: absolute;
+
+    z-index: 20;
+
+    min-width: 160px;
+    max-width: 260px;
+
+    padding: 10px 12px;
+
+    border-radius: 7px;
+
+    background: rgba(20, 38, 31, .95);
+    color: #fff;
+
+    box-shadow: 0 8px 24px rgba(0,0,0,.16);
+
+    font-size: 11px;
+    line-height: 1.45;
+
+    pointer-events: none;
+
+    opacity: 0;
+
+    transform: translateY(4px);
+
+    transition:
+        opacity .15s ease,
+        transform .15s ease;
+}
+
+
+.energy-network-tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+.energy-network-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    margin-top: 14px;
+
+    color: #66706a;
+
+    font-size: 11px;
+}
+
+
+.energy-network-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+
+.energy-network-legend-dot {
+    width: 10px;
+    height: 10px;
+
+    border-radius: 50%;
+}
+
+
+.energy-network-legend-dot.actor {
+    background: #0f6e56;
+}
+
+
+.energy-network-legend-dot.function {
+    background: #d79d2a;
+}
+
+
+.energy-network-legend-dot.policy {
+    background: #64748b;
+}
+
+
+@media (max-width: 800px) {
+
+    .energy-network {
+        height: 520px;
+    }
+
+}
