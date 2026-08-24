@@ -83,6 +83,23 @@
         }
     );
 
+    const stateByCode = {};
+
+    (data.states || []).forEach(state => {
+
+        const code =
+            String(
+                state.state_code || ''
+            ).trim();
+
+        if (!code) {
+            return;
+        }
+
+        stateByCode[code] = state;
+
+    });
+
 
     /*
     |--------------------------------------------------------------------------
@@ -158,6 +175,20 @@
         });
 
 
+        function getStateNameByCode(code) {
+
+            const state =
+                stateByCode[
+                    String(code || '')
+                ];
+
+            return (
+                state
+                    ? state.state_name
+                    : code
+            );
+
+        }
 
         /* ==========================================================
     OVERVIEW AGGREGATION HELPERS
@@ -3610,7 +3641,9 @@
                                 .map(
                                     code => `
                                         <span class="energy-drawer-tag">
-                                            ${escapeEnergyHtml(code)}
+                                            ${escapeEnergyHtml(
+                                                getStateNameByCode(code)
+                                            )}
                                         </span>
                                     `
                                 )
@@ -3629,21 +3662,42 @@
 
             <section class="energy-drawer-section">
 
-                <h3 class="energy-drawer-section-title">
-                    Participation
-                </h3>
+            <h3 class="energy-drawer-section-title">
+                Participation
+            </h3>
 
 
-                <div class="energy-drawer-tags">
+            <div class="energy-drawer-tags">
 
-                    ${
-                        relationships.length
-                            ? relationships
-                                .map(
-                                    relationship => `
-                                        <span class="energy-drawer-tag">
-                                            ${escapeEnergyHtml(
+                ${
+                    relationships.length
+                        ? relationships
+                            .map(
+                                relationship => {
+
+                                    const actor =
+                                        actorById[
+                                            String(
                                                 relationship.actor_id
+                                            )
+                                        ];
+
+
+                                    const actorName =
+                                        actor
+                                            ? (
+                                                actor.acronym
+                                                || actor.organisation_name
+                                                || relationship.actor_id
+                                            )
+                                            : relationship.actor_id;
+
+
+                                    return `
+                                        <span class="energy-drawer-tag">
+
+                                            ${escapeEnergyHtml(
+                                                actorName
                                             )}
 
                                             ${
@@ -3654,20 +3708,84 @@
                                                     )
                                                     : ''
                                             }
+
                                         </span>
-                                    `
-                                )
-                                .join('')
-                            : `
-                                <span class="energy-drawer-tag">
-                                    ${escapeEnergyHtml(leadActor)}
-                                </span>
-                            `
-                    }
+                                    `;
+
+                                }
+                            )
+                            .join('')
+                        : `
+                            <span class="energy-drawer-tag">
+                                ${escapeEnergyHtml(leadActor)}
+                            </span>
+                        `
+                }
+
+            </div>
+
+        </section>
+
+
+        <section class="energy-drawer-section">
+
+            <h3 class="energy-drawer-section-title">
+                Transition alignment
+            </h3>
+
+
+            <div class="energy-drawer-fields">
+
+                <div class="energy-drawer-field">
+
+                    <span>
+                        Compact pillar
+                    </span>
+
+                    <strong>
+                        ${escapeEnergyHtml(
+                            initiative.compact_pillar
+                            || '—'
+                        )}
+                    </strong>
 
                 </div>
 
-            </section>
+
+                <div class="energy-drawer-field">
+
+                    <span>
+                        ETP linkage
+                    </span>
+
+                    <strong>
+                        ${escapeEnergyHtml(
+                            initiative.etp_linkage
+                            || '—'
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div class="energy-drawer-field">
+
+                    <span>
+                        NDC linkage
+                    </span>
+
+                    <strong>
+                        ${escapeEnergyHtml(
+                            initiative.ndc_linkage
+                            || '—'
+                        )}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
 
         `;
 

@@ -881,28 +881,28 @@ button.energy-list-item:hover {
     align-items: center;
     justify-content: center;
 
-    flex: 0 0 38px;
-
     width: 38px;
     height: 38px;
 
     padding: 0;
 
-    border: 1px solid #dde3df;
+    border: 1px solid #dfe5e1;
     border-radius: 50%;
 
     background: #fff;
-    color: #243029;
+    color: #183d32;
 
-    font-size: 25px;
+    font-family: Arial, sans-serif;
+    font-size: 28px;
+    font-weight: 300;
     line-height: 1;
 
     cursor: pointer;
 }
 
-
 .energy-drawer-close:hover {
-    background: #f3f6f4;
+    background: #f2f5f3;
+    border-color: #183d32;
 }
 
 

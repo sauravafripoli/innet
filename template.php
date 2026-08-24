@@ -1445,13 +1445,13 @@ window.INETTThemeUrl =
                         ></span>
                     </div>
 
-                    <button
+                   <button
                         type="button"
-                        id="initiative-drawer-close"
                         class="energy-drawer-close"
+                        id="initiative-drawer-close"
                         aria-label="Close initiative profile"
                     >
-                        ×
+                        &times;
                     </button>
 
                 </div>
