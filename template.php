@@ -1515,6 +1515,33 @@ window.INETTThemeUrl =
                     </div>
 
 
+                    <div class="energy-chart-panel energy-actor-activity-panel">
+
+                        <div class="energy-chart-header">
+
+                            <div>
+
+                                <h3>
+                                    Actor activity
+                                </h3>
+
+                                <p>
+                                    Institutions ranked by the number of tracked initiatives
+                                    they participate in.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            id="actor-activity-chart"
+                            class="energy-chart"
+                        ></div>
+
+                    </div>
+
 
                     <div class="energy-two-column">
 

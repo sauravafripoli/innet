@@ -1743,6 +1743,367 @@
         });
 
     }
+
+
+    /* ==========================================================
+   ACTORS — ACTIVITY CHART
+========================================================== */
+
+    function initActorActivityChart() {
+
+        const element =
+            document.getElementById(
+                'actor-activity-chart'
+            );
+
+
+        if (!element) {
+            return;
+        }
+
+
+        let chart =
+            echarts.getInstanceByDom(
+                element
+            );
+
+
+        if (!chart) {
+
+            chart =
+                echarts.init(
+                    element
+                );
+
+        }
+
+
+        window.INETTActorActivityChart =
+            chart;
+
+
+        updateActorActivityChart();
+
+
+        window.addEventListener(
+            'resize',
+            function () {
+
+                chart.resize();
+
+            }
+        );
+
+    }
+
+
+
+    function updateActorActivityChart() {
+
+        const chart =
+            window.INETTActorActivityChart;
+
+
+        if (!chart) {
+            return;
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Top actors by initiative participation
+        ----------------------------------------------------------
+        */
+
+        let rows =
+            (data.actors || [])
+                .map(
+                    actor => ({
+
+                        name:
+                            actor.acronym
+                            || actor.organisation_name
+                            || actor.actor_id,
+
+                        organisation:
+                            actor.organisation_name
+                            || '',
+
+                        count:
+                            Number(
+                                actor.initiative_count
+                                || 0
+                            ),
+
+                        states:
+                            Number(
+                                actor.states_reached
+                                || 0
+                            )
+
+                    })
+                )
+                .filter(
+                    actor =>
+                        actor.count > 0
+                )
+                .sort(
+                    (a, b) =>
+                        b.count - a.count
+                )
+                .slice(
+                    0,
+                    10
+                );
+
+
+        if (!rows.length) {
+
+            chart.clear();
+
+
+            chart.setOption({
+
+                title: {
+
+                    text:
+                        'No actor activity data available',
+
+                    left:
+                        'center',
+
+                    top:
+                        'middle',
+
+                    textStyle: {
+
+                        fontSize:
+                            13,
+
+                        fontWeight:
+                            400,
+
+                        color:
+                            '#7a817d'
+
+                    }
+
+                }
+
+            });
+
+
+            return;
+
+        }
+
+
+        /*
+        ECharts horizontal categories render bottom-up,
+        so reverse for highest actor at the top.
+        */
+
+        rows.reverse();
+
+
+        chart.clear();
+
+
+        chart.setOption({
+
+            animationDuration:
+                350,
+
+
+            tooltip: {
+
+                trigger:
+                    'axis',
+
+                axisPointer: {
+                    type: 'shadow'
+                },
+
+                formatter:
+                    function (params) {
+
+                        const row =
+                            rows[
+                                params[0]
+                                    .dataIndex
+                            ];
+
+
+                        return `
+                            <strong>
+                                ${escapeEnergyHtml(
+                                    row.name
+                                )}
+                            </strong>
+
+                            ${
+                                row.organisation
+                                && row.organisation
+                                    !== row.name
+                                    ? `
+                                        <br>
+                                        ${escapeEnergyHtml(
+                                            row.organisation
+                                        )}
+                                    `
+                                    : ''
+                            }
+
+                            <br><br>
+
+                            ${row.count.toLocaleString()}
+                            initiatives
+
+                            <br>
+
+                            ${row.states.toLocaleString()}
+                            states reached
+                        `;
+
+                    }
+
+            },
+
+
+            grid: {
+
+                left:
+                    20,
+
+                right:
+                    40,
+
+                top:
+                    10,
+
+                bottom:
+                    15,
+
+                containLabel:
+                    true
+
+            },
+
+
+            xAxis: {
+
+                type:
+                    'value',
+
+                minInterval:
+                    1,
+
+                axisLine: {
+                    show: false
+                },
+
+                axisTick: {
+                    show: false
+                },
+
+                splitLine: {
+
+                    lineStyle: {
+                        color: '#edf0ee'
+                    }
+
+                }
+
+            },
+
+
+            yAxis: {
+
+                type:
+                    'category',
+
+                data:
+                    rows.map(
+                        row =>
+                            row.name
+                    ),
+
+                axisTick: {
+                    show: false
+                },
+
+                axisLine: {
+                    show: false
+                },
+
+                axisLabel: {
+
+                    color:
+                        '#39413d',
+
+                    fontSize:
+                        11
+
+                }
+
+            },
+
+
+            series: [
+
+                {
+
+                    name:
+                        'Initiatives',
+
+                    type:
+                        'bar',
+
+                    data:
+                        rows.map(
+                            row =>
+                                row.count
+                        ),
+
+                    barWidth:
+                        18,
+
+                    itemStyle: {
+
+                        color:
+                            '#0f6e56',
+
+                        borderRadius:
+                            [0, 5, 5, 0]
+
+                    },
+
+                    label: {
+
+                        show:
+                            true,
+
+                        position:
+                            'right',
+
+                        color:
+                            '#39413d',
+
+                        fontSize:
+                            11,
+
+                        fontWeight:
+                            600
+
+                    }
+
+                }
+
+            ]
+
+        });
+
+    }
     /* ==========================================================
    UPDATE OVERVIEW KPIs
 ========================================================== */
@@ -5677,6 +6038,12 @@ document.addEventListener(
         initStateRankingChart();
 
         initTechnologyChart();
+
+                /*
+        Actors & Mandates
+        */
+
+        initActorActivityChart();
 
 
         /*
