@@ -42,6 +42,24 @@
 
     const initiativeSubsectorsById = {};
 
+    const actorById = {};
+
+
+    (data.actors || []).forEach(actor => {
+
+        const actorId =
+            String(
+                actor.actor_id || ''
+            ).trim();
+
+        if (!actorId) {
+            return;
+        }
+
+        actorById[actorId] = actor;
+
+    });
+
 
     /*
     |--------------------------------------------------------------------------
@@ -3083,6 +3101,410 @@
 /* ==========================================================
    INTELLIGENCE TABS
 ========================================================== */
+/* ==========================================================
+   3W INITIATIVE EXPLORER
+========================================================== */
+
+    let initiativeExplorerData = [];
+
+
+    function formatExplorerMoney(value) {
+
+        value =
+            Number(value || 0);
+
+
+        if (!value) {
+            return '—';
+        }
+
+
+        if (value >= 1000000000) {
+
+            return (
+                '$'
+                + (
+                    value / 1000000000
+                ).toFixed(2)
+                + 'bn'
+            );
+
+        }
+
+
+        if (value >= 1000000) {
+
+            return (
+                '$'
+                + (
+                    value / 1000000
+                ).toFixed(1)
+                + 'm'
+            );
+
+        }
+
+
+        if (value >= 1000) {
+
+            return (
+                '$'
+                + (
+                    value / 1000
+                ).toFixed(1)
+                + 'k'
+            );
+
+        }
+
+
+        return (
+            '$'
+            + value.toLocaleString()
+        );
+
+    }
+
+
+    function getInitiativeLeadActor(
+        initiative
+    ) {
+
+        if (!initiative.lead_actor_id) {
+            return '—';
+        }
+
+
+        const actor =
+            actorById[
+                String(
+                    initiative.lead_actor_id
+                )
+            ];
+
+
+        if (!actor) {
+            return initiative.lead_actor_id;
+        }
+
+
+        return (
+            actor.acronym
+            || actor.organisation_name
+            || initiative.lead_actor_id
+        );
+
+    }
+
+
+    function renderInitiativeExplorer(
+        initiatives
+    ) {
+
+        const body =
+            document.getElementById(
+                'initiative-explorer-body'
+            );
+
+
+        const count =
+            document.getElementById(
+                'initiative-result-count'
+            );
+
+
+        if (!body) {
+            return;
+        }
+
+
+        initiativeExplorerData =
+            initiatives || [];
+
+
+        const searchInput =
+            document.getElementById(
+                'initiative-search'
+            );
+
+
+        const searchTerm =
+            normalizeFilterValue(
+                searchInput
+                    ? searchInput.value
+                    : ''
+            );
+
+
+        let rows =
+            [...initiativeExplorerData];
+
+
+        /*
+        ----------------------------------------------------------
+        Search
+        ----------------------------------------------------------
+        */
+
+        if (searchTerm) {
+
+            rows =
+                rows.filter(
+                    initiative => {
+
+                        const searchable =
+                            [
+                                initiative.initiative_name,
+                                initiative.primary_subsector,
+                                initiative.standard_status,
+                                initiative.primary_technology,
+                                getInitiativeLeadActor(
+                                    initiative
+                                )
+                            ]
+                            .join(' ')
+                            .toLowerCase();
+
+
+                        return searchable.includes(
+                            searchTerm
+                        );
+
+                    }
+                );
+
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Sort alphabetically
+        ----------------------------------------------------------
+        */
+
+        rows.sort(
+            (a, b) =>
+                String(
+                    a.initiative_name || ''
+                )
+                .localeCompare(
+                    String(
+                        b.initiative_name || ''
+                    )
+                )
+        );
+
+
+        /*
+        ----------------------------------------------------------
+        Count
+        ----------------------------------------------------------
+        */
+
+        if (count) {
+
+            count.textContent =
+                rows.length
+                + (
+                    rows.length === 1
+                        ? ' initiative'
+                        : ' initiatives'
+                );
+
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Empty state
+        ----------------------------------------------------------
+        */
+
+        if (!rows.length) {
+
+            body.innerHTML = `
+                <tr>
+                    <td
+                        colspan="6"
+                        class="energy-table-empty"
+                    >
+                        No initiatives match the current filters.
+                    </td>
+                </tr>
+            `;
+
+
+            return;
+
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Render rows
+        ----------------------------------------------------------
+        */
+
+        body.innerHTML =
+            rows.map(
+                initiative => {
+
+                    const name =
+                        initiative.initiative_name
+                        || initiative.name
+                        || initiative.initiative_id;
+
+
+                    const subsector =
+                        initiative.primary_subsector
+                        || '—';
+
+
+                    const status =
+                        initiative.standard_status
+                        || '—';
+
+
+                    const technology =
+                        initiative.primary_technology
+                        || '—';
+
+
+                    const actor =
+                        getInitiativeLeadActor(
+                            initiative
+                        );
+
+
+                    const value =
+                        formatExplorerMoney(
+                            initiative.total_value_usd
+                        );
+
+
+                    return `
+                        <tr
+                            data-initiative-id="${initiative.initiative_id}"
+                        >
+
+                            <td>
+                                <span class="energy-initiative-name">
+                                    ${escapeEnergyHtml(name)}
+                                </span>
+
+                                <small>
+                                    ${escapeEnergyHtml(
+                                        initiative.initiative_id
+                                    )}
+                                </small>
+                            </td>
+
+                            <td>
+                                ${escapeEnergyHtml(subsector)}
+                            </td>
+
+                            <td>
+                                <span class="energy-table-tag">
+                                    ${escapeEnergyHtml(status)}
+                                </span>
+                            </td>
+
+                            <td>
+                                ${escapeEnergyHtml(technology)}
+                            </td>
+
+                            <td>
+                                ${escapeEnergyHtml(actor)}
+                            </td>
+
+                            <td>
+                                ${escapeEnergyHtml(value)}
+                            </td>
+
+                        </tr>
+                    `;
+
+                }
+            )
+            .join('');
+
+    }
+
+
+/* ==========================================================
+   BASIC HTML ESCAPING
+========================================================== */
+
+    function escapeEnergyHtml(value) {
+
+        return String(
+            value == null
+                ? ''
+                : value
+        )
+        .replace(
+            /&/g,
+            '&amp;'
+        )
+        .replace(
+            /</g,
+            '&lt;'
+        )
+        .replace(
+            />/g,
+            '&gt;'
+        )
+        .replace(
+            /"/g,
+            '&quot;'
+        )
+        .replace(
+            /'/g,
+            '&#039;'
+        );
+
+    }
+
+
+/* ==========================================================
+   INIT EXPLORER
+========================================================== */
+
+    function initInitiativeExplorer() {
+
+        const search =
+            document.getElementById(
+                'initiative-search'
+            );
+
+
+        if (search) {
+
+            search.addEventListener(
+                'input',
+                function () {
+
+                    renderInitiativeExplorer(
+                        initiativeExplorerData
+                    );
+
+                }
+            );
+
+        }
+
+
+        /*
+        Initial full dataset
+        */
+
+        renderInitiativeExplorer(
+            data.initiatives || []
+        );
+
+    }
+
+
 
     function initEnergyTabs() {
 
@@ -3529,6 +3951,10 @@
 
                 updateEnergyMap();
 
+                renderInitiativeExplorer(
+                    initiatives
+                );
+
             }
         );
 
@@ -3576,6 +4002,8 @@ document.addEventListener(
         */
 
         initOverviewFilterUpdates();
+
+        initInitiativeExplorer();
 
     }
 );

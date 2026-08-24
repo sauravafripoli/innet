@@ -657,3 +657,78 @@ button.energy-list-item:hover {
     }
 
 }
+
+.energy-explorer-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.energy-explorer-search {
+    width: 250px;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #d8dfdb;
+    border-radius: 8px;
+    background: #fff;
+    font: inherit;
+    font-size: 13px;
+}
+
+.energy-explorer-search:focus {
+    outline: 2px solid rgba(20, 61, 53, .12);
+    border-color: #143d35;
+}
+
+.energy-result-count {
+    font-size: 12px;
+    color: #6f7772;
+    white-space: nowrap;
+}
+
+.energy-initiative-table tbody tr {
+    cursor: pointer;
+    transition: background .15s ease;
+}
+
+.energy-initiative-table tbody tr:hover {
+    background: #f7faf8;
+}
+
+.energy-initiative-name {
+    font-weight: 600;
+}
+
+.energy-table-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #e5f0eb;
+    color: #245445;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.energy-table-empty {
+    padding: 30px !important;
+    text-align: center !important;
+    color: #7b817d;
+}
+
+@media (max-width: 800px) {
+    .energy-section-header {
+        align-items: flex-start;
+        gap: 16px;
+        flex-direction: column;
+    }
+
+    .energy-explorer-actions {
+        width: 100%;
+    }
+
+    .energy-explorer-search {
+        flex: 1;
+        width: auto;
+    }
+}

@@ -1230,7 +1230,84 @@ window.INETTThemeUrl =
 
             </section>
 
+            <section class="energy-section energy-section-muted">
 
+                <div class="energy-container">
+
+                    <div class="energy-section-header">
+
+                        <div>
+                            <span class="energy-section-eyebrow">
+                                Initiative explorer
+                            </span>
+
+                            <h2>
+                                Filtered initiatives
+                            </h2>
+
+                            <p class="energy-section-description">
+                                Explore the initiatives behind the current geographic
+                                and sector filters.
+                            </p>
+                        </div>
+
+                        <div class="energy-explorer-actions">
+
+                            <input
+                                type="search"
+                                id="initiative-search"
+                                class="energy-explorer-search"
+                                placeholder="Search initiatives..."
+                            >
+
+                            <span
+                                id="initiative-result-count"
+                                class="energy-result-count"
+                            >
+                                0 initiatives
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="energy-panel">
+
+                        <div class="energy-table-wrap">
+
+                            <table class="energy-table energy-initiative-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>Initiative</th>
+                                        <th>Subsector</th>
+                                        <th>Status</th>
+                                        <th>Technology</th>
+                                        <th>Lead actor</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="initiative-explorer-body">
+
+                                    <tr>
+                                        <td colspan="6">
+                                            Loading initiatives...
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
 
             <!-- FUTURE 3W VISUALS -->
 
