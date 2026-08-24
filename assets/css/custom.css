@@ -732,3 +732,58 @@ button.energy-list-item:hover {
         width: auto;
     }
 }
+
+/* ==========================================================
+   INITIATIVE EXPLORER PAGINATION
+========================================================== */
+
+.energy-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
+
+    padding-top: 18px;
+}
+
+
+.energy-pagination-button {
+    min-width: 86px;
+
+    padding: 9px 14px;
+
+    border: 1px solid #d8dfdb;
+    border-radius: 7px;
+
+    background: #fff;
+    color: #243029;
+
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.energy-pagination-button:hover:not(:disabled) {
+    border-color: #143d35;
+    color: #143d35;
+}
+
+
+.energy-pagination-button:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+}
+
+
+.energy-pagination-info {
+    min-width: 90px;
+
+    text-align: center;
+
+    color: #717a75;
+
+    font-size: 12px;
+}

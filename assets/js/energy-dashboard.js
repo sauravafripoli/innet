@@ -3107,6 +3107,9 @@
 
     let initiativeExplorerData = [];
 
+    let initiativeExplorerPage = 1;
+    let initiativeExplorerPageSize = 10;
+
 
     function formatExplorerMoney(value) {
 
@@ -3294,6 +3297,45 @@
                 )
         );
 
+                /*
+        ----------------------------------------------------------
+        Pagination
+        ----------------------------------------------------------
+        */
+
+        const totalRows =
+            rows.length;
+
+
+        const totalPages =
+            Math.max(
+                1,
+                Math.ceil(
+                    totalRows / initiativeExplorerPageSize
+                )
+            );
+
+
+        if (
+            initiativeExplorerPage > totalPages
+        ) {
+            initiativeExplorerPage = totalPages;
+        }
+
+
+        const startIndex =
+            (
+                initiativeExplorerPage - 1
+            )
+            * initiativeExplorerPageSize;
+
+
+        const visibleRows =
+            rows.slice(
+                startIndex,
+                startIndex + initiativeExplorerPageSize
+            );
+
 
         /*
         ----------------------------------------------------------
@@ -3346,7 +3388,7 @@
         */
 
         body.innerHTML =
-            rows.map(
+            visibleRows.map(
                 initiative => {
 
                     const name =
@@ -3428,6 +3470,55 @@
             )
             .join('');
 
+            /*
+            ----------------------------------------------------------
+            Update pagination controls
+            ----------------------------------------------------------
+            */
+
+            const pageInfo =
+                document.getElementById(
+                    'initiative-page-info'
+                );
+
+
+            const previousButton =
+                document.getElementById(
+                    'initiative-page-prev'
+                );
+
+
+            const nextButton =
+                document.getElementById(
+                    'initiative-page-next'
+                );
+
+
+            if (pageInfo) {
+
+                pageInfo.textContent =
+                    totalRows
+                        ? `Page ${initiativeExplorerPage} of ${totalPages}`
+                        : 'Page 0 of 0';
+
+            }
+
+
+            if (previousButton) {
+
+                previousButton.disabled =
+                    initiativeExplorerPage <= 1;
+
+            }
+
+
+            if (nextButton) {
+
+                nextButton.disabled =
+                    initiativeExplorerPage >= totalPages;
+
+            }
+
     }
 
 
@@ -3483,6 +3574,62 @@
             search.addEventListener(
                 'input',
                 function () {
+                    initiativeExplorerPage = 1;
+                    renderInitiativeExplorer(
+                        initiativeExplorerData
+                    );
+
+                }
+            );
+
+        }
+
+        const previousButton =
+        document.getElementById(
+            'initiative-page-prev'
+        );
+
+
+        const nextButton =
+            document.getElementById(
+                'initiative-page-next'
+            );
+
+
+        if (previousButton) {
+
+            previousButton.addEventListener(
+                'click',
+                function () {
+
+                    if (
+                        initiativeExplorerPage <= 1
+                    ) {
+                        return;
+                    }
+
+
+                    initiativeExplorerPage--;
+
+
+                    renderInitiativeExplorer(
+                        initiativeExplorerData
+                    );
+
+                }
+            );
+
+        }
+
+
+        if (nextButton) {
+
+            nextButton.addEventListener(
+                'click',
+                function () {
+
+                    initiativeExplorerPage++;
+
 
                     renderInitiativeExplorer(
                         initiativeExplorerData
@@ -3950,7 +4097,7 @@
                 */
 
                 updateEnergyMap();
-
+                initiativeExplorerPage = 1;
                 renderInitiativeExplorer(
                     initiatives
                 );

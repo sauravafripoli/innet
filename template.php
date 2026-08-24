@@ -1302,6 +1302,32 @@ window.INETTThemeUrl =
                             </table>
 
                         </div>
+                        <div class="energy-pagination">
+
+                            <button
+                                type="button"
+                                id="initiative-page-prev"
+                                class="energy-pagination-button"
+                            >
+                                Previous
+                            </button>
+
+                            <span
+                                id="initiative-page-info"
+                                class="energy-pagination-info"
+                            >
+                                Page 1 of 1
+                            </span>
+
+                            <button
+                                type="button"
+                                id="initiative-page-next"
+                                class="energy-pagination-button"
+                            >
+                                Next
+                            </button>
+
+                        </div>
 
                     </div>
 
