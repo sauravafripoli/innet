@@ -962,6 +962,788 @@
     }
 
     /* ==========================================================
+   3W — INITIATIVES BY STATE
+========================================================== */
+
+    function initStateRankingChart() {
+
+        const element =
+            document.getElementById(
+                'state-ranking-chart'
+            );
+
+
+        if (!element) {
+            return;
+        }
+
+
+        let chart =
+            echarts.getInstanceByDom(
+                element
+            );
+
+
+        if (!chart) {
+
+            chart =
+                echarts.init(
+                    element
+                );
+
+        }
+
+
+        window.INETTStateRankingChart =
+            chart;
+
+
+        updateStateRankingChart(
+            data.initiatives || []
+        );
+
+
+        window.addEventListener(
+            'resize',
+            function () {
+
+                chart.resize();
+
+            }
+        );
+
+    }
+
+
+
+    function updateStateRankingChart(
+        initiatives
+    ) {
+
+        const chart =
+            window.INETTStateRankingChart;
+
+
+        if (!chart) {
+            return;
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Get IDs for currently filtered initiatives
+        ----------------------------------------------------------
+        */
+
+        const initiativeIds =
+            new Set(
+                initiatives.map(
+                    initiative =>
+                        String(
+                            initiative.initiative_id
+                        )
+                )
+            );
+
+
+        /*
+        ----------------------------------------------------------
+        Count UNIQUE initiatives in each state
+        ----------------------------------------------------------
+        */
+
+        const stateCounts = {};
+
+
+        (data.initiative_locations || [])
+            .forEach(
+                location => {
+
+                    const initiativeId =
+                        String(
+                            location.initiative_id
+                            || ''
+                        );
+
+
+                    const stateCode =
+                        String(
+                            location.state_code
+                            || ''
+                        );
+
+
+                    if (
+                        !initiativeIds.has(
+                            initiativeId
+                        )
+                        || !stateCode
+                    ) {
+                        return;
+                    }
+
+
+                    if (!stateCounts[stateCode]) {
+
+                        stateCounts[stateCode] =
+                            new Set();
+
+                    }
+
+
+                    stateCounts[stateCode]
+                        .add(
+                            initiativeId
+                        );
+
+                }
+            );
+
+
+        /*
+        ----------------------------------------------------------
+        Convert to chart rows
+        ----------------------------------------------------------
+        */
+
+        let rows =
+            Object.entries(
+                stateCounts
+            )
+            .map(
+                ([stateCode, ids]) => ({
+
+                    stateCode:
+                        stateCode,
+
+                    stateName:
+                        getStateNameByCode(
+                            stateCode
+                        ),
+
+                    count:
+                        ids.size
+
+                })
+            )
+            .sort(
+                (a, b) =>
+                    b.count
+                    - a.count
+            );
+
+
+        /*
+        Show top 10 states only.
+        */
+
+        rows =
+            rows.slice(
+                0,
+                10
+            );
+
+
+        if (!rows.length) {
+
+            chart.clear();
+
+
+            chart.setOption({
+
+                title: {
+
+                    text:
+                        'No state activity matches these filters',
+
+                    left:
+                        'center',
+
+                    top:
+                        'middle',
+
+                    textStyle: {
+
+                        fontSize:
+                            13,
+
+                        fontWeight:
+                            400,
+
+                        color:
+                            '#7a817d'
+
+                    }
+
+                }
+
+            });
+
+
+            return;
+
+        }
+
+
+        /*
+        Horizontal chart reads better for state names.
+        Lowest first because ECharts category axis renders
+        from bottom to top.
+        */
+
+        rows.reverse();
+
+
+        chart.clear();
+
+
+        chart.setOption({
+
+            animationDuration:
+                350,
+
+
+            tooltip: {
+
+                trigger:
+                    'axis',
+
+                axisPointer: {
+                    type: 'shadow'
+                },
+
+                formatter:
+                    function (params) {
+
+                        const row =
+                            rows[
+                                params[0]
+                                    .dataIndex
+                            ];
+
+
+                        return `
+                            <strong>
+                                ${escapeEnergyHtml(
+                                    row.stateName
+                                )}
+                            </strong>
+
+                            <br>
+
+                            ${row.count.toLocaleString()}
+                            ${
+                                row.count === 1
+                                    ? 'initiative'
+                                    : 'initiatives'
+                            }
+                        `;
+
+                    }
+
+            },
+
+
+            grid: {
+
+                left:
+                    20,
+
+                right:
+                    35,
+
+                top:
+                    10,
+
+                bottom:
+                    10,
+
+                containLabel:
+                    true
+
+            },
+
+
+            xAxis: {
+
+                type:
+                    'value',
+
+                minInterval:
+                    1,
+
+                axisLine: {
+                    show: false
+                },
+
+                axisTick: {
+                    show: false
+                },
+
+                splitLine: {
+
+                    lineStyle: {
+                        color: '#edf0ee'
+                    }
+
+                }
+
+            },
+
+
+            yAxis: {
+
+                type:
+                    'category',
+
+                data:
+                    rows.map(
+                        row =>
+                            row.stateName
+                    ),
+
+                axisLine: {
+                    show: false
+                },
+
+                axisTick: {
+                    show: false
+                },
+
+                axisLabel: {
+
+                    color:
+                        '#39413d',
+
+                    fontSize:
+                        11
+
+                }
+
+            },
+
+
+            series: [
+
+                {
+
+                    name:
+                        'Initiatives',
+
+                    type:
+                        'bar',
+
+                    data:
+                        rows.map(
+                            row =>
+                                row.count
+                        ),
+
+                    barWidth:
+                        18,
+
+                    itemStyle: {
+
+                        color:
+                            '#0f6e56',
+
+                        borderRadius:
+                            [0, 5, 5, 0]
+
+                    },
+
+                    label: {
+
+                        show:
+                            true,
+
+                        position:
+                            'right',
+
+                        fontSize:
+                            11,
+
+                        fontWeight:
+                            600,
+
+                        color:
+                            '#39413d'
+
+                    }
+
+                }
+
+            ]
+
+        });
+
+    }
+
+    /* ==========================================================
+   3W — TECHNOLOGY MIX
+========================================================== */
+
+    function initTechnologyChart() {
+
+        const element =
+            document.getElementById(
+                'technology-chart'
+            );
+
+
+        if (!element) {
+            return;
+        }
+
+
+        let chart =
+            echarts.getInstanceByDom(
+                element
+            );
+
+
+        if (!chart) {
+
+            chart =
+                echarts.init(
+                    element
+                );
+
+        }
+
+
+        window.INETTTechnologyChart =
+            chart;
+
+
+        updateTechnologyChart(
+            data.initiatives || []
+        );
+
+
+        window.addEventListener(
+            'resize',
+            function () {
+
+                chart.resize();
+
+            }
+        );
+
+    }
+
+
+
+    function updateTechnologyChart(
+        initiatives
+    ) {
+
+        const chart =
+            window.INETTTechnologyChart;
+
+
+        if (!chart) {
+            return;
+        }
+
+
+        const technologyCounts = {};
+
+
+        initiatives.forEach(
+            initiative => {
+
+                const technology =
+                    String(
+                        initiative.primary_technology
+                        || 'Unspecified'
+                    )
+                    .trim();
+
+
+                if (!technologyCounts[technology]) {
+
+                    technologyCounts[
+                        technology
+                    ] = 0;
+
+                }
+
+
+                technologyCounts[
+                    technology
+                ]++;
+
+            }
+        );
+
+
+        let rows =
+            Object.entries(
+                technologyCounts
+            )
+            .map(
+                ([technology, count]) => ({
+
+                    technology:
+                        technology,
+
+                    count:
+                        count
+
+                })
+            )
+            .sort(
+                (a, b) =>
+                    b.count
+                    - a.count
+            );
+
+
+        /*
+        ----------------------------------------------------------
+        Keep chart readable.
+
+        Top 7 technologies remain separate.
+        Everything else becomes "Other".
+        ----------------------------------------------------------
+        */
+
+        const topRows =
+            rows.slice(
+                0,
+                7
+            );
+
+
+        const remainingRows =
+            rows.slice(
+                7
+            );
+
+
+        if (remainingRows.length) {
+
+            const otherCount =
+                remainingRows.reduce(
+                    (
+                        total,
+                        row
+                    ) =>
+                        total + row.count,
+                    0
+                );
+
+
+            topRows.push({
+
+                technology:
+                    'Other',
+
+                count:
+                    otherCount
+
+            });
+
+        }
+
+
+        rows =
+            topRows;
+
+
+        if (!rows.length) {
+
+            chart.clear();
+
+
+            chart.setOption({
+
+                title: {
+
+                    text:
+                        'No technology data matches these filters',
+
+                    left:
+                        'center',
+
+                    top:
+                        'middle',
+
+                    textStyle: {
+
+                        fontSize:
+                            13,
+
+                        fontWeight:
+                            400,
+
+                        color:
+                            '#7a817d'
+
+                    }
+
+                }
+
+            });
+
+
+            return;
+
+        }
+
+
+        chart.clear();
+
+
+        chart.setOption({
+
+            animationDuration:
+                350,
+
+
+            tooltip: {
+
+                trigger:
+                    'item',
+
+                formatter:
+                    function (params) {
+
+                        return `
+                            <strong>
+                                ${escapeEnergyHtml(
+                                    params.name
+                                )}
+                            </strong>
+
+                            <br>
+
+                            ${Number(
+                                params.value
+                            ).toLocaleString()}
+                            initiatives
+
+                            <br>
+
+                            ${params.percent}%
+                            of filtered initiatives
+                        `;
+
+                    }
+
+            },
+
+
+            legend: {
+
+                type: 'scroll',
+
+                orient: 'vertical',
+
+                right: 12,
+
+                top: 'middle',
+
+                itemWidth: 18,
+
+                itemHeight: 10,
+
+                itemGap: 12,
+
+                width: 175,
+
+                textStyle: {
+                    color: '#5f6863',
+                    fontSize: 11
+                },
+
+                formatter: function (name) {
+
+                    /*
+                    Shorten very long legend labels only.
+                    Tooltip still retains the full technology name.
+                    */
+
+                    const maxLength = 24;
+
+                    if (name.length > maxLength) {
+                        return name.substring(0, maxLength) + '…';
+                    }
+
+                    return name;
+                }
+
+            },
+
+
+            series: [
+
+                {
+
+                    name:
+                        'Technology mix',
+
+                    type:
+                        'pie',
+
+                    radius:
+                        [
+                            '38%',
+                            '64%'
+                        ],
+
+                    center:
+                        [
+                            '31%',
+                            '50%'
+                        ],
+
+                    itemStyle: {
+
+                        borderColor:
+                            '#ffffff',
+
+                        borderWidth:
+                            2
+
+                    },
+
+                    label: {
+                        show: false
+                    },
+
+                    emphasis: {
+
+                        scale:
+                            true,
+
+                        scaleSize:
+                            5
+
+                    },
+
+                    data:
+                        rows.map(
+                            row => ({
+
+                                name:
+                                    row.technology,
+
+                                value:
+                                    row.count
+
+                            })
+                        )
+
+                }
+
+            ]
+
+        });
+
+    }
+    /* ==========================================================
    UPDATE OVERVIEW KPIs
 ========================================================== */
 
@@ -4831,7 +5613,18 @@
                 */
 
                 updateEnergyMap();
+
+                updateStateRankingChart(
+                    initiatives
+                );
+
+
+                updateTechnologyChart(
+                    initiatives
+                );
+
                 initiativeExplorerPage = 1;
+
                 renderInitiativeExplorer(
                     initiatives
                 );
@@ -4876,6 +5669,14 @@ document.addEventListener(
         initSubsectorChart();
 
         initStatusChart();
+
+        /*
+        3W Geography charts
+        */
+
+        initStateRankingChart();
+
+        initTechnologyChart();
 
 
         /*
