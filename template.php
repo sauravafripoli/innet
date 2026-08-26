@@ -1175,9 +1175,71 @@ window.INETTThemeUrl =
                                     Relationship intelligence
                                 </span>
 
-                                <h2>
-                                    Institutional network
-                                </h2>
+                                <div class="energy-heading-with-help">
+
+                                    <h2>
+                                        Institutional network
+                                    </h2>
+
+                                    <button
+                                        type="button"
+                                        class="energy-help-tooltip"
+                                        aria-label="About the institutional network"
+                                    >
+                                        ?
+
+                                        <span class="energy-help-tooltip-content energy-network-help">
+
+                                            <strong>
+                                                How to use the network
+                                            </strong>
+
+                                            <span>
+                                                This network shows recorded relationships between
+                                                institutions, energy-system functions and policy instruments.
+                                            </span>
+
+                                            <span>
+                                                <b>Hover over a node</b> to see more information and highlight
+                                                its direct relationships.
+                                            </span>
+
+                                            <span>
+                                                <b>Drag a node</b> to rearrange the network. The node stays
+                                                where you place it.
+                                            </span>
+
+                                            <span>
+                                                <b>Double-click a node</b> to release it back into the automatic
+                                                layout.
+                                            </span>
+
+                                            <span>
+                                                <b>Zoom and pan</b> to explore dense areas of the network.
+                                            </span>
+
+                                            <span>
+                                                <b>Actor, Function and Policy controls</b> can be used to show
+                                                or hide specific node types.
+                                            </span>
+
+
+                                            <span>
+                                                <b>Reset layout</b> releases manually positioned nodes and
+                                                restores the network layout.
+                                            </span>
+
+                                            <span>
+                                                Connections indicate relationships recorded in the INETT
+                                                dataset. Distance between nodes does not represent relationship
+                                                strength.
+                                            </span>
+
+                                        </span>
+
+                                    </button>
+
+                                </div>
 
                                 <p
                                     class="

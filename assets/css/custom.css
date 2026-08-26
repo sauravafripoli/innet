@@ -2000,3 +2000,8 @@ button.energy-list-item:hover {
 .energy-help-tooltip-content {
     display: block;
 }
+
+.energy-network-help {
+    max-height: 420px;
+    overflow-y: auto;
+}
