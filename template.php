@@ -1036,13 +1036,59 @@ window.INETTThemeUrl =
                                         Coordination intelligence
                                     </span>
 
-                                    <h2>
-                                        Mandate signals
-                                    </h2>
+                                    <div class="energy-heading-with-help">
+
+                                        <h2>
+                                            Mandate signals
+                                        </h2>
+
+                                        <button
+                                            type="button"
+                                            class="energy-help-tooltip"
+                                            aria-label="About mandate signals"
+                                        >
+                                            ?
+
+                                            <span class="energy-help-tooltip-content">
+
+                                                <strong>
+                                                    What are mandate signals?
+                                                </strong>
+
+                                                <span>
+                                                    These signals reflect the current INETT institutional
+                                                    mapping of energy-system functions.
+                                                </span>
+
+                                                <span>
+                                                    <b>Actor mapping needed</b> means no actor has yet been
+                                                    mapped to the function in the dataset.
+                                                </span>
+
+                                                <span>
+                                                    <b>No primary holder</b> means actors are mapped, but none
+                                                    is currently identified as the primary mandate holder.
+                                                </span>
+
+                                                <span>
+                                                    <b>Potential overlap</b> means more than one actor is mapped
+                                                    as a primary holder and may require further review.
+                                                </span>
+
+                                            </span>
+
+                                        </button>
+
+                                    </div>
 
                                 </div>
 
                             </div>
+
+                            <p class="energy-mandate-explainer">
+                                Highlights functions where institutional responsibility is incomplete,
+                                unclear or potentially overlapping in the current mapping.
+                            </p>
 
 
                             <div class="energy-list">
@@ -1113,11 +1159,24 @@ window.INETTThemeUrl =
                                                 energy-status-badge
                                             "
                                         >
-                                            <?= safeText(
-                                                $mandate[
-                                                    'mandate_status'
-                                                ]
-                                            ); ?>
+                                            <?php
+
+                                                $mandateStatus =
+                                                    $mandate[
+                                                        'mandate_status'
+                                                    ]
+                                                    ?? '';
+
+                                                $mandateStatusLabel =
+                                                    $mandateStatus === 'Unmapped'
+                                                        ? 'Actor mapping needed'
+                                                        : $mandateStatus;
+
+                                                ?>
+
+                                                <?= safeText(
+                                                    $mandateStatusLabel
+                                                ); ?>
                                         </span>
 
                                     </div>
