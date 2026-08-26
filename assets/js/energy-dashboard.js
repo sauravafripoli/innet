@@ -3693,6 +3693,51 @@
 
         }
 
+        function clearStatePanel() {
+
+            const panelName =
+                document.getElementById(
+                    'state-panel-name'
+                );
+
+
+            const panelDescription =
+                document.getElementById(
+                    'state-panel-description'
+                );
+
+
+            const panelData =
+                document.getElementById(
+                    'state-panel-data'
+                );
+
+
+            if (panelName) {
+
+                panelName.textContent =
+                    'Select a state';
+
+            }
+
+
+            if (panelDescription) {
+
+                panelDescription.textContent =
+                    'Click a state on the map to explore its Energy Transition profile.';
+
+            }
+
+
+            if (panelData) {
+
+                panelData.hidden =
+                    true;
+
+            }
+
+        }
+
 
         /*
         ----------------------------------------------------------
@@ -3900,40 +3945,70 @@
                 */
 
                 click:
-                    function () {
+                function () {
 
-                        if (!state) {
-                            return;
-                        }
+                    if (!state) {
+                        return;
+                    }
 
 
-                        /*
-                        Update state profile
-                        */
+                    const stateCode =
+                        String(
+                            state.state_code || ''
+                        );
+
+
+                    const alreadySelected =
+                        (energyFilterState.states || [])
+                            .some(
+                                selectedState =>
+                                    normalizeFilterValue(
+                                        selectedState
+                                    )
+                                    ===
+                                    normalizeFilterValue(
+                                        stateCode
+                                    )
+                            );
+
+
+                    /*
+                    If this click is removing the state,
+                    clear the State Profile.
+                    Otherwise show the clicked state.
+                    */
+
+                    if (alreadySelected) {
+
+                        clearStatePanel();
+
+                    } else {
 
                         updateStatePanel(
                             state
                         );
 
+                    }
 
-                        /*
-                        Set the global State filter
-                        */
 
-                        if (
-                            typeof window
-                                .INETTSetStateFilter
-                            === 'function'
-                        ) {
+                    /*
+                    Toggle the global State filter
+                    */
 
-                            window
-                                .INETTSetStateFilter(
-                                    state.state_code
-                                );
+                    if (
+                        typeof window
+                            .INETTSetStateFilter
+                        === 'function'
+                    ) {
 
-                        }
+                        window
+                            .INETTSetStateFilter(
+                                stateCode
+                            );
 
                     }
+
+                }
 
             });
 
