@@ -7479,6 +7479,91 @@
 
         updateNetworkTypeVisibility();
 
+        const resetButton =
+            document.getElementById(
+                'network-reset-layout'
+            );
+
+
+        if (resetButton) {
+
+            resetButton.addEventListener(
+                'click',
+                function () {
+
+                    /*
+                    Release every manually pinned node
+                    */
+
+                    nodes.forEach(
+                        d => {
+
+                            d.fx = null;
+                            d.fy = null;
+
+                        }
+                    );
+
+
+                    /*
+                    Remove pinned visual state
+                    */
+
+                    node.classed(
+                        'pinned',
+                        false
+                    );
+
+
+                    /*
+                    Restore all node-type filters
+                    */
+
+                    const actorToggle =
+                        document.getElementById(
+                            'network-filter-actors'
+                        );
+
+                    const functionToggle =
+                        document.getElementById(
+                            'network-filter-functions'
+                        );
+
+                    const policyToggle =
+                        document.getElementById(
+                            'network-filter-policies'
+                        );
+
+
+                    if (actorToggle) {
+                        actorToggle.checked = true;
+                    }
+
+                    if (functionToggle) {
+                        functionToggle.checked = true;
+                    }
+
+                    if (policyToggle) {
+                        policyToggle.checked = true;
+                    }
+
+
+                    updateNetworkTypeVisibility();
+
+
+                    /*
+                    Restart force simulation
+                    */
+
+                    simulation
+                        .alpha(0.8)
+                        .restart();
+
+                }
+            );
+
+        }
+
 
         /*
         ----------------------------------------------------------

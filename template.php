@@ -1878,6 +1878,14 @@ window.INETTThemeUrl =
                                 Policies
                             </label>
 
+                            <button
+                                type="button"
+                                id="network-reset-layout"
+                                class="energy-network-reset"
+                            >
+                                Reset layout
+                            </button>
+
                         </div>
 
                         <div

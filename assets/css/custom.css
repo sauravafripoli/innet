@@ -1436,3 +1436,25 @@ button.energy-list-item:hover {
 .energy-network-filter-dot.policy {
     background: #64748b;
 }
+
+.energy-network-reset {
+    margin-left: auto;
+
+    padding: 8px 12px;
+
+    border: 1px solid #dfe5e1;
+    border-radius: 8px;
+
+    background: #fff;
+    color: #39413d;
+
+    font: inherit;
+    font-size: 11px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.energy-network-reset:hover {
+    background: #f4f7f5;
+}
