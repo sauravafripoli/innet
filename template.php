@@ -1033,13 +1033,13 @@ window.INETTThemeUrl =
                                             energy-section-eyebrow
                                         "
                                     >
-                                        Coordination intelligence
+                                        Mandate intelligence
                                     </span>
 
                                     <div class="energy-heading-with-help">
 
                                         <h2>
-                                            Mandate signals
+                                            Mandates
                                         </h2>
 
                                         <button
@@ -1052,11 +1052,11 @@ window.INETTThemeUrl =
                                             <span class="energy-help-tooltip-content">
 
                                                 <strong>
-                                                    What are mandate signals?
+                                                    What are mandates?
                                                 </strong>
 
                                                 <span>
-                                                    These signals reflect the current INETT institutional
+                                                    These reflect the current INETT institutional
                                                     mapping of energy-system functions.
                                                 </span>
 
@@ -2059,9 +2059,36 @@ window.INETTThemeUrl =
                                         Governance
                                     </span>
 
-                                    <h2>
-                                        Mandate coverage
-                                    </h2>
+                                    <div class="energy-heading-with-help">
+
+                                        <h2>
+                                            Mandate Coverage
+                                        </h2>
+
+                                        <button
+                                            type="button"
+                                            class="energy-help-tooltip"
+                                            aria-label="About mandate signals"
+                                        >
+                                            ?
+
+                                            <span class="energy-help-tooltip-content">
+
+                                                <strong>
+                                                    What are mandates?
+                                                </strong>
+
+                                                <span>
+                                                    These reflect the current INETT institutional
+                                                    mapping of energy-system functions.
+                                                </span>
+
+
+                                            </span>
+
+                                        </button>
+
+                                    </div>
 
                                 </div>
 
