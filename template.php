@@ -1843,7 +1843,42 @@ window.INETTThemeUrl =
                             </div>
 
                         </div>
+                        
+                        <div class="energy-network-controls">
 
+                            <label class="energy-network-toggle">
+                                <input
+                                    type="checkbox"
+                                    id="network-filter-actors"
+                                    checked
+                                >
+                                <span class="energy-network-filter-dot actor"></span>
+                                Actors
+                            </label>
+
+
+                            <label class="energy-network-toggle">
+                                <input
+                                    type="checkbox"
+                                    id="network-filter-functions"
+                                    checked
+                                >
+                                <span class="energy-network-filter-dot function"></span>
+                                Functions
+                            </label>
+
+
+                            <label class="energy-network-toggle">
+                                <input
+                                    type="checkbox"
+                                    id="network-filter-policies"
+                                    checked
+                                >
+                                <span class="energy-network-filter-dot policy"></span>
+                                Policies
+                            </label>
+
+                        </div>
 
                         <div
                             id="actor-network"

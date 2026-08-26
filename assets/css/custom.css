@@ -1371,3 +1371,68 @@ button.energy-list-item:hover {
     }
 
 }
+
+.energy-network-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    margin-bottom: 14px;
+}
+
+
+.energy-network-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    padding: 8px 11px;
+
+    border: 1px solid #dfe5e1;
+    border-radius: 8px;
+
+    background: #fff;
+    color: #39413d;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    user-select: none;
+}
+
+
+.energy-network-toggle:hover {
+    background: #f4f7f5;
+}
+
+
+.energy-network-toggle input {
+    margin: 0;
+}
+
+
+.energy-network-filter-dot {
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+
+    flex: 0 0 auto;
+}
+
+
+.energy-network-filter-dot.actor {
+    background: #0f6e56;
+}
+
+
+.energy-network-filter-dot.function {
+    background: #d79d2a;
+}
+
+
+.energy-network-filter-dot.policy {
+    background: #64748b;
+}

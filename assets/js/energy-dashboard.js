@@ -7315,6 +7315,171 @@
                 );
 
 
+                /* ----------------------------------------------------------
+   Node-type visibility filter
+---------------------------------------------------------- */
+
+        function updateNetworkTypeVisibility() {
+
+            const actorToggle =
+                document.getElementById(
+                    'network-filter-actors'
+                );
+
+
+            const functionToggle =
+                document.getElementById(
+                    'network-filter-functions'
+                );
+
+
+            const policyToggle =
+                document.getElementById(
+                    'network-filter-policies'
+                );
+
+
+            const visibleTypes =
+                new Set();
+
+
+            if (
+                !actorToggle
+                || actorToggle.checked
+            ) {
+                visibleTypes.add(
+                    'actor'
+                );
+            }
+
+
+            if (
+                !functionToggle
+                || functionToggle.checked
+            ) {
+                visibleTypes.add(
+                    'function'
+                );
+            }
+
+
+            if (
+                !policyToggle
+                || policyToggle.checked
+            ) {
+                visibleTypes.add(
+                    'policy'
+                );
+            }
+
+
+            /*
+            ----------------------------------------------------------
+            Nodes
+            ----------------------------------------------------------
+            */
+
+            node.style(
+                'display',
+                d =>
+                    visibleTypes.has(
+                        d.type
+                    )
+                        ? null
+                        : 'none'
+            );
+
+
+            /*
+            ----------------------------------------------------------
+            Links
+
+            Show a link only when BOTH connected node types
+            are currently visible.
+            ----------------------------------------------------------
+            */
+
+            link.style(
+                'display',
+                relationship => {
+
+                    const source =
+                        typeof relationship.source
+                        === 'object'
+                            ? relationship.source
+                            : nodeMap.get(
+                                relationship.source
+                            );
+
+
+                    const target =
+                        typeof relationship.target
+                        === 'object'
+                            ? relationship.target
+                            : nodeMap.get(
+                                relationship.target
+                            );
+
+
+                    if (
+                        !source
+                        || !target
+                    ) {
+                        return 'none';
+                    }
+
+
+                    return (
+                        visibleTypes.has(
+                            source.type
+                        )
+                        &&
+                        visibleTypes.has(
+                            target.type
+                        )
+                    )
+                        ? null
+                        : 'none';
+
+                }
+            );
+
+        }
+
+        [
+            'network-filter-actors',
+            'network-filter-functions',
+            'network-filter-policies'
+        ]
+        .forEach(
+            id => {
+
+                const control =
+                    document.getElementById(
+                        id
+                    );
+
+
+                if (!control) {
+                    return;
+                }
+
+
+                control.addEventListener(
+                    'change',
+                    function () {
+
+                        updateNetworkTypeVisibility();
+
+                    }
+                );
+
+            }
+        );
+
+        updateNetworkTypeVisibility();
+
+
         /*
         ----------------------------------------------------------
         Node circles
