@@ -538,6 +538,167 @@ button.energy-list-item:hover {
     color: #fff;
 }
 
+/* ==========================================================
+   GLOBAL MULTISELECT FILTERS
+========================================================== */
+
+.energy-multiselect {
+    position: relative;
+    width: 100%;
+}
+
+
+.energy-multiselect-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    width: 100%;
+    height: 40px;
+
+    padding: 0 12px;
+
+    border: 1px solid #d8dfdb;
+    border-radius: 8px;
+
+    background: #fff;
+    color: #243029;
+
+    font: inherit;
+    font-size: 13px;
+
+    cursor: pointer;
+
+    text-align: left;
+}
+
+
+.energy-multiselect-trigger:hover {
+    border-color: #b9c6bf;
+}
+
+
+.energy-multiselect.open
+.energy-multiselect-trigger {
+    border-color: #143d35;
+
+    box-shadow:
+        0 0 0 3px rgba(20, 61, 53, .08);
+}
+
+
+.energy-multiselect-label {
+    min-width: 0;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+.energy-multiselect-arrow {
+    flex: 0 0 auto;
+
+    color: #78817c;
+
+    transition:
+        transform .18s ease;
+}
+
+
+.energy-multiselect.open
+.energy-multiselect-arrow {
+    transform: rotate(180deg);
+}
+
+
+.energy-multiselect-menu {
+    position: absolute;
+
+    top: calc(100% + 6px);
+    left: 0;
+
+    z-index: 1200;
+
+    display: none;
+
+    width: max(100%, 240px);
+    max-height: 320px;
+
+    overflow-y: auto;
+
+    padding: 7px;
+
+    border: 1px solid #dce3df;
+    border-radius: 9px;
+
+    background: #fff;
+
+    box-shadow:
+        0 12px 30px rgba(20, 40, 32, .12);
+}
+
+
+.energy-multiselect.open
+.energy-multiselect-menu {
+    display: block;
+}
+
+
+.energy-multiselect-option {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    padding: 9px 8px;
+
+    border-radius: 6px;
+
+    color: #35413b;
+
+    font-size: 12px;
+
+    cursor: pointer;
+}
+
+
+.energy-multiselect-option:hover {
+    background: #f3f6f4;
+}
+
+
+.energy-multiselect-option input {
+    width: 15px;
+    height: 15px;
+
+    margin: 0;
+
+    accent-color: #143d35;
+}
+
+
+.energy-multiselect-option span {
+    line-height: 1.35;
+}
+
+
+.energy-multiselect.has-selection
+.energy-multiselect-trigger {
+    border-color: #9eb5aa;
+
+    background: #f8fbf9;
+}
+
+
+@media (max-width: 620px) {
+
+    .energy-multiselect-menu {
+        width: 100%;
+    }
+
+}
+
 
 /* ==========================================================
    TAB PANELS

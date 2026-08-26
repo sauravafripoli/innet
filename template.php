@@ -331,95 +331,200 @@ window.INETTThemeUrl =
             <div class="energy-global-filters">
 
 
+                <!-- =========================================================
+                    SUBSECTOR MULTISELECT
+                ========================================================== -->
+
                 <div class="energy-filter-group">
 
-                    <label for="energy-filter-subsector">
+                    <label>
                         Subsector
                     </label>
 
-                    <select id="energy-filter-subsector">
+                    <div
+                        class="energy-multiselect"
+                        id="energy-filter-subsector"
+                        data-filter-key="subsectors"
+                    >
 
-                        <option value="">
-                            All subsectors
-                        </option>
+                        <button
+                            type="button"
+                            class="energy-multiselect-trigger"
+                            aria-expanded="false"
+                        >
+                            <span class="energy-multiselect-label">
+                                All subsectors
+                            </span>
 
-                        <?php foreach ($subsectors as $item): ?>
+                            <span class="energy-multiselect-arrow">
+                                ▾
+                            </span>
+                        </button>
 
-                            <option
-                                value="<?= safeText(
-                                    $item['subsector']
-                                ); ?>"
-                            >
-                                <?= safeText(
-                                    $item['subsector']
-                                ); ?>
-                            </option>
 
-                        <?php endforeach; ?>
+                        <div class="energy-multiselect-menu">
 
-                    </select>
+                            <div class="energy-multiselect-options">
+
+                                <?php foreach ($subsectors as $item): ?>
+
+                                    <label class="energy-multiselect-option">
+
+                                        <input
+                                            type="checkbox"
+                                            value="<?= safeText(
+                                                $item['subsector']
+                                            ); ?>"
+                                        >
+
+                                        <span>
+                                            <?= safeText(
+                                                $item['subsector']
+                                            ); ?>
+                                        </span>
+
+                                    </label>
+
+                                <?php endforeach; ?>
+
+                            </div>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
 
+                <!-- =========================================================
+                    STATE MULTISELECT
+                ========================================================== -->
+
                 <div class="energy-filter-group">
 
-                    <label for="energy-filter-state">
+                    <label>
                         State
                     </label>
 
-                    <select id="energy-filter-state">
+                    <div
+                        class="energy-multiselect"
+                        id="energy-filter-state"
+                        data-filter-key="states"
+                    >
 
-                        <option value="">
-                            All Nigeria
-                        </option>
+                        <button
+                            type="button"
+                            class="energy-multiselect-trigger"
+                            aria-expanded="false"
+                        >
+                            <span class="energy-multiselect-label">
+                                All Nigeria
+                            </span>
 
-                        <?php foreach ($allStates as $state): ?>
+                            <span class="energy-multiselect-arrow">
+                                ▾
+                            </span>
+                        </button>
 
-                            <option
-                                value="<?= safeText(
-                                    $state['state_code']
-                                ); ?>"
-                            >
-                                <?= safeText(
-                                    $state['state_name']
-                                ); ?>
-                            </option>
 
-                        <?php endforeach; ?>
+                        <div class="energy-multiselect-menu">
 
-                    </select>
+                            <div class="energy-multiselect-options">
+
+                                <?php foreach ($allStates as $state): ?>
+
+                                    <label class="energy-multiselect-option">
+
+                                        <input
+                                            type="checkbox"
+                                            value="<?= safeText(
+                                                $state['state_code']
+                                            ); ?>"
+                                            data-label="<?= safeText(
+                                                $state['state_name']
+                                            ); ?>"
+                                        >
+
+                                        <span>
+                                            <?= safeText(
+                                                $state['state_name']
+                                            ); ?>
+                                        </span>
+
+                                    </label>
+
+                                <?php endforeach; ?>
+
+                            </div>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
 
+                <!-- =========================================================
+                    STATUS MULTISELECT
+                ========================================================== -->
+
                 <div class="energy-filter-group">
 
-                    <label for="energy-filter-status">
+                    <label>
                         Status
                     </label>
 
-                    <select id="energy-filter-status">
+                    <div
+                        class="energy-multiselect"
+                        id="energy-filter-status"
+                        data-filter-key="statuses"
+                    >
 
-                        <option value="">
-                            All statuses
-                        </option>
+                        <button
+                            type="button"
+                            class="energy-multiselect-trigger"
+                            aria-expanded="false"
+                        >
+                            <span class="energy-multiselect-label">
+                                All statuses
+                            </span>
 
-                        <?php foreach ($statuses as $status): ?>
+                            <span class="energy-multiselect-arrow">
+                                ▾
+                            </span>
+                        </button>
 
-                            <option
-                                value="<?= safeText(
-                                    $status['status']
-                                ); ?>"
-                            >
-                                <?= safeText(
-                                    $status['status']
-                                ); ?>
-                            </option>
 
-                        <?php endforeach; ?>
+                        <div class="energy-multiselect-menu">
 
-                    </select>
+                            <div class="energy-multiselect-options">
+
+                                <?php foreach ($statuses as $status): ?>
+
+                                    <label class="energy-multiselect-option">
+
+                                        <input
+                                            type="checkbox"
+                                            value="<?= safeText(
+                                                $status['status']
+                                            ); ?>"
+                                        >
+
+                                        <span>
+                                            <?= safeText(
+                                                $status['status']
+                                            ); ?>
+                                        </span>
+
+                                    </label>
+
+                                <?php endforeach; ?>
+
+                            </div>
+
+                        </div>
+
+                    </div>
 
                 </div>
 

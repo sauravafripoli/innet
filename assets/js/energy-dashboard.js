@@ -18,11 +18,11 @@
 
     const energyFilterState = {
 
-        state: '',
+        states: [],
 
-        subsector: '',
+        subsectors: [],
 
-        status: ''
+        statuses: []
 
     };
 
@@ -413,10 +413,47 @@
         }
 
 
-        const rows =
+        let rows =
             aggregateInitiativesBySubsector(
                 initiatives
             );
+
+
+        /*
+        ----------------------------------------------------------
+        If subsector filters are active, only display the
+        subsectors explicitly selected by the user.
+
+        An initiative may enter the filtered dataset because one
+        of its related subsectors matches. That should not cause
+        its different primary subsector to appear as an
+        unselected chart category.
+        ----------------------------------------------------------
+        */
+
+        const selectedSubsectors =
+            new Set(
+                (energyFilterState.subsectors || [])
+                    .map(
+                        normalizeFilterValue
+                    )
+                    .filter(Boolean)
+            );
+
+
+        if (selectedSubsectors.size) {
+
+            rows =
+                rows.filter(
+                    row =>
+                        selectedSubsectors.has(
+                            normalizeFilterValue(
+                                row.subsector
+                            )
+                        )
+                );
+
+        }
 
 
         const labels =
@@ -2666,9 +2703,13 @@
         ----------------------------------------------------------
         */
 
-        const selectedState =
-            normalizeFilterValue(
-                energyFilterState.state
+        const selectedStates =
+            new Set(
+                (energyFilterState.states || [])
+                    .map(
+                        normalizeFilterValue
+                    )
+                    .filter(Boolean)
             );
 
 
@@ -2748,12 +2789,11 @@
 
 
                 const isSelected =
-                    selectedState
-                    &&
-                    normalizeFilterValue(
-                        stateCode
-                    )
-                    === selectedState;
+                    selectedStates.has(
+                        normalizeFilterValue(
+                            stateCode
+                        )
+                    );
 
 
                 /*
@@ -2871,21 +2911,28 @@
             data.initiatives || [];
 
 
-        const selectedSubsector =
-            normalizeFilterValue(
-                energyFilterState.subsector
+        const selectedSubsectors =
+            new Set(
+                (energyFilterState.subsectors || [])
+                    .map(
+                        normalizeFilterValue
+                    )
+                    .filter(Boolean)
             );
 
 
-        const selectedStatus =
-            normalizeFilterValue(
-                energyFilterState.status
+        const selectedStatuses =
+            new Set(
+                (energyFilterState.statuses || [])
+                    .map(
+                        normalizeFilterValue
+                    )
+                    .filter(Boolean)
             );
 
 
         return initiatives.filter(
             initiative => {
-
 
                 /*
                 --------------------------------------------------
@@ -2893,7 +2940,7 @@
                 --------------------------------------------------
                 */
 
-                if (selectedSubsector) {
+                if (selectedSubsectors.size) {
 
                     const primarySubsector =
                         normalizeFilterValue(
@@ -2917,18 +2964,21 @@
                             [...relatedSubsectors]
                                 .some(
                                     subsector =>
-                                        normalizeFilterValue(
-                                            subsector
+
+                                        selectedSubsectors.has(
+                                            normalizeFilterValue(
+                                                subsector
+                                            )
                                         )
-                                        === selectedSubsector
                                 );
 
                     }
 
 
                     if (
-                        primarySubsector
-                        !== selectedSubsector
+                        !selectedSubsectors.has(
+                            primarySubsector
+                        )
                         && !relationshipMatches
                     ) {
 
@@ -2945,13 +2995,14 @@
                 --------------------------------------------------
                 */
 
-                if (selectedStatus) {
+                if (selectedStatuses.size) {
 
                     if (
-                        normalizeFilterValue(
-                            initiative.standard_status
+                        !selectedStatuses.has(
+                            normalizeFilterValue(
+                                initiative.standard_status
+                            )
                         )
-                        !== selectedStatus
                     ) {
 
                         return false;
@@ -4211,35 +4262,60 @@
             data.initiatives || [];
 
 
-        const selectedState =
-            normalizeFilterValue(
-                energyFilterState.state
+        /*
+        ----------------------------------------------------------
+        Normalized selections
+
+        Within a group:
+        OR
+
+        Between groups:
+        AND
+        ----------------------------------------------------------
+        */
+
+        const selectedStates =
+            new Set(
+                (energyFilterState.states || [])
+                    .map(
+                        normalizeFilterValue
+                    )
+                    .filter(Boolean)
             );
 
 
-        const selectedSubsector =
-            normalizeFilterValue(
-                energyFilterState.subsector
+        const selectedSubsectors =
+            new Set(
+                (energyFilterState.subsectors || [])
+                    .map(
+                        normalizeFilterValue
+                    )
+                    .filter(Boolean)
             );
 
 
-        const selectedStatus =
-            normalizeFilterValue(
-                energyFilterState.status
+        const selectedStatuses =
+            new Set(
+                (energyFilterState.statuses || [])
+                    .map(
+                        normalizeFilterValue
+                    )
+                    .filter(Boolean)
             );
 
 
         return initiatives.filter(
             initiative => {
 
-
                 /*
-                --------------------------------------------------------------
+                --------------------------------------------------
                 STATE
-                --------------------------------------------------------------
+
+                Match ANY selected state.
+                --------------------------------------------------
                 */
 
-                if (selectedState) {
+                if (selectedStates.size) {
 
                     const locations =
                         initiativeLocationsById[
@@ -4252,17 +4328,20 @@
                     }
 
 
-                    const hasState =
-                        [...locations].some(
-                            stateCode =>
-                                normalizeFilterValue(
-                                    stateCode
-                                )
-                                === selectedState
-                        );
+                    const hasMatchingState =
+                        [...locations]
+                            .some(
+                                stateCode =>
+
+                                    selectedStates.has(
+                                        normalizeFilterValue(
+                                            stateCode
+                                        )
+                                    )
+                            );
 
 
-                    if (!hasState) {
+                    if (!hasMatchingState) {
                         return false;
                     }
 
@@ -4270,17 +4349,19 @@
 
 
                 /*
-                --------------------------------------------------------------
+                --------------------------------------------------
                 SUBSECTOR
-                --------------------------------------------------------------
+
+                Match primary OR related subsector against
+                ANY selected subsector.
+                --------------------------------------------------
                 */
 
-                if (selectedSubsector) {
+                if (selectedSubsectors.size) {
 
                     const primarySubsector =
                         normalizeFilterValue(
-                            initiative
-                                .primary_subsector
+                            initiative.primary_subsector
                         );
 
 
@@ -4291,8 +4372,9 @@
 
 
                     const primaryMatches =
-                        primarySubsector
-                        === selectedSubsector;
+                        selectedSubsectors.has(
+                            primarySubsector
+                        );
 
 
                     let relationshipMatches =
@@ -4305,10 +4387,12 @@
                             [...relatedSubsectors]
                                 .some(
                                     subsector =>
-                                        normalizeFilterValue(
-                                            subsector
+
+                                        selectedSubsectors.has(
+                                            normalizeFilterValue(
+                                                subsector
+                                            )
                                         )
-                                        === selectedSubsector
                                 );
 
                     }
@@ -4327,23 +4411,25 @@
 
 
                 /*
-                --------------------------------------------------------------
+                --------------------------------------------------
                 STATUS
-                --------------------------------------------------------------
+
+                Match ANY selected status.
+                --------------------------------------------------
                 */
 
-                if (selectedStatus) {
+                if (selectedStatuses.size) {
 
                     const initiativeStatus =
                         normalizeFilterValue(
-                            initiative
-                                .standard_status
+                            initiative.standard_status
                         );
 
 
                     if (
-                        initiativeStatus
-                        !== selectedStatus
+                        !selectedStatuses.has(
+                            initiativeStatus
+                        )
                     ) {
 
                         return false;
@@ -4461,105 +4547,345 @@
 
     function initEnergyFilters() {
 
-        const stateSelect =
-            document.getElementById(
-                'energy-filter-state'
-            );
-
-
-        const subsectorSelect =
-            document.getElementById(
-                'energy-filter-subsector'
-            );
-
-
-        const statusSelect =
-            document.getElementById(
-                'energy-filter-status'
-            );
-
-
         const resetButton =
             document.getElementById(
                 'energy-filter-reset'
             );
 
 
+        const configs = [
+
+            {
+                id:
+                    'energy-filter-subsector',
+
+                key:
+                    'subsectors',
+
+                emptyLabel:
+                    'All subsectors'
+            },
+
+            {
+                id:
+                    'energy-filter-state',
+
+                key:
+                    'states',
+
+                emptyLabel:
+                    'All Nigeria'
+            },
+
+            {
+                id:
+                    'energy-filter-status',
+
+                key:
+                    'statuses',
+
+                emptyLabel:
+                    'All statuses'
+            }
+
+        ];
+
+
         /*
         ----------------------------------------------------------
-        State
+        Update visible button label
         ----------------------------------------------------------
         */
 
-        if (stateSelect) {
+        function updateMultiselectLabel(
+            root,
+            emptyLabel
+        ) {
 
-            stateSelect.addEventListener(
-                'change',
-                function () {
+            const checked =
+                [
+                    ...root.querySelectorAll(
+                        'input[type="checkbox"]:checked'
+                    )
+                ];
 
-                    energyFilterState.state =
-                        this.value || '';
+
+            const label =
+                root.querySelector(
+                    '.energy-multiselect-label'
+                );
 
 
-                    applyEnergyFilters();
+            if (!label) {
+                return;
+            }
 
-                }
+
+            root.classList.toggle(
+                'has-selection',
+                checked.length > 0
             );
+
+
+            if (!checked.length) {
+
+                label.textContent =
+                    emptyLabel;
+
+                return;
+
+            }
+
+
+            /*
+            One or two values:
+            show names.
+
+            More than two:
+            show count.
+            */
+
+            if (checked.length <= 2) {
+
+                label.textContent =
+                    checked
+                        .map(
+                            input =>
+                                input.dataset.label
+                                || input.value
+                        )
+                        .join(', ');
+
+                return;
+
+            }
+
+
+            label.textContent =
+                `${checked.length} selected`;
 
         }
 
 
         /*
         ----------------------------------------------------------
-        Subsector
+        Initialize dropdown
         ----------------------------------------------------------
         */
 
-        if (subsectorSelect) {
+        configs.forEach(
+            config => {
 
-            subsectorSelect.addEventListener(
-                'change',
-                function () {
-
-                    energyFilterState.subsector =
-                        this.value || '';
+                const root =
+                    document.getElementById(
+                        config.id
+                    );
 
 
-                    applyEnergyFilters();
+                if (!root) {
+                    return;
+                }
+
+
+                const trigger =
+                    root.querySelector(
+                        '.energy-multiselect-trigger'
+                    );
+
+
+                const inputs =
+                    root.querySelectorAll(
+                        'input[type="checkbox"]'
+                    );
+
+
+                /*
+                Open / close
+                */
+
+                if (trigger) {
+
+                    trigger.addEventListener(
+                        'click',
+                        function (event) {
+
+                            event.stopPropagation();
+
+
+                            document
+                                .querySelectorAll(
+                                    '.energy-multiselect.open'
+                                )
+                                .forEach(
+                                    item => {
+
+                                        if (item !== root) {
+
+                                            item.classList.remove(
+                                                'open'
+                                            );
+
+
+                                            const otherTrigger =
+                                                item.querySelector(
+                                                    '.energy-multiselect-trigger'
+                                                );
+
+
+                                            if (otherTrigger) {
+
+                                                otherTrigger.setAttribute(
+                                                    'aria-expanded',
+                                                    'false'
+                                                );
+
+                                            }
+
+                                        }
+
+                                    }
+                                );
+
+
+                            const isOpen =
+                                root.classList.toggle(
+                                    'open'
+                                );
+
+
+                            trigger.setAttribute(
+                                'aria-expanded',
+                                isOpen
+                                    ? 'true'
+                                    : 'false'
+                            );
+
+                        }
+                    );
 
                 }
-            );
 
-        }
+
+                /*
+                Checkbox changes
+                */
+
+                inputs.forEach(
+                    input => {
+
+                        input.addEventListener(
+                            'change',
+                            function () {
+
+                                energyFilterState[
+                                    config.key
+                                ] =
+                                    [
+                                        ...root.querySelectorAll(
+                                            'input[type="checkbox"]:checked'
+                                        )
+                                    ]
+                                    .map(
+                                        checkbox =>
+                                            checkbox.value
+                                    );
+
+
+                                updateMultiselectLabel(
+                                    root,
+                                    config.emptyLabel
+                                );
+
+
+                                applyEnergyFilters();
+
+                            }
+                        );
+
+                    }
+                );
+
+
+                updateMultiselectLabel(
+                    root,
+                    config.emptyLabel
+                );
+
+            }
+        );
 
 
         /*
         ----------------------------------------------------------
-        Status
+        Click outside → close menus
         ----------------------------------------------------------
         */
 
-        if (statusSelect) {
+        document.addEventListener(
+            'click',
+            function () {
 
-            statusSelect.addEventListener(
-                'change',
-                function () {
+                document
+                    .querySelectorAll(
+                        '.energy-multiselect.open'
+                    )
+                    .forEach(
+                        root => {
 
-                    energyFilterState.status =
-                        this.value || '';
+                            root.classList.remove(
+                                'open'
+                            );
 
 
-                    applyEnergyFilters();
+                            const trigger =
+                                root.querySelector(
+                                    '.energy-multiselect-trigger'
+                                );
+
+
+                            if (trigger) {
+
+                                trigger.setAttribute(
+                                    'aria-expanded',
+                                    'false'
+                                );
+
+                            }
+
+                        }
+                    );
+
+            }
+        );
+
+
+        /*
+        Prevent clicks inside menu from closing it.
+        */
+
+        document
+            .querySelectorAll(
+                '.energy-multiselect-menu'
+            )
+            .forEach(
+                menu => {
+
+                    menu.addEventListener(
+                        'click',
+                        function (event) {
+
+                            event.stopPropagation();
+
+                        }
+                    );
 
                 }
             );
 
-        }
-
 
         /*
         ----------------------------------------------------------
-        Reset
+        RESET ALL
         ----------------------------------------------------------
         */
 
@@ -4569,29 +4895,51 @@
                 'click',
                 function () {
 
-                    energyFilterState.state =
-                        '';
+                    energyFilterState.states =
+                        [];
 
-                    energyFilterState.subsector =
-                        '';
+                    energyFilterState.subsectors =
+                        [];
 
-                    energyFilterState.status =
-                        '';
-
-
-                    if (stateSelect) {
-                        stateSelect.value = '';
-                    }
+                    energyFilterState.statuses =
+                        [];
 
 
-                    if (subsectorSelect) {
-                        subsectorSelect.value = '';
-                    }
+                    configs.forEach(
+                        config => {
+
+                            const root =
+                                document.getElementById(
+                                    config.id
+                                );
 
 
-                    if (statusSelect) {
-                        statusSelect.value = '';
-                    }
+                            if (!root) {
+                                return;
+                            }
+
+
+                            root
+                                .querySelectorAll(
+                                    'input[type="checkbox"]'
+                                )
+                                .forEach(
+                                    input => {
+
+                                        input.checked =
+                                            false;
+
+                                    }
+                                );
+
+
+                            updateMultiselectLabel(
+                                root,
+                                config.emptyLabel
+                            );
+
+                        }
+                    );
 
 
                     applyEnergyFilters();
@@ -4602,6 +4950,8 @@
         }
 
     }
+
+
 /* ==========================================================
    INTELLIGENCE TABS
 ========================================================== */
@@ -6012,9 +6362,11 @@
 
         const filtersActive =
             Boolean(
-                energyFilterState.state
-                || energyFilterState.subsector
-                || energyFilterState.status
+                (energyFilterState.states || []).length
+                ||
+                (energyFilterState.subsectors || []).length
+                ||
+                (energyFilterState.statuses || []).length
             );
 
 
@@ -9258,20 +9610,129 @@
         stateCode
     ) {
 
-        const stateSelect =
+        stateCode =
+            String(
+                stateCode || ''
+            ).trim();
+
+
+        if (!stateCode) {
+            return;
+        }
+
+
+        const stateFilter =
             document.getElementById(
                 'energy-filter-state'
             );
 
 
-        energyFilterState.state =
-            stateCode || '';
+        /*
+        Toggle clicked state:
+        click once = select
+        click again = deselect
+        */
+
+        const currentStates =
+            new Set(
+                energyFilterState.states
+                || []
+            );
 
 
-        if (stateSelect) {
+        if (
+            currentStates.has(
+                stateCode
+            )
+        ) {
 
-            stateSelect.value =
-                stateCode || '';
+            currentStates.delete(
+                stateCode
+            );
+
+        } else {
+
+            currentStates.add(
+                stateCode
+            );
+
+        }
+
+
+        energyFilterState.states =
+            [...currentStates];
+
+
+        /*
+        Synchronize checkbox UI
+        */
+
+        if (stateFilter) {
+
+            stateFilter
+                .querySelectorAll(
+                    'input[type="checkbox"]'
+                )
+                .forEach(
+                    input => {
+
+                        input.checked =
+                            currentStates.has(
+                                input.value
+                            );
+
+                    }
+                );
+
+
+            const label =
+                stateFilter.querySelector(
+                    '.energy-multiselect-label'
+                );
+
+
+            const checked =
+                [
+                    ...stateFilter.querySelectorAll(
+                        'input[type="checkbox"]:checked'
+                    )
+                ];
+
+
+            stateFilter.classList.toggle(
+                'has-selection',
+                checked.length > 0
+            );
+
+
+            if (label) {
+
+                if (!checked.length) {
+
+                    label.textContent =
+                        'All Nigeria';
+
+                } else if (
+                    checked.length <= 2
+                ) {
+
+                    label.textContent =
+                        checked
+                            .map(
+                                input =>
+                                    input.dataset.label
+                                    || input.value
+                            )
+                            .join(', ');
+
+                } else {
+
+                    label.textContent =
+                        `${checked.length} selected`;
+
+                }
+
+            }
 
         }
 
