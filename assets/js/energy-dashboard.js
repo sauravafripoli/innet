@@ -7792,7 +7792,7 @@
                     */
 
                     if (
-                        tabName === 'actors'
+                        tabName === 'overview'
                     ) {
 
                         setTimeout(

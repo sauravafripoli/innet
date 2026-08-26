@@ -262,7 +262,7 @@ window.INETTThemeUrl =
                     role="tab"
                     aria-selected="false"
                 >
-                    3W &amp; Geography
+                    Geography &amp; Initiatives
                 </button>
 
 
@@ -1060,20 +1060,6 @@ window.INETTThemeUrl =
                                                     mapping of energy-system functions.
                                                 </span>
 
-                                                <span>
-                                                    <b>Actor mapping needed</b> means no actor has yet been
-                                                    mapped to the function in the dataset.
-                                                </span>
-
-                                                <span>
-                                                    <b>No primary holder</b> means actors are mapped, but none
-                                                    is currently identified as the primary mandate holder.
-                                                </span>
-
-                                                <span>
-                                                    <b>Potential overlap</b> means more than one actor is mapped
-                                                    as a primary holder and may require further review.
-                                                </span>
 
                                             </span>
 
@@ -1084,11 +1070,6 @@ window.INETTThemeUrl =
                                 </div>
 
                             </div>
-
-                            <p class="energy-mandate-explainer">
-                                Highlights functions where institutional responsibility is incomplete,
-                                unclear or potentially overlapping in the current mapping.
-                            </p>
 
 
                             <div class="energy-list">
@@ -1154,30 +1135,7 @@ window.INETTThemeUrl =
                                         </div>
 
 
-                                        <span
-                                            class="
-                                                energy-status-badge
-                                            "
-                                        >
-                                            <?php
-
-                                                $mandateStatus =
-                                                    $mandate[
-                                                        'mandate_status'
-                                                    ]
-                                                    ?? '';
-
-                                                $mandateStatusLabel =
-                                                    $mandateStatus === 'Unmapped'
-                                                        ? 'Actor mapping needed'
-                                                        : $mandateStatus;
-
-                                                ?>
-
-                                                <?= safeText(
-                                                    $mandateStatusLabel
-                                                ); ?>
-                                        </span>
+                                        
 
                                     </div>
 
@@ -1193,6 +1151,161 @@ window.INETTThemeUrl =
                 </div>
 
             </section>
+
+                        <section
+                class="
+                    energy-section
+                    energy-section-muted
+                "
+            >
+
+                <div class="energy-container">
+
+                    <div class="energy-panel">
+
+                        <div class="energy-section-header">
+
+                            <div>
+
+                                <span
+                                    class="
+                                        energy-section-eyebrow
+                                    "
+                                >
+                                    Relationship intelligence
+                                </span>
+
+                                <h2>
+                                    Institutional network
+                                </h2>
+
+                                <p
+                                    class="
+                                        energy-section-description
+                                    "
+                                >
+                                    Actor → function → policy
+                                    relationships.
+                                </p>
+
+                            </div>
+
+                        </div>
+                        
+                        <div class="energy-network-controls">
+
+                            <label class="energy-network-toggle">
+                                <input
+                                    type="checkbox"
+                                    id="network-filter-actors"
+                                    checked
+                                >
+                                <span class="energy-network-filter-dot actor"></span>
+                                Actors
+                            </label>
+
+
+                            <label class="energy-network-toggle">
+                                <input
+                                    type="checkbox"
+                                    id="network-filter-functions"
+                                    checked
+                                >
+                                <span class="energy-network-filter-dot function"></span>
+                                Functions
+                            </label>
+
+
+                            <label class="energy-network-toggle">
+                                <input
+                                    type="checkbox"
+                                    id="network-filter-policies"
+                                    checked
+                                >
+                                <span class="energy-network-filter-dot policy"></span>
+                                Policies
+                            </label>
+
+                            <button
+                                type="button"
+                                id="network-reset-layout"
+                                class="energy-network-reset"
+                            >
+                                Reset layout
+                            </button>
+
+                        </div>
+
+                        <div
+                            id="actor-network"
+                            class="energy-network"
+                        >
+
+                            
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+            
+            <!-- =========================================================
+                ACTOR DETAIL DRAWER
+            ========================================================== -->
+
+            <div
+                id="actor-drawer-backdrop"
+                class="energy-drawer-backdrop"
+            ></div>
+
+            <aside
+                id="actor-drawer"
+                class="energy-initiative-drawer"
+                aria-hidden="true"
+            >
+
+                <div class="energy-drawer-header">
+
+                    <div>
+
+                        <span class="energy-section-eyebrow">
+                            Actor profile
+                        </span>
+
+                        <h2 id="actor-drawer-title">
+                            Actor
+                        </h2>
+
+                        <span
+                            id="actor-drawer-id"
+                            class="energy-drawer-id"
+                        ></span>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="actor-drawer-close"
+                        class="energy-drawer-close"
+                        aria-label="Close actor profile"
+                    >
+                        &times;
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="actor-drawer-content"
+                    class="energy-drawer-content"
+                >
+                    <!-- JS inserts actor profile here -->
+                </div>
+
+            </aside>
 
 
         </div>
@@ -1930,17 +2043,7 @@ window.INETTThemeUrl =
                                         </div>
 
 
-                                        <span
-                                            class="
-                                                energy-status-badge
-                                            "
-                                        >
-                                            <?= safeText(
-                                                $mandate[
-                                                    'mandate_status'
-                                                ]
-                                            ); ?>
-                                        </span>
+                                        
 
                                     </div>
 
@@ -2098,160 +2201,7 @@ window.INETTThemeUrl =
 
             <!-- D3 NETWORK AREA -->
 
-            <section
-                class="
-                    energy-section
-                    energy-section-muted
-                "
-            >
 
-                <div class="energy-container">
-
-                    <div class="energy-panel">
-
-                        <div class="energy-section-header">
-
-                            <div>
-
-                                <span
-                                    class="
-                                        energy-section-eyebrow
-                                    "
-                                >
-                                    Relationship intelligence
-                                </span>
-
-                                <h2>
-                                    Institutional network
-                                </h2>
-
-                                <p
-                                    class="
-                                        energy-section-description
-                                    "
-                                >
-                                    Actor → function → policy
-                                    relationships.
-                                </p>
-
-                            </div>
-
-                        </div>
-                        
-                        <div class="energy-network-controls">
-
-                            <label class="energy-network-toggle">
-                                <input
-                                    type="checkbox"
-                                    id="network-filter-actors"
-                                    checked
-                                >
-                                <span class="energy-network-filter-dot actor"></span>
-                                Actors
-                            </label>
-
-
-                            <label class="energy-network-toggle">
-                                <input
-                                    type="checkbox"
-                                    id="network-filter-functions"
-                                    checked
-                                >
-                                <span class="energy-network-filter-dot function"></span>
-                                Functions
-                            </label>
-
-
-                            <label class="energy-network-toggle">
-                                <input
-                                    type="checkbox"
-                                    id="network-filter-policies"
-                                    checked
-                                >
-                                <span class="energy-network-filter-dot policy"></span>
-                                Policies
-                            </label>
-
-                            <button
-                                type="button"
-                                id="network-reset-layout"
-                                class="energy-network-reset"
-                            >
-                                Reset layout
-                            </button>
-
-                        </div>
-
-                        <div
-                            id="actor-network"
-                            class="energy-network"
-                        >
-
-                            
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </section>
-            
-            <!-- =========================================================
-                ACTOR DETAIL DRAWER
-            ========================================================== -->
-
-            <div
-                id="actor-drawer-backdrop"
-                class="energy-drawer-backdrop"
-            ></div>
-
-            <aside
-                id="actor-drawer"
-                class="energy-initiative-drawer"
-                aria-hidden="true"
-            >
-
-                <div class="energy-drawer-header">
-
-                    <div>
-
-                        <span class="energy-section-eyebrow">
-                            Actor profile
-                        </span>
-
-                        <h2 id="actor-drawer-title">
-                            Actor
-                        </h2>
-
-                        <span
-                            id="actor-drawer-id"
-                            class="energy-drawer-id"
-                        ></span>
-
-                    </div>
-
-
-                    <button
-                        type="button"
-                        id="actor-drawer-close"
-                        class="energy-drawer-close"
-                        aria-label="Close actor profile"
-                    >
-                        &times;
-                    </button>
-
-                </div>
-
-
-                <div
-                    id="actor-drawer-content"
-                    class="energy-drawer-content"
-                >
-                    <!-- JS inserts actor profile here -->
-                </div>
-
-            </aside>
 
         </div>
 
