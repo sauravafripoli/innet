@@ -7501,6 +7501,10 @@
         ----------------------------------------------------------
         */
 
+        /* ----------------------------------------------------------
+   Drag — pin nodes where the user drops them
+---------------------------------------------------------- */
+
         node.call(
 
             d3.drag()
@@ -7517,20 +7521,18 @@
                         ) {
 
                             simulation
-                                .alphaTarget(
-                                    0.3
-                                )
+                                .alphaTarget(0.15)
                                 .restart();
 
                         }
 
 
-                        d.fx =
-                            d.x;
+                        /*
+                        Pin immediately at current position.
+                        */
 
-
-                        d.fy =
-                            d.y;
+                        d.fx = d.x;
+                        d.fy = d.y;
 
                     }
                 )
@@ -7542,12 +7544,12 @@
                         d
                     ) {
 
-                        d.fx =
-                            event.x;
+                        /*
+                        Move the pinned position with the pointer.
+                        */
 
-
-                        d.fy =
-                            event.y;
+                        d.fx = event.x;
+                        d.fy = event.y;
 
                     }
                 )
@@ -7564,25 +7566,60 @@
                         ) {
 
                             simulation
-                                .alphaTarget(
-                                    0
-                                );
+                                .alphaTarget(0);
 
                         }
 
 
-                        d.fx =
-                            null;
+                        /*
+                        IMPORTANT:
+                        Do NOT clear fx / fy here.
 
+                        This means the node remains exactly
+                        where the user dropped it.
+                        */
 
-                        d.fy =
-                            null;
+                        d.fx = event.x;
+                        d.fy = event.y;
 
                     }
                 )
 
         );
 
+        /* ----------------------------------------------------------
+   Double-click node → release back into simulation
+---------------------------------------------------------- */
+
+        node.on(
+            'dblclick',
+            function (
+                event,
+                d
+            ) {
+
+                event.stopPropagation();
+
+
+                /*
+                Remove manual pin.
+                */
+
+                d.fx = null;
+                d.fy = null;
+
+
+                /*
+                Give the network a little energy so
+                the released node settles naturally.
+                */
+
+                simulation
+                    .alpha(0.35)
+                    .restart();
+
+            }
+        );
 
         /*
         ----------------------------------------------------------
@@ -7709,23 +7746,410 @@
                 );
 
 
-                tooltip.innerHTML = `
-                    <strong>
-                        ${escapeEnergyHtml(
-                            d.label
-                        )}
-                    </strong>
+                                /*
+                ----------------------------------------------------------
+                Build richer tooltip content
+                ----------------------------------------------------------
+                */
 
-                    <br>
+                const connectedLinks =
+                    links.filter(
+                        relationship => {
 
-                    ${
-                        d.type === 'actor'
-                            ? 'Institution'
-                            : d.type === 'function'
-                                ? 'Energy-system function'
-                                : 'Policy'
-                    }
-                `;
+                            const sourceId =
+                                typeof relationship.source === 'object'
+                                    ? relationship.source.id
+                                    : relationship.source;
+
+                            const targetId =
+                                typeof relationship.target === 'object'
+                                    ? relationship.target.id
+                                    : relationship.target;
+
+                            return (
+                                sourceId === d.id
+                                || targetId === d.id
+                            );
+
+                        }
+                    );
+
+
+                let tooltipContent = '';
+
+
+                /*
+                ----------------------------------------------------------
+                ACTOR TOOLTIP
+                ----------------------------------------------------------
+                */
+
+                if (d.type === 'actor') {
+
+                    const actor =
+                        d.raw || {};
+
+
+                    const primaryFunctions =
+                        connectedLinks.filter(
+                            relationship =>
+                                relationship.type === 'actor-function'
+                                && String(
+                                    relationship.primacy
+                                    || ''
+                                ).toLowerCase() === 'primary'
+                        ).length;
+
+
+                    tooltipContent = `
+
+                        <div class="energy-network-tooltip-type">
+                            Institution
+                        </div>
+
+                        <strong class="energy-network-tooltip-title">
+                            ${escapeEnergyHtml(d.label)}
+                        </strong>
+
+                        ${
+                            actor.organisation_name
+                            && actor.organisation_name !== d.label
+                                ? `
+                                    <div class="energy-network-tooltip-subtitle">
+                                        ${escapeEnergyHtml(
+                                            actor.organisation_name
+                                        )}
+                                    </div>
+                                `
+                                : ''
+                        }
+
+                        <div class="energy-network-tooltip-grid">
+
+                            <div>
+                                <span>Actor type</span>
+
+                                <strong>
+                                    ${escapeEnergyHtml(
+                                        actor.actor_type
+                                        || '—'
+                                    )}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Primary role</span>
+
+                                <strong>
+                                    ${escapeEnergyHtml(
+                                        actor.primary_role
+                                        || '—'
+                                    )}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Mapped functions</span>
+
+                                <strong>
+                                    ${connectedLinks.length}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Primary mandates</span>
+
+                                <strong>
+                                    ${primaryFunctions}
+                                </strong>
+                            </div>
+
+                        </div>
+
+                        ${
+                            actor.subsector_focus
+                                ? `
+                                    <div class="energy-network-tooltip-detail">
+
+                                        <span>
+                                            Subsector focus
+                                        </span>
+
+                                        <strong>
+                                            ${escapeEnergyHtml(
+                                                actor.subsector_focus
+                                            )}
+                                        </strong>
+
+                                    </div>
+                                `
+                                : ''
+                        }
+
+                        <div class="energy-network-tooltip-hint">
+                            Click to open actor profile
+                        </div>
+
+                    `;
+
+                }
+
+
+                /*
+                ----------------------------------------------------------
+                FUNCTION TOOLTIP
+                ----------------------------------------------------------
+                */
+
+                else if (d.type === 'function') {
+
+                    const func =
+                        d.raw || {};
+
+
+                    const actorLinks =
+                        connectedLinks.filter(
+                            relationship =>
+                                relationship.type
+                                === 'actor-function'
+                        );
+
+
+                    const policyLinks =
+                        connectedLinks.filter(
+                            relationship =>
+                                relationship.type
+                                === 'policy-function'
+                        );
+
+
+                    const primaryActors =
+                        actorLinks.filter(
+                            relationship =>
+                                String(
+                                    relationship.primacy
+                                    || ''
+                                ).toLowerCase() === 'primary'
+                        ).length;
+
+
+                    tooltipContent = `
+
+                        <div class="energy-network-tooltip-type">
+                            Energy-system function
+                        </div>
+
+                        <strong class="energy-network-tooltip-title">
+                            ${escapeEnergyHtml(d.label)}
+                        </strong>
+
+                        <div class="energy-network-tooltip-grid">
+
+                            <div>
+                                <span>Subsector</span>
+
+                                <strong>
+                                    ${escapeEnergyHtml(
+                                        func.primary_subsector
+                                        || '—'
+                                    )}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Value chain</span>
+
+                                <strong>
+                                    ${escapeEnergyHtml(
+                                        func.typical_value_chain_segment
+                                        || '—'
+                                    )}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Institutions</span>
+
+                                <strong>
+                                    ${actorLinks.length}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Policies</span>
+
+                                <strong>
+                                    ${policyLinks.length}
+                                </strong>
+                            </div>
+
+                        </div>
+
+                        <div class="energy-network-tooltip-detail">
+
+                            <span>
+                                Primary mandate holders
+                            </span>
+
+                            <strong>
+                                ${primaryActors}
+                            </strong>
+
+                        </div>
+
+                        ${
+                            func.contestation_note
+                                ? `
+                                    <div class="energy-network-tooltip-note">
+
+                                        <span>
+                                            Governance note
+                                        </span>
+
+                                        <p>
+                                            ${escapeEnergyHtml(
+                                                func.contestation_note
+                                            )}
+                                        </p>
+
+                                    </div>
+                                `
+                                : ''
+                        }
+
+                    `;
+
+                }
+
+
+                /*
+                ----------------------------------------------------------
+                POLICY TOOLTIP
+                ----------------------------------------------------------
+                */
+
+                else {
+
+                    const policy =
+                        d.raw || {};
+
+
+                    const functionLinks =
+                        connectedLinks.filter(
+                            relationship =>
+                                relationship.type
+                                === 'policy-function'
+                        );
+
+
+                    const subsectors =
+                        [
+                            ...new Set(
+                                functionLinks
+                                    .map(
+                                        relationship =>
+                                            relationship.subsector
+                                    )
+                                    .filter(Boolean)
+                            )
+                        ];
+
+
+                    tooltipContent = `
+
+                        <div class="energy-network-tooltip-type">
+                            Policy / framework
+                        </div>
+
+                        <strong class="energy-network-tooltip-title">
+                            ${escapeEnergyHtml(d.label)}
+                        </strong>
+
+                        ${
+                            policy.instrument_name
+                            && policy.instrument_name !== d.label
+                                ? `
+                                    <div class="energy-network-tooltip-subtitle">
+                                        ${escapeEnergyHtml(
+                                            policy.instrument_name
+                                        )}
+                                    </div>
+                                `
+                                : ''
+                        }
+
+                        <div class="energy-network-tooltip-grid">
+
+                            <div>
+                                <span>Type</span>
+
+                                <strong>
+                                    ${escapeEnergyHtml(
+                                        policy.instrument_type
+                                        || '—'
+                                    )}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Status</span>
+
+                                <strong>
+                                    ${escapeEnergyHtml(
+                                        policy.status
+                                        || '—'
+                                    )}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Year</span>
+
+                                <strong>
+                                    ${escapeEnergyHtml(
+                                        policy.publication_year
+                                        || '—'
+                                    )}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Functions covered</span>
+
+                                <strong>
+                                    ${functionLinks.length}
+                                </strong>
+                            </div>
+
+                        </div>
+
+                        ${
+                            subsectors.length
+                                ? `
+                                    <div class="energy-network-tooltip-detail">
+
+                                        <span>
+                                            Network subsectors
+                                        </span>
+
+                                        <strong>
+                                            ${escapeEnergyHtml(
+                                                subsectors.join(', ')
+                                            )}
+                                        </strong>
+
+                                    </div>
+                                `
+                                : ''
+                        }
+
+                    `;
+
+                }
+
+
+                tooltip.innerHTML =
+                    tooltipContent;
 
 
                 tooltip.style.left =
