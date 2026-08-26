@@ -4614,6 +4614,15 @@
     let initiativeExplorerPage = 1;
     let initiativeExplorerPageSize = 10;
 
+    let actorDirectoryPage = 1;
+
+    const actorDirectoryPageSize = 10;
+
+    let actorDirectorySearch = '';
+
+    let actorDirectoryInitiatives =
+        data.initiatives || [];
+
 
     function formatExplorerMoney(value) {
 
@@ -5890,6 +5899,509 @@
     }
 
 
+    function getActorDirectoryRows(
+        initiatives
+    ) {
+
+        const initiativeIds =
+            new Set(
+                (initiatives || [])
+                    .map(
+                        initiative =>
+                            String(
+                                initiative.initiative_id
+                            )
+                    )
+            );
+
+
+        const activityByActor = {};
+
+
+        (data.initiative_actors || [])
+            .forEach(
+                relationship => {
+
+                    const initiativeId =
+                        String(
+                            relationship.initiative_id
+                            || ''
+                        );
+
+
+                    const actorId =
+                        String(
+                            relationship.actor_id
+                            || ''
+                        );
+
+
+                    if (
+                        !initiativeIds.has(
+                            initiativeId
+                        )
+                        || !actorId
+                    ) {
+                        return;
+                    }
+
+
+                    if (!activityByActor[actorId]) {
+
+                        activityByActor[actorId] = {
+
+                            initiatives:
+                                new Set(),
+
+                            states:
+                                new Set()
+
+                        };
+
+                    }
+
+
+                    activityByActor[
+                        actorId
+                    ]
+                    .initiatives
+                    .add(
+                        initiativeId
+                    );
+
+
+                    const locations =
+                        initiativeLocationsById[
+                            initiativeId
+                        ];
+
+
+                    if (locations) {
+
+                        locations.forEach(
+                            stateCode => {
+
+                                activityByActor[
+                                    actorId
+                                ]
+                                .states
+                                .add(
+                                    stateCode
+                                );
+
+                            }
+                        );
+
+                    }
+
+                }
+            );
+
+
+        let actors;
+
+
+        /*
+        ----------------------------------------------------------
+        If no dashboard filter is active, show ALL actors.
+
+        If filters are active, show only actors connected to
+        matching initiatives.
+        ----------------------------------------------------------
+        */
+
+        const filtersActive =
+            Boolean(
+                energyFilterState.state
+                || energyFilterState.subsector
+                || energyFilterState.status
+            );
+
+
+        if (filtersActive) {
+
+            actors =
+                Object.keys(
+                    activityByActor
+                )
+                .map(
+                    actorId =>
+                        actorById[
+                            actorId
+                        ]
+                )
+                .filter(Boolean);
+
+        } else {
+
+            actors =
+                data.all_actors
+                || data.actors
+                || [];
+
+        }
+
+
+        let rows =
+            actors.map(
+                actor => {
+
+                    const actorId =
+                        String(
+                            actor.actor_id
+                            || ''
+                        );
+
+
+                    const activity =
+                        activityByActor[
+                            actorId
+                        ];
+
+
+                    return {
+
+                        actor:
+                            actor,
+
+                        initiativeCount:
+                            activity
+                                ? activity
+                                    .initiatives
+                                    .size
+                                : 0,
+
+                        statesReached:
+                            activity
+                                ? activity
+                                    .states
+                                    .size
+                                : 0
+
+                    };
+
+                }
+            );
+
+
+        /*
+        ----------------------------------------------------------
+        Directory text search
+        ----------------------------------------------------------
+        */
+
+        const search =
+            normalizeFilterValue(
+                actorDirectorySearch
+            );
+
+
+        if (search) {
+
+            rows =
+                rows.filter(
+                    row => {
+
+                        const actor =
+                            row.actor;
+
+
+                        const haystack =
+                            [
+                                actor.organisation_name,
+                                actor.acronym,
+                                actor.actor_type,
+                                actor.primary_role,
+                                actor.subsector_focus
+                            ]
+                            .filter(Boolean)
+                            .join(' ')
+                            .toLowerCase();
+
+
+                        return haystack.includes(
+                            search
+                        );
+
+                    }
+                );
+
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Sort:
+        active actors first, then organisation name
+        ----------------------------------------------------------
+        */
+
+        rows.sort(
+            (a, b) => {
+
+                if (
+                    b.initiativeCount
+                    !== a.initiativeCount
+                ) {
+
+                    return (
+                        b.initiativeCount
+                        - a.initiativeCount
+                    );
+
+                }
+
+
+                return String(
+                    a.actor.organisation_name
+                    || ''
+                )
+                .localeCompare(
+                    String(
+                        b.actor.organisation_name
+                        || ''
+                    )
+                );
+
+            }
+        );
+
+
+        return rows;
+
+    }
+
+    function renderActorDirectory() {
+
+        const body =
+            document.getElementById(
+                'actor-directory-body'
+            );
+
+
+        const countElement =
+            document.getElementById(
+                'actor-directory-count'
+            );
+
+
+        const pageInfo =
+            document.getElementById(
+                'actor-directory-page-info'
+            );
+
+
+        const previousButton =
+            document.getElementById(
+                'actor-directory-prev'
+            );
+
+
+        const nextButton =
+            document.getElementById(
+                'actor-directory-next'
+            );
+
+
+        if (!body) {
+            return;
+        }
+
+
+        const rows =
+            getActorDirectoryRows(
+                actorDirectoryInitiatives
+            );
+
+
+        const totalRows =
+            rows.length;
+
+
+        const totalPages =
+            Math.max(
+                1,
+                Math.ceil(
+                    totalRows
+                    / actorDirectoryPageSize
+                )
+            );
+
+
+        if (
+            actorDirectoryPage
+            > totalPages
+        ) {
+
+            actorDirectoryPage =
+                totalPages;
+
+        }
+
+
+        if (
+            actorDirectoryPage
+            < 1
+        ) {
+
+            actorDirectoryPage = 1;
+
+        }
+
+
+        const start =
+            (
+                actorDirectoryPage - 1
+            )
+            * actorDirectoryPageSize;
+
+
+        const pageRows =
+            rows.slice(
+                start,
+                start
+                + actorDirectoryPageSize
+            );
+
+
+        if (countElement) {
+
+            countElement.textContent =
+                `${totalRows.toLocaleString()} ${
+                    totalRows === 1
+                        ? 'actor'
+                        : 'actors'
+                }`;
+
+        }
+
+
+        if (!pageRows.length) {
+
+            body.innerHTML = `
+
+                <tr>
+
+                    <td colspan="5">
+                        No actors match the current filters.
+                    </td>
+
+                </tr>
+
+            `;
+
+        } else {
+
+            body.innerHTML =
+                pageRows
+                    .map(
+                        row => {
+
+                            const actor =
+                                row.actor;
+
+
+                            const displayName =
+                                actor.acronym
+                                || actor.organisation_name
+                                || actor.actor_id;
+
+
+                            return `
+
+                                <tr
+                                    class="energy-actor-directory-row"
+                                    data-actor-id="${escapeEnergyHtml(
+                                        actor.actor_id
+                                    )}"
+                                >
+
+                                    <td>
+
+                                        <strong>
+                                            ${escapeEnergyHtml(
+                                                displayName
+                                            )}
+                                        </strong>
+
+                                        ${
+                                            actor.acronym
+                                            && actor.organisation_name
+                                            ? `
+                                                <small>
+                                                    ${escapeEnergyHtml(
+                                                        actor.organisation_name
+                                                    )}
+                                                </small>
+                                            `
+                                            : ''
+                                        }
+
+                                    </td>
+
+
+                                    <td>
+                                        ${escapeEnergyHtml(
+                                            actor.actor_type
+                                            || '—'
+                                        )}
+                                    </td>
+
+
+                                    <td>
+                                        ${escapeEnergyHtml(
+                                            actor.primary_role
+                                            || '—'
+                                        )}
+                                    </td>
+
+
+                                    <td>
+                                        ${row.initiativeCount.toLocaleString()}
+                                    </td>
+
+
+                                    <td>
+                                        ${row.statesReached.toLocaleString()}
+                                    </td>
+
+                                </tr>
+
+                            `;
+
+                        }
+                    )
+                    .join('');
+
+        }
+
+
+        if (pageInfo) {
+
+            pageInfo.textContent =
+                `Page ${actorDirectoryPage} of ${totalPages}`;
+
+        }
+
+
+        if (previousButton) {
+
+            previousButton.disabled =
+                actorDirectoryPage <= 1;
+
+        }
+
+
+        if (nextButton) {
+
+            nextButton.disabled =
+                actorDirectoryPage >= totalPages;
+
+        }
+
+    }
+
+
     function renderInitiativeExplorer(
         initiatives
     ) {
@@ -6208,6 +6720,132 @@
                     initiativeExplorerPage >= totalPages;
 
             }
+
+    }
+
+    function initActorDirectory() {
+
+        const search =
+            document.getElementById(
+                'actor-directory-search'
+            );
+
+
+        const previousButton =
+            document.getElementById(
+                'actor-directory-prev'
+            );
+
+
+        const nextButton =
+            document.getElementById(
+                'actor-directory-next'
+            );
+
+
+        const body =
+            document.getElementById(
+                'actor-directory-body'
+            );
+
+
+        if (search) {
+
+            search.addEventListener(
+                'input',
+                function () {
+
+                    actorDirectorySearch =
+                        this.value || '';
+
+
+                    actorDirectoryPage = 1;
+
+
+                    renderActorDirectory();
+
+                }
+            );
+
+        }
+
+
+        if (previousButton) {
+
+            previousButton.addEventListener(
+                'click',
+                function () {
+
+                    if (
+                        actorDirectoryPage
+                        <= 1
+                    ) {
+                        return;
+                    }
+
+
+                    actorDirectoryPage--;
+
+
+                    renderActorDirectory();
+
+                }
+            );
+
+        }
+
+
+        if (nextButton) {
+
+            nextButton.addEventListener(
+                'click',
+                function () {
+
+                    actorDirectoryPage++;
+
+
+                    renderActorDirectory();
+
+                }
+            );
+
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Event delegation keeps row clicks working after rerender
+        ----------------------------------------------------------
+        */
+
+        if (body) {
+
+            body.addEventListener(
+                'click',
+                function (event) {
+
+                    const row =
+                        event.target.closest(
+                            '.energy-actor-directory-row'
+                        );
+
+
+                    if (!row) {
+                        return;
+                    }
+
+
+                    openActorDrawer(
+                        row.dataset.actorId
+                    );
+
+                }
+            );
+
+        }
+
+
+        renderActorDirectory();
 
     }
 
@@ -8709,6 +9347,20 @@
                     initiatives
                 );
 
+                /*
+                Actor directory
+                */
+
+                actorDirectoryInitiatives =
+                    initiatives;
+
+
+                actorDirectoryPage =
+                    1;
+
+
+                renderActorDirectory();
+
                 initiativeExplorerPage = 1;
 
                 renderInitiativeExplorer(
@@ -8773,6 +9425,8 @@ document.addEventListener(
         initMandatePagination();
 
         initActorDrawer();
+
+        initActorDirectory();
 
 
         /*

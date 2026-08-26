@@ -1800,6 +1800,115 @@ window.INETTThemeUrl =
 
             </section>
 
+            <section class="energy-section">
+
+                <div class="energy-container">
+
+
+                <div class="energy-section-header">
+
+                    <div>
+                        <span class="energy-section-eyebrow">
+                            Directory
+                        </span>
+
+                        <h2>
+                            Actor directory
+                        </h2>
+
+                        <p class="energy-section-description">
+                            Browse institutions participating in initiatives matching
+                            the current dashboard filters.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="energy-panel">
+
+                    <div class="energy-directory-toolbar">
+
+                        <input
+                            type="search"
+                            id="actor-directory-search"
+                            class="energy-directory-search"
+                            placeholder="Search organisation or acronym..."
+                            autocomplete="off"
+                        >
+
+
+                        <span
+                            id="actor-directory-count"
+                            class="energy-directory-count"
+                        >
+                            0 actors
+                        </span>
+
+                    </div>
+
+
+                    <div class="energy-table-wrap">
+
+                        <table class="energy-table">
+
+                            <thead>
+
+                                <tr>
+                                    <th>Organisation</th>
+                                    <th>Type</th>
+                                    <th>Primary role</th>
+                                    <th>Initiatives</th>
+                                    <th>States reached</th>
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody
+                                id="actor-directory-body"
+                            ></tbody>
+
+                        </table>
+
+                    </div>
+
+
+                    <div class="energy-pagination">
+
+                        <button
+                            type="button"
+                            id="actor-directory-prev"
+                            class="energy-pagination-button"
+                        >
+                            Previous
+                        </button>
+
+
+                        <span
+                            id="actor-directory-page-info"
+                            class="energy-pagination-info"
+                        >
+                            Page 1 of 1
+                        </span>
+
+
+                        <button
+                            type="button"
+                            id="actor-directory-next"
+                            class="energy-pagination-button"
+                        >
+                            Next
+                        </button>
+
+                    </div>
+
+                </div>
+
+                </div>
+
+            </section>
+
 
 
             <!-- D3 NETWORK AREA -->
