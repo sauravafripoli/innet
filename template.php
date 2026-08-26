@@ -364,6 +364,13 @@ window.INETTThemeUrl =
 
                         <div class="energy-multiselect-menu">
 
+                            <button
+                                type="button"
+                                class="energy-multiselect-select-all"
+                            >
+                                Select all
+                            </button>
+
                             <div class="energy-multiselect-options">
 
                                 <?php foreach ($subsectors as $item): ?>
@@ -428,6 +435,13 @@ window.INETTThemeUrl =
 
 
                         <div class="energy-multiselect-menu">
+
+                                    <button
+                                        type="button"
+                                        class="energy-multiselect-select-all"
+                                    >
+                                        Select all
+                                    </button>
 
                             <div class="energy-multiselect-options">
 
@@ -496,6 +510,13 @@ window.INETTThemeUrl =
 
 
                         <div class="energy-multiselect-menu">
+
+                            <button
+                                type="button"
+                                class="energy-multiselect-select-all"
+                            >
+                                Select all
+                            </button>
 
                             <div class="energy-multiselect-options">
 

@@ -4593,7 +4593,7 @@
 
         /*
         ----------------------------------------------------------
-        Update visible button label
+        Update visible dropdown label
         ----------------------------------------------------------
         */
 
@@ -4606,6 +4606,14 @@
                 [
                     ...root.querySelectorAll(
                         'input[type="checkbox"]:checked'
+                    )
+                ];
+
+
+            const allInputs =
+                [
+                    ...root.querySelectorAll(
+                        'input[type="checkbox"]'
                     )
                 ];
 
@@ -4627,6 +4635,10 @@
             );
 
 
+            /*
+            No selection
+            */
+
             if (!checked.length) {
 
                 label.textContent =
@@ -4638,11 +4650,27 @@
 
 
             /*
-            One or two values:
-            show names.
+            Everything selected is analytically equivalent
+            to showing everything.
+            */
 
-            More than two:
-            show count.
+            if (
+                allInputs.length
+                &&
+                checked.length === allInputs.length
+            ) {
+
+                label.textContent =
+                    emptyLabel;
+
+                return;
+
+            }
+
+
+            /*
+            One or two selected values:
+            show their names.
             */
 
             if (checked.length <= 2) {
@@ -4661,6 +4689,11 @@
             }
 
 
+            /*
+            Three or more:
+            compact count.
+            */
+
             label.textContent =
                 `${checked.length} selected`;
 
@@ -4669,7 +4702,7 @@
 
         /*
         ----------------------------------------------------------
-        Initialize dropdown
+        Initialize each multiselect
         ----------------------------------------------------------
         */
 
@@ -4693,14 +4726,63 @@
                     );
 
 
+                const menu =
+                    root.querySelector(
+                        '.energy-multiselect-menu'
+                    );
+
+
                 const inputs =
-                    root.querySelectorAll(
-                        'input[type="checkbox"]'
+                    [
+                        ...root.querySelectorAll(
+                            'input[type="checkbox"]'
+                        )
+                    ];
+
+
+                const selectAllButton =
+                    root.querySelector(
+                        '.energy-multiselect-select-all'
                     );
 
 
                 /*
-                Open / close
+                --------------------------------------------------
+                Sync Select all / Clear all label
+                --------------------------------------------------
+                */
+
+                function syncSelectAllLabel() {
+
+                    if (!selectAllButton) {
+                        return;
+                    }
+
+
+                    const total =
+                        inputs.length;
+
+
+                    const checked =
+                        inputs.filter(
+                            input =>
+                                input.checked
+                        ).length;
+
+
+                    selectAllButton.textContent =
+                        total > 0
+                        && checked === total
+                            ? 'Clear all'
+                            : 'Select all';
+
+                }
+
+
+                /*
+                --------------------------------------------------
+                Open / close dropdown
+                --------------------------------------------------
                 */
 
                 if (trigger) {
@@ -4712,6 +4794,10 @@
                             event.stopPropagation();
 
 
+                            /*
+                            Close other multiselects first
+                            */
+
                             document
                                 .querySelectorAll(
                                     '.energy-multiselect.open'
@@ -4719,27 +4805,28 @@
                                 .forEach(
                                     item => {
 
-                                        if (item !== root) {
+                                        if (item === root) {
+                                            return;
+                                        }
 
-                                            item.classList.remove(
-                                                'open'
+
+                                        item.classList.remove(
+                                            'open'
+                                        );
+
+
+                                        const otherTrigger =
+                                            item.querySelector(
+                                                '.energy-multiselect-trigger'
                                             );
 
 
-                                            const otherTrigger =
-                                                item.querySelector(
-                                                    '.energy-multiselect-trigger'
-                                                );
+                                        if (otherTrigger) {
 
-
-                                            if (otherTrigger) {
-
-                                                otherTrigger.setAttribute(
-                                                    'aria-expanded',
-                                                    'false'
-                                                );
-
-                                            }
+                                            otherTrigger.setAttribute(
+                                                'aria-expanded',
+                                                'false'
+                                            );
 
                                         }
 
@@ -4767,7 +4854,100 @@
 
 
                 /*
-                Checkbox changes
+                --------------------------------------------------
+                Keep menu open while interacting inside it
+                --------------------------------------------------
+                */
+
+                if (menu) {
+
+                    menu.addEventListener(
+                        'click',
+                        function (event) {
+
+                            event.stopPropagation();
+
+                        }
+                    );
+
+                }
+
+
+                /*
+                --------------------------------------------------
+                Select all / Clear all
+                --------------------------------------------------
+                */
+
+                if (selectAllButton) {
+
+                    selectAllButton.addEventListener(
+                        'click',
+                        function (event) {
+
+                            event.preventDefault();
+                            event.stopPropagation();
+
+
+                            const allSelected =
+                                inputs.length > 0
+                                &&
+                                inputs.every(
+                                    input =>
+                                        input.checked
+                                );
+
+
+                            /*
+                            If all are selected:
+                            clear everything.
+
+                            Otherwise:
+                            select everything.
+                            */
+
+                            inputs.forEach(
+                                input => {
+
+                                    input.checked =
+                                        !allSelected;
+
+                                }
+                            );
+
+
+                            energyFilterState[
+                                config.key
+                            ] =
+                                !allSelected
+                                    ? inputs.map(
+                                        input =>
+                                            input.value
+                                    )
+                                    : [];
+
+
+                            updateMultiselectLabel(
+                                root,
+                                config.emptyLabel
+                            );
+
+
+                            syncSelectAllLabel();
+
+
+                            applyEnergyFilters();
+
+                        }
+                    );
+
+                }
+
+
+                /*
+                --------------------------------------------------
+                Individual checkbox changes
+                --------------------------------------------------
                 */
 
                 inputs.forEach(
@@ -4780,21 +4960,24 @@
                                 energyFilterState[
                                     config.key
                                 ] =
-                                    [
-                                        ...root.querySelectorAll(
-                                            'input[type="checkbox"]:checked'
+                                    inputs
+                                        .filter(
+                                            checkbox =>
+                                                checkbox.checked
                                         )
-                                    ]
-                                    .map(
-                                        checkbox =>
-                                            checkbox.value
-                                    );
+                                        .map(
+                                            checkbox =>
+                                                checkbox.value
+                                        );
 
 
                                 updateMultiselectLabel(
                                     root,
                                     config.emptyLabel
                                 );
+
+
+                                syncSelectAllLabel();
 
 
                                 applyEnergyFilters();
@@ -4806,10 +4989,19 @@
                 );
 
 
+                /*
+                --------------------------------------------------
+                Initial appearance
+                --------------------------------------------------
+                */
+
                 updateMultiselectLabel(
                     root,
                     config.emptyLabel
                 );
+
+
+                syncSelectAllLabel();
 
             }
         );
@@ -4817,7 +5009,7 @@
 
         /*
         ----------------------------------------------------------
-        Click outside → close menus
+        Click outside → close all dropdowns
         ----------------------------------------------------------
         */
 
@@ -4860,32 +5052,8 @@
 
 
         /*
-        Prevent clicks inside menu from closing it.
-        */
-
-        document
-            .querySelectorAll(
-                '.energy-multiselect-menu'
-            )
-            .forEach(
-                menu => {
-
-                    menu.addEventListener(
-                        'click',
-                        function (event) {
-
-                            event.stopPropagation();
-
-                        }
-                    );
-
-                }
-            );
-
-
-        /*
         ----------------------------------------------------------
-        RESET ALL
+        RESET ALL GLOBAL FILTERS
         ----------------------------------------------------------
         */
 
@@ -4919,24 +5087,63 @@
                             }
 
 
-                            root
-                                .querySelectorAll(
-                                    'input[type="checkbox"]'
-                                )
-                                .forEach(
-                                    input => {
+                            const inputs =
+                                [
+                                    ...root.querySelectorAll(
+                                        'input[type="checkbox"]'
+                                    )
+                                ];
 
-                                        input.checked =
-                                            false;
 
-                                    }
-                                );
+                            inputs.forEach(
+                                input => {
+
+                                    input.checked =
+                                        false;
+
+                                }
+                            );
 
 
                             updateMultiselectLabel(
                                 root,
                                 config.emptyLabel
                             );
+
+
+                            const selectAllButton =
+                                root.querySelector(
+                                    '.energy-multiselect-select-all'
+                                );
+
+
+                            if (selectAllButton) {
+
+                                selectAllButton.textContent =
+                                    'Select all';
+
+                            }
+
+
+                            root.classList.remove(
+                                'open'
+                            );
+
+
+                            const trigger =
+                                root.querySelector(
+                                    '.energy-multiselect-trigger'
+                                );
+
+
+                            if (trigger) {
+
+                                trigger.setAttribute(
+                                    'aria-expanded',
+                                    'false'
+                                );
+
+                            }
 
                         }
                     );
