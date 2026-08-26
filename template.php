@@ -1313,61 +1313,6 @@ window.INETTThemeUrl =
 
             </section>
             
-            <!-- =========================================================
-                ACTOR DETAIL DRAWER
-            ========================================================== -->
-
-            <div
-                id="actor-drawer-backdrop"
-                class="energy-drawer-backdrop"
-            ></div>
-
-            <aside
-                id="actor-drawer"
-                class="energy-initiative-drawer"
-                aria-hidden="true"
-            >
-
-                <div class="energy-drawer-header">
-
-                    <div>
-
-                        <span class="energy-section-eyebrow">
-                            Actor profile
-                        </span>
-
-                        <h2 id="actor-drawer-title">
-                            Actor
-                        </h2>
-
-                        <span
-                            id="actor-drawer-id"
-                            class="energy-drawer-id"
-                        ></span>
-
-                    </div>
-
-
-                    <button
-                        type="button"
-                        id="actor-drawer-close"
-                        class="energy-drawer-close"
-                        aria-label="Close actor profile"
-                    >
-                        &times;
-                    </button>
-
-                </div>
-
-
-                <div
-                    id="actor-drawer-content"
-                    class="energy-drawer-content"
-                >
-                    <!-- JS inserts actor profile here -->
-                </div>
-
-            </aside>
 
 
         </div>
@@ -2288,7 +2233,61 @@ window.INETTThemeUrl =
 
 
 
-            <!-- D3 NETWORK AREA -->
+            <!-- =========================================================
+                ACTOR DETAIL DRAWER
+            ========================================================== -->
+
+            <div
+                id="actor-drawer-backdrop"
+                class="energy-drawer-backdrop"
+            ></div>
+
+            <aside
+                id="actor-drawer"
+                class="energy-initiative-drawer"
+                aria-hidden="true"
+            >
+
+                <div class="energy-drawer-header">
+
+                    <div>
+
+                        <span class="energy-section-eyebrow">
+                            Actor profile
+                        </span>
+
+                        <h2 id="actor-drawer-title">
+                            Actor
+                        </h2>
+
+                        <span
+                            id="actor-drawer-id"
+                            class="energy-drawer-id"
+                        ></span>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="actor-drawer-close"
+                        class="energy-drawer-close"
+                        aria-label="Close actor profile"
+                    >
+                        &times;
+                    </button>
+
+                </div>
+
+
+                <div
+                    id="actor-drawer-content"
+                    class="energy-drawer-content"
+                >
+                    <!-- JS inserts actor profile here -->
+                </div>
+
+            </aside>
 
 
 
