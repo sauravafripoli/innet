@@ -44,10 +44,14 @@
 
     const actorById = {};
 
+    const policyById = {};
+
     const initiativeById = {};
 
 
-    (data.actors || []).forEach(actor => {
+    (data.all_actors || data.actors || [])
+    .forEach(actor => {
+
 
         const actorId =
             String(
@@ -59,6 +63,25 @@
         }
 
         actorById[actorId] = actor;
+
+    });
+
+    (data.all_policies || data.policies || [])
+    .forEach(policy => {
+
+        const policyId =
+            String(
+                policy.policy_id || ''
+            ).trim();
+
+
+        if (!policyId) {
+            return;
+        }
+
+
+        policyById[policyId] =
+            policy;
 
     });
 
@@ -7061,14 +7084,9 @@
 
 
                     const policy =
-                        (data.policies || [])
-                            .find(
-                                item =>
-                                    String(
-                                        item.policy_id
-                                    )
-                                    === policyId
-                            );
+                        policyById[
+                            policyId
+                        ];
 
 
                     const policyLabel =

@@ -414,6 +414,12 @@ function getEnergyDashboardData(PDO $db): array
         'targets' =>
             getTargetSummary($db),
 
+        'all_actors' =>
+            getAllActors($db),
+
+        'all_policies' =>
+            getAllPolicies($db),
+
         /*
         ------------------------------------------------------
         Client-side analytical relationships
@@ -474,6 +480,66 @@ function getAllStates(PDO $db): array
             current_regulatory_authority
         FROM vw_state_coverage
         ORDER BY state_name
+    ");
+
+    return $stmt->fetchAll();
+}
+
+/* ============================================================
+   COMPLETE ACTOR REFERENCE DATA
+============================================================ */
+
+function getAllActors(PDO $db): array
+{
+    $stmt = $db->query("
+        SELECT
+            actor_id,
+            organisation_name,
+            acronym,
+            actor_type,
+            primary_role,
+            subsector_focus,
+            mandate_summary,
+            governance_tier,
+            state_code,
+            website_url,
+            source_citation,
+            source_url,
+            source_type
+        FROM actors
+        ORDER BY organisation_name
+    ");
+
+    return $stmt->fetchAll();
+}
+
+/* ============================================================
+   COMPLETE POLICY REFERENCE DATA
+============================================================ */
+
+function getAllPolicies(PDO $db): array
+{
+    $stmt = $db->query("
+        SELECT
+            policy_id,
+            instrument_name,
+            short_name,
+            instrument_type,
+            legal_force,
+            governance_tier,
+            issuing_institution,
+            implementing_institutions,
+            status,
+            publication_year,
+            implementation_mechanism_defined,
+            monitoring_evaluation_framework,
+            primary_subsector,
+            implementation_note,
+            source_citation,
+            source_url,
+            source_type
+        FROM policies
+        ORDER BY instrument_name
     ");
 
     return $stmt->fetchAll();
