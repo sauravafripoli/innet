@@ -7342,8 +7342,9 @@
         renderPolicyCoverageMatrix();
 
         updateTargetKpis();
-
+        updateTargetSubsectorChart();
         updateTargetTimelineChart();
+        updateTargetMonitoringCoverage();
 
         document.dispatchEvent(
             new CustomEvent(
@@ -14556,6 +14557,581 @@
         });
 
     }
+
+/* ==========================================================
+   TARGETS BY SUBSECTOR
+========================================================== */
+
+    function initTargetSubsectorChart() {
+
+        const element =
+            document.getElementById(
+                'target-subsector-chart'
+            );
+
+
+        if (!element) {
+            return;
+        }
+
+
+        let chart =
+            echarts.getInstanceByDom(
+                element
+            );
+
+
+        if (!chart) {
+
+            chart =
+                echarts.init(
+                    element
+                );
+
+        }
+
+
+        window.INETTTargetSubsectorChart =
+            chart;
+
+
+        updateTargetSubsectorChart();
+
+
+        window.addEventListener(
+            'resize',
+            function () {
+
+                chart.resize();
+
+            }
+        );
+
+    }
+
+
+    function updateTargetSubsectorChart() {
+
+        const chart =
+            window.INETTTargetSubsectorChart;
+
+
+        if (!chart) {
+            return;
+        }
+
+
+        const targets =
+            getFilteredTargets();
+
+
+        const counts = {};
+
+
+        targets.forEach(
+            target => {
+
+                const subsector =
+                    String(
+                        target.subsector
+                        || 'Unspecified'
+                    ).trim();
+
+
+                if (!counts[subsector]) {
+
+                    counts[subsector] =
+                        0;
+
+                }
+
+
+                counts[subsector]++;
+
+            }
+        );
+
+
+        const rows =
+            Object.entries(
+                counts
+            )
+            .map(
+                ([subsector, count]) => ({
+
+                    subsector:
+                        subsector,
+
+                    count:
+                        count
+
+                })
+            )
+            .sort(
+                (a, b) =>
+                    b.count - a.count
+            );
+
+
+        chart.clear();
+
+
+        if (!rows.length) {
+
+            chart.setOption({
+
+                title: {
+
+                    text:
+                        'No targets match these filters',
+
+                    left:
+                        'center',
+
+                    top:
+                        'middle',
+
+                    textStyle: {
+
+                        fontSize:
+                            13,
+
+                        fontWeight:
+                            400,
+
+                        color:
+                            '#7a817d'
+
+                    }
+
+                }
+
+            });
+
+
+            return;
+
+        }
+
+
+        chart.setOption({
+
+            animationDuration:
+                350,
+
+
+            tooltip: {
+
+                trigger:
+                    'axis',
+
+                axisPointer: {
+
+                    type:
+                        'shadow'
+
+                },
+
+                formatter:
+                    function (
+                        params
+                    ) {
+
+                        const row =
+                            rows[
+                                params[0]
+                                    .dataIndex
+                            ];
+
+
+                        return `
+                            <strong>
+                                ${row.subsector}
+                            </strong>
+
+                            <br>
+
+                            ${row.count.toLocaleString()}
+                            ${
+                                row.count === 1
+                                    ? ' target'
+                                    : ' targets'
+                            }
+                        `;
+
+                    }
+
+            },
+
+
+            grid: {
+
+                left:
+                    20,
+
+                right:
+                    55,
+
+                top:
+                    10,
+
+                bottom:
+                    20,
+
+                containLabel:
+                    true
+
+            },
+
+
+            xAxis: {
+
+                type:
+                    'value',
+
+                minInterval:
+                    1,
+
+                axisLine: {
+
+                    show:
+                        false
+
+                },
+
+                axisTick: {
+
+                    show:
+                        false
+
+                },
+
+                axisLabel: {
+
+                    color:
+                        '#69716d',
+
+                    fontSize:
+                        11
+
+                },
+
+                splitLine: {
+
+                    lineStyle: {
+
+                        color:
+                            '#edf0ee'
+
+                    }
+
+                }
+
+            },
+
+
+            yAxis: {
+
+                type:
+                    'category',
+
+                inverse:
+                    true,
+
+                data:
+                    rows.map(
+                        row =>
+                            row.subsector
+                    ),
+
+                axisLine: {
+
+                    show:
+                        false
+
+                },
+
+                axisTick: {
+
+                    show:
+                        false
+
+                },
+
+                axisLabel: {
+
+                    color:
+                        '#39413d',
+
+                    fontSize:
+                        12,
+
+                    margin:
+                        14
+
+                }
+
+            },
+
+
+            series: [
+
+                {
+
+                    name:
+                        'Targets',
+
+                    type:
+                        'bar',
+
+                    data:
+                        rows.map(
+                            row =>
+                                row.count
+                        ),
+
+                    barWidth:
+                        24,
+
+                    itemStyle: {
+
+                        color:
+                            '#0f6e56',
+
+                        borderRadius:
+                            [0, 5, 5, 0]
+
+                    },
+
+                    label: {
+
+                        show:
+                            true,
+
+                        position:
+                            'right',
+
+                        color:
+                            '#39413d',
+
+                        fontSize:
+                            11,
+
+                        fontWeight:
+                            700,
+
+                        formatter:
+                            function (
+                                params
+                            ) {
+
+                                return params.value;
+
+                            }
+
+                    }
+
+                }
+
+            ]
+
+        });
+
+    }
+
+    function updateTargetMonitoringCoverage() {
+
+        const targets =
+            getFilteredTargets();
+
+
+        const observations =
+            data.target_observations
+            || [];
+
+
+        const targetIds =
+            new Set(
+                targets.map(
+                    target =>
+                        String(
+                            target.target_id
+                            || ''
+                        )
+                )
+            );
+
+
+        const matchingObservations =
+            observations.filter(
+                observation =>
+                    targetIds.has(
+                        String(
+                            observation.target_id
+                            || ''
+                        )
+                    )
+            );
+
+
+        const observedIds =
+            new Set(
+                matchingObservations.map(
+                    observation =>
+                        String(
+                            observation.target_id
+                        )
+                )
+            );
+
+
+        const verifiedIds =
+            new Set();
+
+
+        const unverifiedIds =
+            new Set();
+
+
+        matchingObservations.forEach(
+            observation => {
+
+                const targetId =
+                    String(
+                        observation.target_id
+                        || ''
+                    );
+
+
+                const status =
+                    normalizeFilterValue(
+                        observation.verification_status
+                    );
+
+
+                if (
+                    status === 'verified'
+                    ||
+                    status === 'partially verified'
+                ) {
+
+                    verifiedIds.add(
+                        targetId
+                    );
+
+                } else {
+
+                    unverifiedIds.add(
+                        targetId
+                    );
+
+                }
+
+            }
+        );
+
+
+        const total =
+            targets.length;
+
+
+        const observed =
+            observedIds.size;
+
+
+        const unobserved =
+            Math.max(
+                0,
+                total - observed
+            );
+
+
+        const percentage =
+            total
+                ? (
+                    observed
+                    / total
+                    * 100
+                )
+                : 0;
+
+
+        const observedElement =
+            document.getElementById(
+                'target-monitoring-observed'
+            );
+
+
+        const unobservedElement =
+            document.getElementById(
+                'target-monitoring-unobserved'
+            );
+
+
+        const percentElement =
+            document.getElementById(
+                'target-monitoring-percent'
+            );
+
+
+        const progressBar =
+            document.getElementById(
+                'target-monitoring-progress-bar'
+            );
+
+
+        const verifiedElement =
+            document.getElementById(
+                'target-monitoring-verified'
+            );
+
+
+        const unverifiedElement =
+            document.getElementById(
+                'target-monitoring-unverified'
+            );
+
+
+        if (observedElement) {
+            observedElement.textContent = observed;
+        }
+
+
+        if (unobservedElement) {
+            unobservedElement.textContent = unobserved;
+        }
+
+
+        if (percentElement) {
+
+            percentElement.textContent =
+                percentage.toFixed(1)
+                + '%';
+
+        }
+
+
+        if (progressBar) {
+
+            progressBar.style.width =
+                percentage
+                + '%';
+
+        }
+
+
+        if (verifiedElement) {
+            verifiedElement.textContent = verifiedIds.size;
+        }
+
+
+        if (unverifiedElement) {
+            unverifiedElement.textContent = unverifiedIds.size;
+        }
+
+    }
+
+
 /*
 |--------------------------------------------------------------------------
 | Expose to interactive map
@@ -14631,8 +15207,9 @@ document.addEventListener(
         renderPolicyCoverageMatrix();
 
         initTargetTimelineChart();
-
+        initTargetSubsectorChart();
         updateTargetKpis();
+        updateTargetMonitoringCoverage();
 
     }
 );

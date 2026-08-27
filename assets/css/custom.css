@@ -2838,3 +2838,209 @@ button.energy-list-item:hover {
     }
 
 }
+
+/* ==========================================================
+   TARGETS BY SUBSECTOR
+========================================================== */
+
+.energy-target-subsector-panel {
+    margin-top: 28px;
+}
+
+
+.energy-target-subsector-chart {
+    width: 100%;
+    height: 360px;
+    min-height: 360px;
+}
+
+
+@media (max-width: 760px) {
+
+    .energy-target-subsector-chart {
+        height: 320px;
+        min-height: 320px;
+    }
+
+}
+
+/* ==========================================================
+   TARGET ANALYSIS
+========================================================== */
+
+.energy-target-analysis-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.7fr);
+    gap: 24px;
+
+    margin-top: 28px;
+}
+
+
+.energy-target-analysis-grid
+.energy-target-subsector-panel {
+    margin-top: 0;
+}
+
+
+.energy-target-analysis-grid
+.energy-target-subsector-chart {
+    height: 350px;
+    min-height: 350px;
+}
+
+
+/* Monitoring */
+
+.energy-target-monitoring-panel {
+    min-width: 0;
+}
+
+
+.energy-monitoring-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+
+    margin-top: 24px;
+}
+
+
+.energy-monitoring-stat {
+    padding: 18px;
+
+    border: 1px solid #e2e7e4;
+    border-radius: 10px;
+
+    background: #f8faf9;
+}
+
+
+.energy-monitoring-stat span {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #69716d;
+
+    font-size: 11px;
+}
+
+
+.energy-monitoring-stat strong {
+    color: #17221d;
+
+    font-size: 26px;
+    line-height: 1;
+}
+
+
+/* Coverage progress */
+
+.energy-monitoring-progress {
+    margin-top: 28px;
+}
+
+
+.energy-monitoring-progress-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 10px;
+
+    font-size: 12px;
+}
+
+
+.energy-monitoring-progress-header span {
+    color: #69716d;
+}
+
+
+.energy-monitoring-progress-header strong {
+    color: #0f6e56;
+}
+
+
+.energy-monitoring-progress-track {
+    width: 100%;
+    height: 10px;
+
+    overflow: hidden;
+
+    border-radius: 999px;
+
+    background: #e9eeeb;
+}
+
+
+.energy-monitoring-progress-bar {
+    width: 0;
+    height: 100%;
+
+    border-radius: inherit;
+
+    background: #0f6e56;
+
+    transition: width 0.35s ease;
+}
+
+
+/* Evidence breakdown */
+
+.energy-monitoring-breakdown {
+    margin-top: 28px;
+
+    border-top: 1px solid #e6ebe8;
+}
+
+
+.energy-monitoring-breakdown > div {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 14px 0;
+
+    border-bottom: 1px solid #edf1ee;
+
+    font-size: 11px;
+}
+
+
+.energy-monitoring-breakdown strong {
+    color: #17221d;
+
+    font-size: 13px;
+}
+
+
+.energy-monitoring-dot {
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+}
+
+
+.energy-monitoring-dot.is-verified {
+    background: #0f6e56;
+}
+
+
+.energy-monitoring-dot.is-unverified {
+    background: #b8c0bc;
+}
+
+
+@media (max-width: 1000px) {
+
+    .energy-target-analysis-grid {
+        grid-template-columns: 1fr;
+    }
+
+}

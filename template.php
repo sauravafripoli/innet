@@ -3042,7 +3042,230 @@ window.INETTThemeUrl =
 
                     </div>
 
+                
+
+                <!-- =========================================================
+                    TARGETS BY SUBSECTOR
+                ========================================================== -->
+                <div class="energy-target-analysis-grid">
+                    <div class="energy-chart-panel energy-target-subsector-panel">
+
+                        <div class="energy-chart-header">
+
+                            <div>
+
+                                <div class="energy-heading-with-help">
+
+                                    <h3>
+                                        Targets by subsector
+                                    </h3>
+
+                                    <button
+                                        type="button"
+                                        class="energy-help-tooltip"
+                                        aria-label="How to read targets by subsector"
+                                    >
+                                        ?
+
+                                        <span class="energy-help-tooltip-content">
+
+                                            <strong>
+                                                How to read this chart
+                                            </strong>
+
+                                            <span>
+                                                Each bar shows the number of tracked
+                                                targets mapped to an energy subsector.
+                                            </span>
+
+                                            <span>
+                                                Longer bars represent subsectors with
+                                                more tracked targets.
+                                            </span>
+
+                                            <span>
+                                                This shows the distribution of targets,
+                                                not progress toward achieving them.
+                                            </span>
+
+                                            <span>
+                                                Use the global subsector filter to focus
+                                                the Targets page on selected subsectors.
+                                            </span>
+
+                                        </span>
+
+                                    </button>
+
+                                </div>
+
+                                <p>
+                                    Distribution of tracked targets across energy subsectors.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            id="target-subsector-chart"
+                            class="energy-chart energy-target-subsector-chart"
+                        ></div>
+
+                    </div>
+
+                    <!-- =========================================================
+                        MONITORING COVERAGE
+                    ========================================================== -->
+
+                    <div class="energy-chart-panel energy-target-monitoring-panel">
+
+                        <div class="energy-chart-header">
+
+                            <div>
+
+                                <div class="energy-heading-with-help">
+
+                                    <h3>
+                                        Monitoring coverage
+                                    </h3>
+
+                                    <button
+                                        type="button"
+                                        class="energy-help-tooltip"
+                                        aria-label="How to read monitoring coverage"
+                                    >
+                                        ?
+
+                                        <span class="energy-help-tooltip-content">
+
+                                            <strong>
+                                                How to read this section
+                                            </strong>
+
+                                            <span>
+                                                Monitoring coverage shows how many tracked
+                                                targets currently have at least one recorded
+                                                observation.
+                                            </span>
+
+                                            <span>
+                                                A target may have an observation without
+                                                having a numeric progress value.
+                                            </span>
+
+                                            <span>
+                                                Verification describes the evidence status
+                                                of recorded observations.
+                                            </span>
+
+                                        </span>
+
+                                    </button>
+
+                                </div>
+
+                                <p>
+                                    Evidence availability across tracked targets.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="energy-monitoring-summary">
+
+                            <div class="energy-monitoring-stat">
+
+                                <span>
+                                    With observations
+                                </span>
+
+                                <strong id="target-monitoring-observed">
+                                    0
+                                </strong>
+
+                            </div>
+
+
+                            <div class="energy-monitoring-stat">
+
+                                <span>
+                                    Without observations
+                                </span>
+
+                                <strong id="target-monitoring-unobserved">
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="energy-monitoring-progress">
+
+                            <div class="energy-monitoring-progress-header">
+
+                                <span>
+                                    Observation coverage
+                                </span>
+
+                                <strong id="target-monitoring-percent">
+                                    0%
+                                </strong>
+
+                            </div>
+
+
+                            <div class="energy-monitoring-progress-track">
+
+                                <div
+                                    id="target-monitoring-progress-bar"
+                                    class="energy-monitoring-progress-bar"
+                                ></div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="energy-monitoring-breakdown">
+
+                            <div>
+                                <span class="energy-monitoring-dot is-verified"></span>
+
+                                <span>
+                                    Verified / partially verified
+                                </span>
+
+                                <strong id="target-monitoring-verified">
+                                    0
+                                </strong>
+                            </div>
+
+
+                            <div>
+                                <span class="energy-monitoring-dot is-unverified"></span>
+
+                                <span>
+                                    Unverified
+                                </span>
+
+                                <strong id="target-monitoring-unverified">
+                                    0
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
                 </div>
+                <!-- closes .energy-target-analysis-grid -->
+            </div>
 
             </section>
 
