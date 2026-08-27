@@ -2005,3 +2005,129 @@ button.energy-list-item:hover {
     max-height: 420px;
     overflow-y: auto;
 }
+
+/* ==========================================================
+   FINANCE VISUALS
+========================================================== */
+
+.energy-finance-chart-grid {
+    grid-template-columns:
+        minmax(0, 0.9fr)
+        minmax(0, 1.35fr);
+}
+
+
+.energy-finance-flow-chart {
+    min-height: 560px;
+    height: 560px;
+}
+
+
+.energy-finance-help {
+    width: 340px;
+    max-width: min(
+        340px,
+        calc(100vw - 40px)
+    );
+}
+
+
+@media (max-width: 1000px) {
+
+    .energy-finance-chart-grid {
+        grid-template-columns: 1fr;
+    }
+
+
+    .energy-finance-flow-chart {
+        min-height: 600px;
+        height: 600px;
+    }
+
+}
+
+.energy-finance-flow-row {
+    margin-top: 24px;
+}
+
+
+.energy-finance-flow-panel {
+    width: 100%;
+}
+
+
+.energy-finance-flow-chart {
+    width: 100%;
+    height: 620px;
+    min-height: 620px;
+}
+
+.energy-finance-subsector-row {
+    width: 100%;
+}
+
+
+.energy-finance-subsector-panel {
+    width: 100%;
+}
+
+
+.energy-finance-subsector-chart {
+    width: 100%;
+    height: 440px;
+    min-height: 440px;
+}
+
+.energy-finance-flow-summary {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 12px;
+
+    margin: 18px 0 8px;
+}
+
+
+.energy-finance-flow-summary-item {
+    padding: 12px 14px;
+
+    border: 1px solid #e4e9e6;
+    border-radius: 8px;
+
+    background: #f8faf9;
+}
+
+
+.energy-finance-flow-summary-item span {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #747c77;
+
+    font-size: 10px;
+    font-weight: 600;
+
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+
+.energy-finance-flow-summary-item strong {
+    color: #173d32;
+
+    font-size: 18px;
+    font-weight: 700;
+}
+
+
+@media (max-width: 760px) {
+
+    .energy-finance-flow-summary {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+}

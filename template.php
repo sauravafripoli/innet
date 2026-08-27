@@ -2477,10 +2477,11 @@ window.INETTThemeUrl =
 
                 <div class="energy-container">
 
-                    <div class="energy-chart-grid">
+                    <div class="energy-finance-subsector-row">
 
 
-                        <div class="energy-chart-panel">
+                        <div class="energy-chart-panel energy-finance-subsector-panel">
+
 
                             <div class="energy-chart-header">
 
@@ -2491,8 +2492,8 @@ window.INETTThemeUrl =
                                     </h3>
 
                                     <p>
-                                        Aggregation-eligible
-                                        finance by sector.
+                                        Aggregation-eligible finance by subsector.
+                                        Non-additive records are excluded.
                                     </p>
 
                                 </div>
@@ -2502,37 +2503,110 @@ window.INETTThemeUrl =
 
                             <div
                                 id="finance-subsector-chart"
-                                class="energy-chart"
+                                class="energy-chart energy-finance-subsector-chart"
                             ></div>
 
                         </div>
+                    </div>
 
 
+                        <div class="energy-finance-flow-row">
 
-                        <div class="energy-chart-panel">
+                            <div class="energy-chart-panel energy-finance-flow-panel">
 
-                            <div class="energy-chart-header">
+                                <div class="energy-chart-header">
 
-                                <div>
+                                    <div>
 
-                                    <h3>
-                                        Finance flow
-                                    </h3>
+                                        <div class="energy-heading-with-help">
 
-                                    <p>
-                                        Provider → recipient →
-                                        initiative relationships.
-                                    </p>
+                                            <h3>
+                                                Finance flow
+                                            </h3>
+
+                                            <button
+                                                type="button"
+                                                class="energy-help-tooltip"
+                                                aria-label="How to read the finance flow"
+                                            >
+                                                ?
+
+                                                <span
+                                                    class="
+                                                        energy-help-tooltip-content
+                                                        energy-finance-help
+                                                    "
+                                                >
+
+                                                    <strong>
+                                                        How to read this chart
+                                                    </strong>
+
+                                                    <span>
+                                                        Read the flow from
+                                                        <b>left to right:</b>
+                                                        Provider → Recipient → Initiative.
+                                                    </span>
+
+                                                    <span>
+                                                        <b>Providers</b> are the institutions
+                                                        supplying or mobilising finance.
+                                                    </span>
+
+                                                    <span>
+                                                        <b>Recipients</b> are the institutions
+                                                        receiving or administering that finance.
+                                                    </span>
+
+                                                    <span>
+                                                        <b>Initiatives</b> show what the finance
+                                                        is linked to in the INETT dataset.
+                                                    </span>
+
+                                                    <span>
+                                                        <b>Thicker flows</b> represent larger
+                                                        USD amounts.
+                                                    </span>
+
+                                                    <span>
+                                                        Hover over a node or connection to inspect
+                                                        its details and value.
+                                                    </span>
+
+                                                    <span>
+                                                        Only <b>aggregation-eligible</b> records
+                                                        are included. Non-additive records are
+                                                        excluded to avoid double counting.
+                                                    </span>
+
+                                                </span>
+
+                                            </button>
+
+                                        </div>
+
+
+                                        <p>
+                                            Aggregation-eligible finance from providers
+                                            through recipients to linked initiatives.
+                                        </p>
+
+                                        
+
+                                    </div>
 
                                 </div>
 
+
+                                <div
+                                    id="finance-flow-chart"
+                                    class="
+                                        energy-chart
+                                        energy-finance-flow-chart
+                                    "
+                                ></div>
+
                             </div>
-
-
-                            <div
-                                id="finance-sankey-chart"
-                                class="energy-chart"
-                            ></div>
 
                         </div>
 

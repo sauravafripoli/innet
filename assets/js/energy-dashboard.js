@@ -3259,6 +3259,7 @@
                 if (!grouped[subsector]) {
 
                     grouped[subsector] = {
+
                         subsector:
                             subsector,
 
@@ -3267,6 +3268,7 @@
 
                         records:
                             0
+
                     };
 
                 }
@@ -3330,6 +3332,47 @@
 
         /*
         ----------------------------------------------------------
+        Calculate total eligible finance in current result
+        ----------------------------------------------------------
+        */
+
+        const totalFinance =
+            rows.reduce(
+                (
+                    total,
+                    row
+                ) =>
+                    total
+                    + Number(
+                        row.amount || 0
+                    ),
+                0
+            );
+
+
+        /*
+        ----------------------------------------------------------
+        Add percentage share to each subsector
+        ----------------------------------------------------------
+        */
+
+        rows.forEach(
+            row => {
+
+                row.percent =
+                    totalFinance > 0
+                        ? (
+                            row.amount
+                            / totalFinance
+                        ) * 100
+                        : 0;
+
+            }
+        );
+
+
+        /*
+        ----------------------------------------------------------
         Empty state
         ----------------------------------------------------------
         */
@@ -3375,6 +3418,12 @@
         }
 
 
+        /*
+        ----------------------------------------------------------
+        Render chart
+        ----------------------------------------------------------
+        */
+
         chart.clear();
 
 
@@ -3390,8 +3439,10 @@
                     'axis',
 
                 axisPointer: {
+
                     type:
                         'shadow'
+
                 },
 
                 formatter:
@@ -3413,20 +3464,28 @@
                                 )}
                             </strong>
 
+                            <br><br>
+
+                            Finance:
+                            <strong>
+                                ${formatMoney(
+                                    row.amount
+                                )}
+                            </strong>
+
                             <br>
 
-                            ${formatMoney(
-                                row.amount
-                            )}
+                            Share of eligible finance:
+                            <strong>
+                                ${row.percent.toFixed(1)}%
+                            </strong>
 
                             <br>
 
-                            ${row.records.toLocaleString()}
-                            ${
-                                row.records === 1
-                                    ? 'eligible record'
-                                    : 'eligible records'
-                            }
+                            Eligible records:
+                            <strong>
+                                ${row.records.toLocaleString()}
+                            </strong>
                         `;
 
                     }
@@ -3440,13 +3499,13 @@
                     20,
 
                 right:
-                    45,
+                    190,
 
                 top:
-                    10,
+                    20,
 
                 bottom:
-                    15,
+                    20,
 
                 containLabel:
                     true
@@ -3460,20 +3519,26 @@
                     'value',
 
                 axisLine: {
+
                     show:
                         false
+
                 },
 
                 axisTick: {
+
                     show:
                         false
+
                 },
 
                 splitLine: {
 
                     lineStyle: {
+
                         color:
                             '#edf0ee'
+
                     }
 
                 },
@@ -3508,13 +3573,17 @@
                     ),
 
                 axisLine: {
+
                     show:
                         false
+
                 },
 
                 axisTick: {
+
                     show:
                         false
+
                 },
 
                 axisLabel: {
@@ -3523,7 +3592,7 @@
                         '#39413d',
 
                     fontSize:
-                        11
+                        12
 
                 }
 
@@ -3547,7 +3616,7 @@
                         ),
 
                     barWidth:
-                        20,
+                        22,
 
                     itemStyle: {
 
@@ -3567,19 +3636,45 @@
                         position:
                             'right',
 
+                        distance:
+                            10,
+
                         formatter:
                             function (
                                 params
                             ) {
 
-                                return formatMoney(
-                                    params.value
+                                const row =
+                                    rows[
+                                        params.dataIndex
+                                    ];
+
+
+                                return (
+                                    formatMoney(
+                                        row.amount
+                                    )
+                                    + '\n'
+                                    + row.percent.toFixed(1)
+                                    + '% · '
+                                    + row.records
+                                    + (
+                                        row.records === 1
+                                            ? ' eligible record'
+                                            : ' eligible records'
+                                    )
                                 );
 
                             },
 
                         color:
                             '#39413d',
+
+                        fontSize:
+                            11,
+
+                        lineHeight:
+                            17,
 
                         fontWeight:
                             600
@@ -3596,52 +3691,770 @@
 
     function initFinanceSubsectorChart() {
 
-    const element =
-        document.getElementById(
-            'finance-subsector-chart'
-        );
+        const element =
+            document.getElementById(
+                'finance-subsector-chart'
+            );
 
 
-    if (!element) {
-        return;
-    }
+        if (!element) {
+            return;
+        }
 
 
-    let chart =
-        echarts.getInstanceByDom(
-            element
-        );
-
-
-    if (!chart) {
-
-        chart =
-            echarts.init(
+        let chart =
+            echarts.getInstanceByDom(
                 element
             );
 
+
+        if (!chart) {
+
+            chart =
+                echarts.init(
+                    element
+                );
+
+        }
+
+
+        window.INETTFinanceSubsectorChart =
+            chart;
+
+
+        updateFinanceSubsectorChart(
+            getFilteredInitiatives()
+        );
+
+
+        window.addEventListener(
+            'resize',
+            function () {
+
+                chart.resize();
+
+            }
+        );
+
+    }
+
+    function updateFinanceFlowChart(
+        initiatives
+    ) {
+
+        const chart =
+            window.INETTFinanceFlowChart;
+
+
+        if (!chart) {
+            return;
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Eligible finance records only
+        ----------------------------------------------------------
+        */
+
+        const records =
+            getFilteredFinanceRecords(
+                initiatives
+            )
+            .filter(
+                record =>
+                    Number(
+                        record.aggregation_eligible
+                    ) === 1
+                    &&
+                    Number(
+                        record.amount_usd
+                    ) > 0
+            );
+
+
+        /*
+        ----------------------------------------------------------
+        Node + link collections
+        ----------------------------------------------------------
+        */
+
+        const nodes =
+            new Map();
+
+
+        const links =
+            new Map();
+
+
+        /*
+        ----------------------------------------------------------
+        Add a node once
+        ----------------------------------------------------------
+        */
+
+        function addNode(
+            id,
+            name,
+            type
+        ) {
+
+            if (!id) {
+                return;
+            }
+
+
+            if (!nodes.has(id)) {
+
+                nodes.set(
+                    id,
+                    {
+
+                        name:
+                            id,
+
+                        displayName:
+                            name,
+
+                        nodeType:
+                            type
+
+                    }
+                );
+
+            }
+
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Add / aggregate links
+        ----------------------------------------------------------
+        */
+
+        function addLink(
+            source,
+            target,
+            value
+        ) {
+
+            if (
+                !source
+                ||
+                !target
+                ||
+                !value
+            ) {
+                return;
+            }
+
+
+            const key =
+                source
+                + '|||'
+                + target;
+
+
+            if (!links.has(key)) {
+
+                links.set(
+                    key,
+                    {
+                        source:
+                            source,
+
+                        target:
+                            target,
+
+                        actualValue:
+                            0,
+
+                        value:
+                            0
+                    }
+                );
+
+            }
+
+
+            links.get(
+                key
+            ).actualValue +=
+                Number(
+                    value
+                );
+
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Build Provider → Recipient → Initiative relationships
+        ----------------------------------------------------------
+        */
+
+        records.forEach(
+            record => {
+
+                const amount =
+                    Number(
+                        record.amount_usd
+                        || 0
+                    );
+
+
+                const providerId =
+                    'provider:'
+                    + (
+                        record.provider_actor_id
+                        || 'unknown'
+                    );
+
+
+                const recipientId =
+                    'recipient:'
+                    + (
+                        record.recipient_actor_id
+                        || 'unknown'
+                    );
+
+
+                const initiativeId =
+                    'initiative:'
+                    + (
+                        record.linked_initiative_id
+                        || record.finance_id
+                    );
+
+
+                const providerName =
+                    record.provider_acronym
+                    || record.provider_name
+                    || 'Unspecified provider';
+
+
+                const recipientName =
+                    record.recipient_acronym
+                    || record.recipient_name
+                    || 'Unspecified recipient';
+
+
+                const initiativeName =
+                    record.initiative_name
+                    || record.linked_initiative_id
+                    || 'Unlinked finance';
+
+
+                addNode(
+                    providerId,
+                    providerName,
+                    'Provider'
+                );
+
+
+                addNode(
+                    recipientId,
+                    recipientName,
+                    'Recipient'
+                );
+
+
+                addNode(
+                    initiativeId,
+                    initiativeName,
+                    'Initiative'
+                );
+
+
+                addLink(
+                    providerId,
+                    recipientId,
+                    amount
+                );
+
+
+                addLink(
+                    recipientId,
+                    initiativeId,
+                    amount
+                );
+
+            }
+        );
+
+
+        const nodeData =
+            [...nodes.values()];
+
+
+        const linkData =
+            [...links.values()];
+
+        linkData.forEach(
+            link => {
+
+                /*
+                Visual compression only.
+
+                Actual USD value remains stored
+                in link.actualValue.
+                */
+
+                link.value =
+                    Math.sqrt(
+                        link.actualValue
+                        / 1000000
+                    );
+
+            }
+        );
+
+
+        /*
+        ----------------------------------------------------------
+        Empty state
+        ----------------------------------------------------------
+        */
+
+        chart.clear();
+
+
+        if (!linkData.length) {
+
+            chart.setOption({
+
+                title: {
+
+                    text:
+                        'No eligible finance flows match these filters',
+
+                    left:
+                        'center',
+
+                    top:
+                        'middle',
+
+                    textStyle: {
+
+                        fontSize:
+                            13,
+
+                        fontWeight:
+                            400,
+
+                        color:
+                            '#7a817d'
+
+                    }
+
+                }
+
+            });
+
+
+            return;
+
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Render Sankey
+        ----------------------------------------------------------
+        */
+
+        chart.setOption({
+
+            animationDuration:
+                400,
+
+
+            /*
+            ------------------------------------------------------
+            Column headings
+            ------------------------------------------------------
+            */
+
+            graphic: [
+
+                {
+
+                    type:
+                        'text',
+
+                    left:
+                        42,
+
+                    top:
+                        8,
+
+                    style: {
+
+                        text:
+                            'PROVIDERS',
+
+                        fontSize:
+                            11,
+
+                        fontWeight:
+                            700,
+
+                        fill:
+                            '#66716b'
+
+                    }
+
+                },
+
+
+                {
+
+                    type:
+                        'text',
+
+                    left:
+                        '47%',
+
+                    top:
+                        8,
+
+                    style: {
+
+                        text:
+                            'RECIPIENTS',
+
+                        fontSize:
+                            11,
+
+                        fontWeight:
+                            700,
+
+                        fill:
+                            '#66716b'
+
+                    }
+
+                },
+
+
+                {
+
+                    type:
+                        'text',
+
+                    right:
+                        85,
+
+                    top:
+                        8,
+
+                    style: {
+
+                        text:
+                            'INITIATIVES',
+
+                        fontSize:
+                            11,
+
+                        fontWeight:
+                            700,
+
+                        fill:
+                            '#66716b'
+
+                    }
+
+                }
+
+            ],
+
+
+            /*
+            ------------------------------------------------------
+            Tooltips
+            ------------------------------------------------------
+            */
+
+            tooltip: {
+
+                trigger:
+                    'item',
+
+                formatter:
+                    function (
+                        params
+                    ) {
+
+                        /*
+                        ------------------------------------------
+                        Connection tooltip
+                        ------------------------------------------
+                        */
+
+                        if (
+                            params.dataType
+                            === 'edge'
+                        ) {
+
+                            const sourceNode =
+                                nodes.get(
+                                    params.data.source
+                                );
+
+
+                            const targetNode =
+                                nodes.get(
+                                    params.data.target
+                                );
+
+
+                            return `
+                                <strong>
+                                    Finance flow
+                                </strong>
+
+                                <br><br>
+
+                                ${
+                                    escapeEnergyHtml(
+                                        sourceNode
+                                            ?.displayName
+                                        || params.data.source
+                                    )
+                                }
+
+                                &nbsp;→&nbsp;
+
+                                ${
+                                    escapeEnergyHtml(
+                                        targetNode
+                                            ?.displayName
+                                        || params.data.target
+                                    )
+                                }
+
+                                <br><br>
+
+                                <strong>
+                                    ${formatMoney(
+                                        params.data.actualValue
+                                    )}
+                                </strong>
+                            `;
+
+                        }
+
+
+                        /*
+                        ------------------------------------------
+                        Node tooltip
+                        ------------------------------------------
+                        */
+
+                        const node =
+                            params.data;
+
+
+                        return `
+                            <strong>
+                                ${escapeEnergyHtml(
+                                    node.displayName
+                                    || node.name
+                                )}
+                            </strong>
+
+                            <br>
+
+                            ${escapeEnergyHtml(
+                                node.nodeType
+                                || ''
+                            )}
+                        `;
+
+                    }
+
+            },
+
+
+            series: [
+
+                {
+
+                    type:
+                        'sankey',
+
+
+                    data:
+                        nodeData,
+
+
+                    links:
+                        linkData,
+
+
+                    /*
+                    --------------------------------------------------
+                    Layout
+                    --------------------------------------------------
+                    */
+
+                    left:
+                        45,
+
+                    right:
+                        220,
+
+                    top:
+                        50,
+
+                    bottom:
+                        30,
+
+
+                    nodeWidth:
+                        18,
+
+                    nodeGap:
+                        20,
+
+
+                    draggable:
+                        true,
+
+
+                    /*
+                    --------------------------------------------------
+                    Hover behaviour
+                    --------------------------------------------------
+                    */
+
+                    emphasis: {
+
+                        focus:
+                            'adjacency'
+
+                    },
+
+
+                    /*
+                    --------------------------------------------------
+                    Connections
+                    --------------------------------------------------
+                    */
+
+                    lineStyle: {
+
+                        color:
+                            'gradient',
+
+                        curveness:
+                            0.5,
+
+                        opacity:
+                            0.32
+
+                    },
+
+
+                    /*
+                    --------------------------------------------------
+                    Labels
+                    --------------------------------------------------
+                    */
+
+                    label: {
+
+                        fontSize:
+                            11,
+
+                        color:
+                            '#39413d',
+
+                        distance:
+                            8,
+
+                        width:
+                            190,
+
+                        overflow:
+                            'truncate',
+
+                        ellipsis:
+                            '…',
+
+                        formatter:
+                            function (
+                                params
+                            ) {
+
+                                return (
+                                    params.data
+                                        .displayName
+                                    || params.name
+                                );
+
+                            }
+
+                    }
+
+                }
+
+            ]
+
+        });
+
     }
 
 
-    window.INETTFinanceSubsectorChart =
-        chart;
+    function initFinanceFlowChart() {
+
+        const element =
+            document.getElementById(
+                'finance-flow-chart'
+            );
 
 
-    updateFinanceSubsectorChart(
-        getFilteredInitiatives()
-    );
+        if (!element) {
+            return;
+        }
 
 
-    window.addEventListener(
-        'resize',
-        function () {
+        let chart =
+            echarts.getInstanceByDom(
+                element
+            );
 
-            chart.resize();
+
+        if (!chart) {
+
+            chart =
+                echarts.init(
+                    element
+                );
 
         }
-    );
 
-}
+
+        window.INETTFinanceFlowChart =
+            chart;
+
+
+        updateFinanceFlowChart(
+            getFilteredInitiatives()
+        );
+
+
+        window.addEventListener(
+            'resize',
+            function () {
+
+                chart.resize();
+
+            }
+        );
+
+    }
 
 
     function getMapFilteredInitiatives() {
@@ -10857,6 +11670,10 @@
                     initiatives
                 );
 
+                updateFinanceFlowChart(
+                    initiatives
+                );
+
             }
         );
 
@@ -10929,6 +11746,7 @@ document.addEventListener(
 
 
         initFinanceSubsectorChart();
+        initFinanceFlowChart();
 
     }
 );
