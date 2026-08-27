@@ -2636,104 +2636,83 @@ window.INETTThemeUrl =
 
                         <!-- POLICY LIST -->
 
-                        <div class="energy-panel">
+                        <div class="energy-panel energy-policy-library-panel">
 
                             <div class="energy-section-header">
 
                                 <div>
 
+                                    <span class="energy-section-eyebrow">
+                                        Library
+                                    </span>
+
                                     <h2>
                                         Policy library
                                     </h2>
+
+                                    <p class="energy-section-description">
+                                        Browse tracked policy instruments and frameworks.
+                                        The library responds to the current subsector filter.
+                                    </p>
 
                                 </div>
 
                             </div>
 
 
-                            <div class="energy-list">
+                            <div class="energy-directory-toolbar">
 
-                                <?php foreach (
-                                    $policies
-                                    as $policy
-                                ): ?>
-
-                                    <button
-                                        type="button"
-                                        class="
-                                            energy-list-item
-                                            energy-policy-row
-                                        "
-                                        data-policy-id="<?= safeText(
-                                            $policy[
-                                                'policy_id'
-                                            ]
-                                            ?? ''
-                                        ); ?>"
-                                    >
-
-                                        <div>
-
-                                            <strong>
-                                                <?= safeText(
-                                                    $policy[
-                                                        'short_name'
-                                                    ]
-                                                    ?:
-                                                    $policy[
-                                                        'instrument_name'
-                                                    ]
-                                                ); ?>
-                                            </strong>
+                                <input
+                                    type="search"
+                                    id="policy-library-search"
+                                    class="energy-directory-search"
+                                    placeholder="Search policy, framework or instrument..."
+                                    autocomplete="off"
+                                >
 
 
-                                            <small>
+                                <span
+                                    id="policy-library-count"
+                                    class="energy-directory-count"
+                                >
+                                    0 policies
+                                </span>
 
-                                                <?= safeText(
-                                                    $policy[
-                                                        'instrument_type'
-                                                    ]
-                                                    ?? ''
-                                                ); ?>
-
-
-                                                <?php if (
-                                                    !empty(
-                                                        $policy[
-                                                            'publication_year'
-                                                        ]
-                                                    )
-                                                ): ?>
-
-                                                    ·
-                                                    <?= safeText(
-                                                        $policy[
-                                                            'publication_year'
-                                                        ]
-                                                    ); ?>
-
-                                                <?php endif; ?>
-
-                                            </small>
-
-                                        </div>
+                            </div>
 
 
-                                        <span>
+                            <div
+                                id="policy-library-list"
+                                class="energy-list"
+                            ></div>
 
-                                            <?= number_format(
-                                                $policy[
-                                                    'function_count'
-                                                ] ?? 0
-                                            ); ?>
 
-                                            functions
+                            <div class="energy-pagination">
 
-                                        </span>
+                                <button
+                                    type="button"
+                                    id="policy-library-prev"
+                                    class="energy-pagination-button"
+                                >
+                                    Previous
+                                </button>
 
-                                    </button>
 
-                                <?php endforeach; ?>
+                                <span
+                                    id="policy-library-page-info"
+                                    class="energy-pagination-info"
+                                >
+                                    Page 1 of 1
+                                </span>
+
+
+                                <button
+                                    type="button"
+                                    id="policy-library-next"
+                                    class="energy-pagination-button"
+                                >
+                                    Next
+                                </button>
 
                             </div>
 
@@ -3096,6 +3075,62 @@ window.INETTThemeUrl =
                 class="energy-drawer-content"
             >
                 <!-- JS inserts actor profile here -->
+            </div>
+
+        </aside>
+
+        <!-- =========================================================
+            POLICY DETAIL DRAWER
+        ========================================================== -->
+
+        <div
+            id="policy-drawer-backdrop"
+            class="energy-drawer-backdrop"
+        ></div>
+
+        <aside
+            id="policy-drawer"
+            class="energy-initiative-drawer"
+            aria-hidden="true"
+        >
+
+            <div class="energy-drawer-header">
+
+                <div>
+
+                    <span class="energy-section-eyebrow">
+                        Policy profile
+                    </span>
+
+                    <h2 id="policy-drawer-title">
+                        Policy
+                    </h2>
+
+                    <span
+                        id="policy-drawer-id"
+                        class="energy-drawer-id"
+                    ></span>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="policy-drawer-close"
+                    class="energy-drawer-close"
+                    aria-label="Close policy profile"
+                >
+                    &times;
+                </button>
+
+            </div>
+
+
+            <div
+                id="policy-drawer-content"
+                class="energy-drawer-content"
+            >
+                <!-- JS inserts policy profile here -->
             </div>
 
         </aside>
