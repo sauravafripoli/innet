@@ -12,6 +12,76 @@
 
     const data = window.INETTEnergyData;
 
+
+    function formatMoney(
+        value
+    ) {
+
+        value =
+            Number(
+                value || 0
+            );
+
+
+        if (
+            value >=
+            1000000000
+        ) {
+
+            return (
+                '$'
+                + (
+                    value
+                    / 1000000000
+                ).toFixed(2)
+                + 'bn'
+            );
+
+        }
+
+
+        if (
+            value >=
+            1000000
+        ) {
+
+            return (
+                '$'
+                + (
+                    value
+                    / 1000000
+                ).toFixed(1)
+                + 'm'
+            );
+
+        }
+
+
+        if (
+            value >=
+            1000
+        ) {
+
+            return (
+                '$'
+                + (
+                    value
+                    / 1000
+                ).toFixed(1)
+                + 'k'
+            );
+
+        }
+
+
+        return (
+            '$'
+            + value
+                .toLocaleString()
+        );
+
+    }
+
         /* ==========================================================
     SHARED ANALYTICAL FILTER STATE
     ========================================================== */
@@ -2903,6 +2973,675 @@
         );
 
     }
+
+    function updateFinanceKpis(
+        initiatives
+    ) {
+
+        const records =
+            getFilteredFinanceRecords(
+                initiatives
+            );
+
+
+        const eligibleRecords =
+            records.filter(
+                record =>
+                    Number(
+                        record.aggregation_eligible
+                    ) === 1
+            );
+
+
+        const trackedFinance =
+            eligibleRecords.reduce(
+                (
+                    total,
+                    record
+                ) =>
+                    total
+                    + Number(
+                        record.amount_usd
+                        || 0
+                    ),
+                0
+            );
+
+
+        const providers =
+            new Set(
+                records
+                    .map(
+                        record =>
+                            String(
+                                record.provider_actor_id
+                                || ''
+                            )
+                    )
+                    .filter(Boolean)
+            );
+
+
+        const recipients =
+            new Set(
+                records
+                    .map(
+                        record =>
+                            String(
+                                record.recipient_actor_id
+                                || ''
+                            )
+                    )
+                    .filter(Boolean)
+            );
+
+
+        const financeValueElement =
+            document.getElementById(
+                'finance-kpi-value'
+            );
+
+
+        const financeRecordsElement =
+            document.getElementById(
+                'finance-kpi-records'
+            );
+
+
+        const eligibleElement =
+            document.getElementById(
+                'finance-kpi-eligible'
+            );
+
+
+        const providersElement =
+            document.getElementById(
+                'finance-kpi-providers'
+            );
+
+
+        const recipientsElement =
+            document.getElementById(
+                'finance-kpi-recipients'
+            );
+
+
+        if (financeValueElement) {
+
+            financeValueElement.textContent =
+                formatMoney(
+                    trackedFinance
+                );
+
+        }
+
+
+        if (financeRecordsElement) {
+
+            financeRecordsElement.textContent =
+                records.length
+                    .toLocaleString();
+
+        }
+
+
+        if (eligibleElement) {
+
+            eligibleElement.textContent =
+                eligibleRecords.length
+                    .toLocaleString();
+
+        }
+
+
+        if (providersElement) {
+
+            providersElement.textContent =
+                providers.size
+                    .toLocaleString();
+
+        }
+
+
+        if (recipientsElement) {
+
+            recipientsElement.textContent =
+                recipients.size
+                    .toLocaleString();
+
+        }
+
+    }
+
+
+    function getFilteredFinanceRecords(
+        initiatives
+    ) {
+
+        const financeRecords =
+            data.finance_records || [];
+
+
+        initiatives =
+            initiatives
+            || getFilteredInitiatives();
+
+
+        /*
+        ----------------------------------------------------------
+        Current globally filtered initiative IDs
+        ----------------------------------------------------------
+        */
+
+        const initiativeIds =
+            new Set(
+                initiatives.map(
+                    initiative =>
+                        String(
+                            initiative.initiative_id
+                            || ''
+                        )
+                )
+            );
+
+
+        /*
+        ----------------------------------------------------------
+        If no global filters are active,
+        return every finance record.
+        ----------------------------------------------------------
+        */
+
+        const filtersActive =
+            Boolean(
+                (energyFilterState.states || []).length
+                ||
+                (energyFilterState.subsectors || []).length
+                ||
+                (energyFilterState.statuses || []).length
+            );
+
+
+        if (!filtersActive) {
+
+            return financeRecords;
+
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        When filters are active, finance follows its
+        linked initiative.
+
+        Records with no linked initiative cannot be reliably
+        assigned to State / initiative Status filters.
+        ----------------------------------------------------------
+        */
+
+        return financeRecords.filter(
+            record => {
+
+                const initiativeId =
+                    String(
+                        record.linked_initiative_id
+                        || ''
+                    );
+
+
+                if (!initiativeId) {
+                    return false;
+                }
+
+
+                return initiativeIds.has(
+                    initiativeId
+                );
+
+            }
+        );
+
+    }
+
+    function updateFinanceSubsectorChart(
+        initiatives
+    ) {
+
+        const chart =
+            window.INETTFinanceSubsectorChart;
+
+
+        if (!chart) {
+            return;
+        }
+
+
+        const records =
+            getFilteredFinanceRecords(
+                initiatives
+            );
+
+
+        /*
+        ----------------------------------------------------------
+        Only aggregation-eligible finance belongs in totals
+        ----------------------------------------------------------
+        */
+
+        const eligibleRecords =
+            records.filter(
+                record =>
+                    Number(
+                        record.aggregation_eligible
+                    ) === 1
+            );
+
+
+        /*
+        ----------------------------------------------------------
+        Group USD by finance subsector
+        ----------------------------------------------------------
+        */
+
+        const grouped = {};
+
+
+        eligibleRecords.forEach(
+            record => {
+
+                const subsector =
+                    String(
+                        record.subsector
+                        || 'Unspecified'
+                    ).trim();
+
+
+                if (!grouped[subsector]) {
+
+                    grouped[subsector] = {
+                        subsector:
+                            subsector,
+
+                        amount:
+                            0,
+
+                        records:
+                            0
+                    };
+
+                }
+
+
+                grouped[subsector].amount +=
+                    Number(
+                        record.amount_usd
+                        || 0
+                    );
+
+
+                grouped[subsector].records++;
+
+            }
+        );
+
+
+        let rows =
+            Object.values(
+                grouped
+            )
+            .sort(
+                (a, b) =>
+                    a.amount
+                    - b.amount
+            );
+
+
+        /*
+        ----------------------------------------------------------
+        If subsector filters are active,
+        only show explicitly selected subsectors
+        ----------------------------------------------------------
+        */
+
+        const selectedSubsectors =
+            new Set(
+                (energyFilterState.subsectors || [])
+                    .map(
+                        normalizeFilterValue
+                    )
+                    .filter(Boolean)
+            );
+
+
+        if (selectedSubsectors.size) {
+
+            rows =
+                rows.filter(
+                    row =>
+                        selectedSubsectors.has(
+                            normalizeFilterValue(
+                                row.subsector
+                            )
+                        )
+                );
+
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Empty state
+        ----------------------------------------------------------
+        */
+
+        if (!rows.length) {
+
+            chart.clear();
+
+
+            chart.setOption({
+
+                title: {
+
+                    text:
+                        'No eligible finance matches these filters',
+
+                    left:
+                        'center',
+
+                    top:
+                        'middle',
+
+                    textStyle: {
+
+                        fontSize:
+                            13,
+
+                        fontWeight:
+                            400,
+
+                        color:
+                            '#7a817d'
+
+                    }
+
+                }
+
+            });
+
+
+            return;
+
+        }
+
+
+        chart.clear();
+
+
+        chart.setOption({
+
+            animationDuration:
+                350,
+
+
+            tooltip: {
+
+                trigger:
+                    'axis',
+
+                axisPointer: {
+                    type:
+                        'shadow'
+                },
+
+                formatter:
+                    function (
+                        params
+                    ) {
+
+                        const row =
+                            rows[
+                                params[0]
+                                    .dataIndex
+                            ];
+
+
+                        return `
+                            <strong>
+                                ${escapeEnergyHtml(
+                                    row.subsector
+                                )}
+                            </strong>
+
+                            <br>
+
+                            ${formatMoney(
+                                row.amount
+                            )}
+
+                            <br>
+
+                            ${row.records.toLocaleString()}
+                            ${
+                                row.records === 1
+                                    ? 'eligible record'
+                                    : 'eligible records'
+                            }
+                        `;
+
+                    }
+
+            },
+
+
+            grid: {
+
+                left:
+                    20,
+
+                right:
+                    45,
+
+                top:
+                    10,
+
+                bottom:
+                    15,
+
+                containLabel:
+                    true
+
+            },
+
+
+            xAxis: {
+
+                type:
+                    'value',
+
+                axisLine: {
+                    show:
+                        false
+                },
+
+                axisTick: {
+                    show:
+                        false
+                },
+
+                splitLine: {
+
+                    lineStyle: {
+                        color:
+                            '#edf0ee'
+                    }
+
+                },
+
+                axisLabel: {
+
+                    formatter:
+                        function (
+                            value
+                        ) {
+
+                            return formatMoney(
+                                value
+                            );
+
+                        }
+
+                }
+
+            },
+
+
+            yAxis: {
+
+                type:
+                    'category',
+
+                data:
+                    rows.map(
+                        row =>
+                            row.subsector
+                    ),
+
+                axisLine: {
+                    show:
+                        false
+                },
+
+                axisTick: {
+                    show:
+                        false
+                },
+
+                axisLabel: {
+
+                    color:
+                        '#39413d',
+
+                    fontSize:
+                        11
+
+                }
+
+            },
+
+
+            series: [
+
+                {
+
+                    name:
+                        'Eligible finance',
+
+                    type:
+                        'bar',
+
+                    data:
+                        rows.map(
+                            row =>
+                                row.amount
+                        ),
+
+                    barWidth:
+                        20,
+
+                    itemStyle: {
+
+                        color:
+                            '#0f6e56',
+
+                        borderRadius:
+                            [0, 5, 5, 0]
+
+                    },
+
+                    label: {
+
+                        show:
+                            true,
+
+                        position:
+                            'right',
+
+                        formatter:
+                            function (
+                                params
+                            ) {
+
+                                return formatMoney(
+                                    params.value
+                                );
+
+                            },
+
+                        color:
+                            '#39413d',
+
+                        fontWeight:
+                            600
+
+                    }
+
+                }
+
+            ]
+
+        });
+
+    }
+
+    function initFinanceSubsectorChart() {
+
+    const element =
+        document.getElementById(
+            'finance-subsector-chart'
+        );
+
+
+    if (!element) {
+        return;
+    }
+
+
+    let chart =
+        echarts.getInstanceByDom(
+            element
+        );
+
+
+    if (!chart) {
+
+        chart =
+            echarts.init(
+                element
+            );
+
+    }
+
+
+    window.INETTFinanceSubsectorChart =
+        chart;
+
+
+    updateFinanceSubsectorChart(
+        getFilteredInitiatives()
+    );
+
+
+    window.addEventListener(
+        'resize',
+        function () {
+
+            chart.resize();
+
+        }
+    );
+
+}
 
 
     function getMapFilteredInitiatives() {
@@ -10110,6 +10849,14 @@
                     initiatives
                 );
 
+                updateFinanceKpis(
+                    initiatives
+                );
+
+                updateFinanceSubsectorChart(
+                    initiatives
+                );
+
             }
         );
 
@@ -10179,6 +10926,9 @@ document.addEventListener(
         initOverviewFilterUpdates();
 
         initInitiativeExplorer();
+
+
+        initFinanceSubsectorChart();
 
     }
 );

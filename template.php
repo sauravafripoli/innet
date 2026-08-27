@@ -78,6 +78,10 @@ $financeBySubsector =
     $dashboard['finance_by_subsector']
     ?? [];
 
+$financeRecords =
+    $dashboard['finance_records']
+    ?? [];
+
 $mandates = $dashboard['mandates'] ?? [];
 
 $policies = $dashboard['policies'] ?? [];
@@ -171,6 +175,8 @@ window.INETTEnergyData = <?= json_encode(
         'finance' => $finance,
 
         'finance_by_subsector' => $financeBySubsector,
+
+        'finance_records' => $financeRecords,
 
         'mandates' => $mandates,
 
@@ -2354,7 +2360,7 @@ window.INETTThemeUrl =
                                 Tracked finance
                             </span>
 
-                            <strong class="energy-kpi-value">
+                            <strong class="energy-kpi-value" id ="finance-kpi-value">
                                 <?= formatMoney(
                                     $finance[
                                         'tracked_finance_usd'
@@ -2363,7 +2369,7 @@ window.INETTThemeUrl =
                             </strong>
 
                             <small>
-                                aggregation eligible
+                                Aggregation-eligible finance by subsector. Non-additive records are excluded.
                             </small>
 
                         </article>
@@ -2375,7 +2381,7 @@ window.INETTThemeUrl =
                                 Finance records
                             </span>
 
-                            <strong class="energy-kpi-value">
+                            <strong class="energy-kpi-value" id="finance-kpi-records">
                                 <?= number_format(
                                     $finance[
                                         'finance_records'
@@ -2396,7 +2402,7 @@ window.INETTThemeUrl =
                                 Eligible records
                             </span>
 
-                            <strong class="energy-kpi-value">
+                            <strong class="energy-kpi-value" id ="finance-kpi-eligible">
                                 <?= number_format(
                                     $finance[
                                         'aggregation_eligible_records'
@@ -2417,7 +2423,7 @@ window.INETTThemeUrl =
                                 Providers
                             </span>
 
-                            <strong class="energy-kpi-value">
+                            <strong class="energy-kpi-value" id ="finance-kpi-providers">
                                 <?= number_format(
                                     $finance[
                                         'tracked_provider_count'
@@ -2438,7 +2444,7 @@ window.INETTThemeUrl =
                                 Recipients
                             </span>
 
-                            <strong class="energy-kpi-value">
+                            <strong class="energy-kpi-value" id="finance-kpi-recipients">
                                 <?= number_format(
                                     $finance[
                                         'tracked_recipient_count'

@@ -154,6 +154,69 @@ function getFinanceBySubsector(PDO $db): array
     return $stmt->fetchAll();
 }
 
+function getFinanceRecords(PDO $db): array
+{
+    $stmt = $db->query("
+        SELECT
+            f.finance_id,
+            f.description,
+
+            f.provider_actor_id,
+            provider.organisation_name
+                AS provider_name,
+            provider.acronym
+                AS provider_acronym,
+
+            f.funder_type,
+
+            f.recipient_actor_id,
+            recipient.organisation_name
+                AS recipient_name,
+            recipient.acronym
+                AS recipient_acronym,
+
+            f.finance_instrument,
+            f.value_type,
+            f.commitment_stage,
+            f.amount_original,
+            f.currency,
+            f.amount_usd,
+            f.fx_reference_date,
+            f.aggregation_eligible,
+            f.channel,
+            f.period_start,
+            f.period_end,
+            f.subsector,
+            f.linked_initiative_id,
+
+            i.initiative_name,
+
+            f.component_of_finance_id,
+            f.not_additive_note,
+            f.source_citation,
+            f.source_url,
+            f.source_type
+
+        FROM finance f
+
+        LEFT JOIN actors provider
+            ON provider.actor_id =
+                f.provider_actor_id
+
+        LEFT JOIN actors recipient
+            ON recipient.actor_id =
+                f.recipient_actor_id
+
+        LEFT JOIN initiatives i
+            ON i.initiative_id =
+                f.linked_initiative_id
+
+        ORDER BY f.finance_id
+    ");
+
+    return $stmt->fetchAll();
+}
+
 
 function getMandateSummary(PDO $db): array
 {
@@ -404,6 +467,9 @@ function getEnergyDashboardData(PDO $db): array
 
         'finance_by_subsector' =>
             getFinanceBySubsector($db),
+        
+        'finance_records' =>
+            getFinanceRecords($db),
 
         'mandates' =>
             getMandateSummary($db),
