@@ -2722,23 +2722,81 @@ window.INETTThemeUrl =
 
                         <!-- POLICY MATRIX -->
 
-                        <div class="energy-panel">
+                        <div class="energy-panel energy-policy-matrix-panel">
 
                             <div class="energy-section-header">
 
                                 <div>
 
-                                    <h2>
-                                        Policy coverage matrix
-                                    </h2>
+                                    <span class="energy-section-eyebrow">
+                                        Coverage
+                                    </span>
 
-                                    <p
-                                        class="
-                                            energy-section-description
-                                        "
-                                    >
-                                        Policy coverage across
-                                        functions and subsectors.
+                                    <div class="energy-heading-with-help">
+
+                                        <h2>
+                                            Policy coverage matrix
+                                        </h2>
+
+                                        <button
+                                            type="button"
+                                            class="energy-help-tooltip"
+                                            aria-label="How to read the policy coverage matrix"
+                                        >
+                                            ?
+
+                                            <span
+                                                class="
+                                                    energy-help-tooltip-content
+                                                    energy-policy-matrix-help
+                                                "
+                                            >
+
+                                                <strong>
+                                                    How to read this matrix
+                                                </strong>
+
+                                                <span>
+                                                    Each row represents a tracked policy or framework.
+                                                </span>
+
+                                                <span>
+                                                    Each column represents an energy subsector.
+                                                </span>
+
+                                                <span>
+                                                    A <b>green dot</b> means the policy is mapped
+                                                    to one or more energy-system functions in that subsector.
+                                                </span>
+
+                                                <span>
+                                                    The <b>number beside the dot</b> shows how many
+                                                    functions are covered.
+                                                </span>
+
+                                                <span>
+                                                    A dash means no function coverage is currently mapped
+                                                    for that policy in that subsector.
+                                                </span>
+
+                                                <span>
+                                                    Hover over a populated cell to see the specific
+                                                    functions covered.
+                                                </span>
+
+                                                <span>
+                                                    Click any policy row to open its full Policy Profile.
+                                                </span>
+
+                                            </span>
+
+                                        </button>
+
+                                    </div>
+
+                                    <p class="energy-section-description">
+                                        See which tracked policies cover energy-system
+                                        functions across subsectors.
                                     </p>
 
                                 </div>
@@ -2747,8 +2805,8 @@ window.INETTThemeUrl =
 
 
                             <div
-                                id="policy-matrix-chart"
-                                class="energy-chart"
+                                id="policy-coverage-matrix"
+                                class="energy-policy-coverage-matrix"
                             ></div>
 
                         </div>

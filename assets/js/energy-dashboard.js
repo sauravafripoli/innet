@@ -5576,7 +5576,10 @@
 
                 const row =
                     event.target.closest(
-                        '.energy-policy-row[data-policy-id]'
+                        `
+                            .energy-policy-row[data-policy-id],
+                            .energy-policy-matrix-row[data-policy-id]
+                        `
                     );
 
 
@@ -7336,6 +7339,7 @@
 
 
         renderPolicyLibrary();
+        renderPolicyCoverageMatrix();
 
         document.dispatchEvent(
             new CustomEvent(
@@ -10472,6 +10476,435 @@
                 actorDirectoryPage >= totalPages;
 
         }
+
+    }
+
+    function renderPolicyCoverageMatrix() {
+
+        const container =
+            document.getElementById(
+                'policy-coverage-matrix'
+            );
+
+
+        if (!container) {
+            return;
+        }
+
+
+        const selectedSubsectors =
+            new Set(
+                (energyFilterState.subsectors || [])
+                    .map(
+                        normalizeFilterValue
+                    )
+                    .filter(Boolean)
+            );
+
+
+        const policies =
+            Object.values(
+                policyById
+            );
+
+
+        const scopes =
+            data.policy_scopes
+            || [];
+
+
+        const subsectorSet =
+            new Set();
+
+
+        scopes.forEach(
+            scope => {
+
+                const subsector =
+                    String(
+                        scope.subsector
+                        || ''
+                    ).trim();
+
+
+                if (subsector) {
+
+                    subsectorSet.add(
+                        subsector
+                    );
+
+                }
+
+            }
+        );
+
+
+        let subsectors =
+            [...subsectorSet]
+                .sort();
+
+
+        if (selectedSubsectors.size) {
+
+            subsectors =
+                subsectors.filter(
+                    subsector =>
+                        selectedSubsectors.has(
+                            normalizeFilterValue(
+                                subsector
+                            )
+                        )
+                );
+
+        }
+
+
+        /*
+        ----------------------------------------------------------
+        Build policy → subsector → functions lookup
+        ----------------------------------------------------------
+        */
+
+        const coverage = {};
+
+
+        scopes.forEach(
+            scope => {
+
+                const policyId =
+                    String(
+                        scope.policy_id
+                        || ''
+                    );
+
+
+                const subsector =
+                    String(
+                        scope.subsector
+                        || ''
+                    ).trim();
+
+
+                const functionId =
+                    String(
+                        scope.function_id
+                        || ''
+                    );
+
+
+                if (
+                    !policyId
+                    ||
+                    !subsector
+                ) {
+                    return;
+                }
+
+
+                if (!coverage[policyId]) {
+
+                    coverage[policyId] =
+                        {};
+
+                }
+
+
+                if (
+                    !coverage[
+                        policyId
+                    ][
+                        subsector
+                    ]
+                ) {
+
+                    coverage[
+                        policyId
+                    ][
+                        subsector
+                    ] =
+                        [];
+
+                }
+
+
+                if (functionId) {
+
+                    coverage[
+                        policyId
+                    ][
+                        subsector
+                    ].push(
+                        functionId
+                    );
+
+                }
+
+            }
+        );
+
+
+        const visiblePolicies =
+            policies
+                .filter(
+                    policy => {
+
+                        const policyCoverage =
+                            coverage[
+                                policy.policy_id
+                            ];
+
+
+                        if (!policyCoverage) {
+                            return false;
+                        }
+
+
+                        if (!selectedSubsectors.size) {
+                            return true;
+                        }
+
+
+                        return subsectors.some(
+                            subsector =>
+                                Array.isArray(
+                                    policyCoverage[
+                                        subsector
+                                    ]
+                                )
+                        );
+
+                    }
+                )
+                .sort(
+                    (a, b) =>
+                        String(
+                            a.short_name
+                            || a.instrument_name
+                            || ''
+                        )
+                        .localeCompare(
+                            String(
+                                b.short_name
+                                || b.instrument_name
+                                || ''
+                            )
+                        )
+                );
+
+
+        if (
+            !visiblePolicies.length
+            ||
+            !subsectors.length
+        ) {
+
+            container.innerHTML = `
+                <div class="energy-table-empty">
+                    No policy coverage matches the current filters.
+                </div>
+            `;
+
+            return;
+        }
+
+
+        const functionById =
+            Object.fromEntries(
+                (data.functions || [])
+                    .map(
+                        fn => [
+                            String(
+                                fn.function_id
+                                || ''
+                            ),
+                            fn
+                        ]
+                    )
+            );
+
+
+        container.innerHTML = `
+
+            <div class="energy-policy-matrix-scroll">
+
+                <table class="energy-policy-matrix-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Policy
+                            </th>
+
+                            ${subsectors
+                                .map(
+                                    subsector => `
+                                        <th>
+                                            ${escapeEnergyHtml(
+                                                subsector
+                                            )}
+                                        </th>
+                                    `
+                                )
+                                .join('')}
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        ${visiblePolicies
+                            .map(
+                                policy => {
+
+                                    const policyId =
+                                        String(
+                                            policy.policy_id
+                                            || ''
+                                        );
+
+
+                                    const name =
+                                        policy.short_name
+                                        || policy.instrument_name
+                                        || policyId;
+
+
+                                    return `
+
+                                        <tr
+                                            class="energy-policy-matrix-row"
+                                            data-policy-id="${escapeEnergyHtml(
+                                                policyId
+                                            )}"
+                                        >
+
+                                            <td>
+
+                                                <strong>
+                                                    ${escapeEnergyHtml(
+                                                        name
+                                                    )}
+                                                </strong>
+
+                                                <small>
+                                                    ${escapeEnergyHtml(
+                                                        policyId
+                                                    )}
+                                                </small>
+
+                                            </td>
+
+
+                                            ${subsectors
+                                                .map(
+                                                    subsector => {
+
+                                                        const ids =
+                                                            coverage[
+                                                                policyId
+                                                            ]?.[
+                                                                subsector
+                                                            ]
+                                                            || [];
+
+
+                                                        const functions =
+                                                            ids
+                                                                .map(
+                                                                    id => {
+
+                                                                        const fn =
+                                                                            functionById[
+                                                                                id
+                                                                            ];
+
+
+                                                                        return fn
+                                                                            ? (
+                                                                                fn.function_name
+                                                                                || id
+                                                                            )
+                                                                            : id;
+
+                                                                    }
+                                                                );
+
+
+                                                        const title =
+                                                            functions.length
+                                                                ? functions.join(
+                                                                    ' • '
+                                                                )
+                                                                : 'No mapped function coverage';
+
+
+                                                        return `
+
+                                                            <td
+                                                                class="
+                                                                    energy-policy-matrix-cell
+                                                                    ${
+                                                                        functions.length
+                                                                            ? 'has-coverage'
+                                                                            : ''
+                                                                    }
+                                                                "
+                                                                title="${escapeEnergyHtml(
+                                                                    title
+                                                                )}"
+                                                            >
+
+                                                                ${
+                                                                    functions.length
+                                                                        ? `
+                                                                            <span
+                                                                                class="
+                                                                                    energy-policy-coverage-dot
+                                                                                "
+                                                                            ></span>
+
+                                                                            <small>
+                                                                                ${functions.length}
+                                                                            </small>
+                                                                        `
+                                                                        : `
+                                                                            <span
+                                                                                class="
+                                                                                    energy-policy-coverage-empty
+                                                                                "
+                                                                            >
+                                                                                —
+                                                                            </span>
+                                                                        `
+                                                                }
+
+                                                            </td>
+
+                                                        `;
+
+                                                    }
+                                                )
+                                                .join('')}
+
+                                        </tr>
+
+                                    `;
+
+                                }
+                            )
+                            .join('')}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        `;
 
     }
 
@@ -13638,6 +14071,7 @@ document.addEventListener(
 
         initPolicyDrawer();
         initPolicyLibrary();
+        renderPolicyCoverageMatrix();
 
     }
 );
