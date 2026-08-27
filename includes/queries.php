@@ -309,6 +309,39 @@ function getTargetSummary(PDO $db, int $limit = 8): array
     return $stmt->fetchAll();
 }
 
+function getTargetObservations(
+    PDO $db
+): array
+{
+
+    $stmt =
+        $db->query(
+            "
+                SELECT
+                    observation_id,
+                    target_id,
+                    observation_date,
+                    actual_value,
+                    unit,
+                    verification_status,
+                    observation_note,
+                    source_citation,
+                    source_url,
+                    source_type
+
+                FROM target_observations
+
+                ORDER BY
+                    observation_date DESC,
+                    observation_id DESC
+            "
+        );
+
+
+    return $stmt->fetchAll();
+
+}
+
 function getInitiativeRecords(PDO $db): array
 {
     $stmt = $db->query("
@@ -517,10 +550,38 @@ function getEnergyDashboardData(PDO $db): array
             getActorFunctions($db),
 
         'policy_scopes' =>
-            getPolicyScopes($db)
+            getPolicyScopes($db),
+
+        'target_observations' =>
+            getTargetObservations($db),
+
+        'all_targets' => 
+            getAllTargets($db),
 
         
     ];
+}
+
+
+function getAllTargets(
+    PDO $db
+): array
+{
+
+    $stmt =
+        $db->query(
+            "
+                SELECT *
+                FROM targets
+                ORDER BY
+                    target_year ASC,
+                    target_id ASC
+            "
+        );
+
+
+    return $stmt->fetchAll();
+
 }
 
 function getAllStates(PDO $db): array

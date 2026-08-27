@@ -88,6 +88,10 @@ $policies = $dashboard['policies'] ?? [];
 
 $targets = $dashboard['targets'] ?? [];
 
+$target_observations = $dashboard['target_observations'] ?? [];
+
+$allTargets = $dashboard['all_targets'] ?? [];
+
 
 /* ============================================================
    HELPERS
@@ -183,6 +187,10 @@ window.INETTEnergyData = <?= json_encode(
         'policies' => $policies,
 
         'targets' => $targets,
+
+        'target_observations' => $target_observations,
+
+        'all_targets' => $dashboard['all_targets'],
 
         'initiatives' => $dashboard['initiatives'],
 
@@ -2871,20 +2879,153 @@ window.INETTThemeUrl =
 
 
 
-                    <div class="energy-two-column">
+                    <div class="energy-target-overview">
 
 
-                        <!-- TARGET VISUAL -->
+                        <!-- =========================================================
+                            TARGET KPIS
+                        ========================================================== -->
 
-                        <div class="energy-panel">
+                        <div class="energy-kpi-grid energy-target-kpi-grid">
 
-                            <div class="energy-section-header">
+                            <article class="energy-kpi-card">
+
+                                <span class="energy-kpi-label">
+                                    Tracked targets
+                                </span>
+
+                                <strong
+                                    class="energy-kpi-value"
+                                    id="target-kpi-total"
+                                >
+                                    0
+                                </strong>
+
+                                <small>
+                                    national transition targets
+                                </small>
+
+                            </article>
+
+
+                            <article class="energy-kpi-card">
+
+                                <span class="energy-kpi-label">
+                                    2030 targets
+                                </span>
+
+                                <strong
+                                    class="energy-kpi-value"
+                                    id="target-kpi-2030"
+                                >
+                                    0
+                                </strong>
+
+                                <small>
+                                    targets due by 2030
+                                </small>
+
+                            </article>
+
+
+                            <article class="energy-kpi-card">
+
+                                <span class="energy-kpi-label">
+                                    With observations
+                                </span>
+
+                                <strong
+                                    class="energy-kpi-value"
+                                    id="target-kpi-observed"
+                                >
+                                    0
+                                </strong>
+
+                                <small>
+                                    targets with recorded evidence
+                                </small>
+
+                            </article>
+
+
+                            <article class="energy-kpi-card">
+
+                                <span class="energy-kpi-label">
+                                    Verified evidence
+                                </span>
+
+                                <strong
+                                    class="energy-kpi-value"
+                                    id="target-kpi-verified"
+                                >
+                                    0
+                                </strong>
+
+                                <small>
+                                    verified or partially verified observations
+                                </small>
+
+                            </article>
+
+                        </div>
+
+
+                        <!-- =========================================================
+                            TARGET TIMELINE
+                        ========================================================== -->
+
+                        <div class="energy-chart-panel energy-target-timeline-panel">
+
+                            <div class="energy-chart-header">
 
                                 <div>
 
-                                    <h2>
-                                        Targets by framework
-                                    </h2>
+                                    <div class="energy-heading-with-help">
+
+                                        <h3>
+                                            Target timeline
+                                        </h3>
+
+                                        <button
+                                            type="button"
+                                            class="energy-help-tooltip"
+                                            aria-label="How to read the target timeline"
+                                        >
+                                            ?
+
+                                            <span class="energy-help-tooltip-content">
+
+                                                <strong>
+                                                    How to read this timeline
+                                                </strong>
+
+                                                <span>
+                                                    Each bar shows how many tracked targets
+                                                    are due in a given year.
+                                                </span>
+
+                                                <span>
+                                                    The timeline reflects target dates,
+                                                    not implementation progress.
+                                                </span>
+
+                                                <span>
+                                                    Use the global subsector filter to focus
+                                                    on targets in selected parts of the
+                                                    energy transition.
+                                                </span>
+
+                                            </span>
+
+                                        </button>
+
+                                    </div>
+
+
+                                    <p>
+                                        Distribution of tracked target milestones
+                                        across target years.
+                                    </p>
 
                                 </div>
 
@@ -2892,116 +3033,9 @@ window.INETTThemeUrl =
 
 
                             <div
-                                id="targets-framework-chart"
-                                class="energy-chart"
+                                id="target-timeline-chart"
+                                class="energy-chart energy-target-timeline-chart"
                             ></div>
-
-                        </div>
-
-
-
-                        <!-- TARGET LIST -->
-
-                        <div class="energy-panel">
-
-                            <div class="energy-section-header">
-
-                                <div>
-
-                                    <h2>
-                                        Monitoring readiness
-                                    </h2>
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="energy-list">
-
-                                <?php foreach (
-                                    $targets
-                                    as $target
-                                ): ?>
-
-                                    <button
-                                        type="button"
-                                        class="
-                                            energy-list-item
-                                            energy-target-row
-                                        "
-                                        data-target-id="<?= safeText(
-                                            $target[
-                                                'target_id'
-                                            ]
-                                            ?? ''
-                                        ); ?>"
-                                    >
-
-                                        <div>
-
-                                            <strong>
-                                                <?= safeText(
-                                                    $target[
-                                                        'indicator'
-                                                    ]
-                                                    ?:
-                                                    $target[
-                                                        'target_statement'
-                                                    ]
-                                                ); ?>
-                                            </strong>
-
-
-                                            <small>
-
-                                                <?= safeText(
-                                                    $target[
-                                                        'framework'
-                                                    ]
-                                                    ?? ''
-                                                ); ?>
-
-
-                                                <?php if (
-                                                    !empty(
-                                                        $target[
-                                                            'target_year'
-                                                        ]
-                                                    )
-                                                ): ?>
-
-                                                    · target
-                                                    <?= safeText(
-                                                        $target[
-                                                            'target_year'
-                                                        ]
-                                                    ); ?>
-
-                                                <?php endif; ?>
-
-                                            </small>
-
-                                        </div>
-
-
-                                        <span>
-
-                                            <?= number_format(
-                                                $target[
-                                                    'observation_count'
-                                                ] ?? 0
-                                            ); ?>
-
-                                            obs.
-
-                                        </span>
-
-                                    </button>
-
-                                <?php endforeach; ?>
-
-                            </div>
 
                         </div>
 

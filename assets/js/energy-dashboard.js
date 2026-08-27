@@ -7341,6 +7341,10 @@
         renderPolicyLibrary();
         renderPolicyCoverageMatrix();
 
+        updateTargetKpis();
+
+        updateTargetTimelineChart();
+
         document.dispatchEvent(
             new CustomEvent(
                 'inett:filtersChanged',
@@ -13999,6 +14003,559 @@
         );
 
     }
+
+
+/* ==========================================================
+   TARGET KPIS
+========================================================== */
+
+    function getFilteredTargets() {
+
+        let targets =
+            data.all_targets
+            || data.targets
+            || [];
+
+
+        const selectedSubsectors =
+            new Set(
+                (energyFilterState.subsectors || [])
+                    .map(
+                        normalizeFilterValue
+                    )
+                    .filter(Boolean)
+            );
+
+
+        if (selectedSubsectors.size) {
+
+            targets =
+                targets.filter(
+                    target =>
+                        selectedSubsectors.has(
+                            normalizeFilterValue(
+                                target.subsector
+                            )
+                        )
+                );
+
+        }
+
+
+        return targets;
+
+    }
+
+
+    function updateTargetKpis() {
+
+        const targets =
+            getFilteredTargets();
+
+
+        const observations =
+            data.target_observations
+            || [];
+
+
+        const targetIds =
+            new Set(
+                targets.map(
+                    target =>
+                        String(
+                            target.target_id
+                            || ''
+                        )
+                )
+            );
+
+
+        const matchingObservations =
+            observations.filter(
+                observation =>
+                    targetIds.has(
+                        String(
+                            observation.target_id
+                            || ''
+                        )
+                    )
+            );
+
+
+        const observedTargetIds =
+            new Set(
+                matchingObservations.map(
+                    observation =>
+                        String(
+                            observation.target_id
+                        )
+                )
+            );
+
+
+        const verifiedTargetIds =
+            new Set(
+                matchingObservations
+                    .filter(
+                        observation => {
+
+                            const status =
+                                normalizeFilterValue(
+                                    observation.verification_status
+                                );
+
+
+                            return (
+                                status === 'verified'
+                                ||
+                                status === 'partially verified'
+                            );
+
+                        }
+                    )
+                    .map(
+                        observation =>
+                            String(
+                                observation.target_id
+                            )
+                    )
+            );
+
+
+        const totalElement =
+            document.getElementById(
+                'target-kpi-total'
+            );
+
+
+        const year2030Element =
+            document.getElementById(
+                'target-kpi-2030'
+            );
+
+
+        const observedElement =
+            document.getElementById(
+                'target-kpi-observed'
+            );
+
+
+        const verifiedElement =
+            document.getElementById(
+                'target-kpi-verified'
+            );
+
+
+        if (totalElement) {
+
+            totalElement.textContent =
+                targets.length
+                    .toLocaleString();
+
+        }
+
+
+        if (year2030Element) {
+
+            year2030Element.textContent =
+                targets
+                    .filter(
+                        target =>
+                            Number(
+                                target.target_year
+                            ) === 2030
+                    )
+                    .length
+                    .toLocaleString();
+
+        }
+
+
+        if (observedElement) {
+
+            observedElement.textContent =
+                observedTargetIds.size
+                    .toLocaleString();
+
+        }
+
+
+        if (verifiedElement) {
+
+            verifiedElement.textContent =
+                verifiedTargetIds.size
+                    .toLocaleString();
+
+        }
+
+    }
+
+
+/* ==========================================================
+   TARGET TIMELINE
+========================================================== */
+
+    function initTargetTimelineChart() {
+
+        const element =
+            document.getElementById(
+                'target-timeline-chart'
+            );
+
+
+        if (!element) {
+            return;
+        }
+
+
+        let chart =
+            echarts.getInstanceByDom(
+                element
+            );
+
+
+        if (!chart) {
+
+            chart =
+                echarts.init(
+                    element
+                );
+
+        }
+
+
+        window.INETTTargetTimelineChart =
+            chart;
+
+
+        updateTargetTimelineChart();
+
+
+        window.addEventListener(
+            'resize',
+            function () {
+
+                chart.resize();
+
+            }
+        );
+
+    }
+
+
+    function updateTargetTimelineChart() {
+
+        const chart =
+            window.INETTTargetTimelineChart;
+
+
+        if (!chart) {
+            return;
+        }
+
+
+        const targets =
+            getFilteredTargets();
+
+
+        const counts = {};
+
+
+        targets.forEach(
+            target => {
+
+                const year =
+                    Number(
+                        target.target_year
+                    );
+
+
+                if (!year) {
+                    return;
+                }
+
+
+                if (!counts[year]) {
+
+                    counts[year] =
+                        0;
+
+                }
+
+
+                counts[year]++;
+
+            }
+        );
+
+
+        const rows =
+            Object.entries(
+                counts
+            )
+            .map(
+                ([year, count]) => ({
+
+                    year:
+                        Number(
+                            year
+                        ),
+
+                    count:
+                        count
+
+                })
+            )
+            .sort(
+                (a, b) =>
+                    a.year - b.year
+            );
+
+
+        chart.clear();
+
+
+        if (!rows.length) {
+
+            chart.setOption({
+
+                title: {
+
+                    text:
+                        'No target milestones match these filters',
+
+                    left:
+                        'center',
+
+                    top:
+                        'middle',
+
+                    textStyle: {
+
+                        fontSize:
+                            13,
+
+                        fontWeight:
+                            400,
+
+                        color:
+                            '#7a817d'
+
+                    }
+
+                }
+
+            });
+
+
+            return;
+
+        }
+
+
+        chart.setOption({
+
+            animationDuration:
+                350,
+
+
+            tooltip: {
+
+                trigger:
+                    'axis',
+
+                axisPointer: {
+
+                    type:
+                        'shadow'
+
+                },
+
+                formatter:
+                    function (
+                        params
+                    ) {
+
+                        const row =
+                            rows[
+                                params[0]
+                                    .dataIndex
+                            ];
+
+
+                        return `
+                            <strong>
+                                ${row.year}
+                            </strong>
+
+                            <br>
+
+                            ${row.count.toLocaleString()}
+                            ${
+                                row.count === 1
+                                    ? ' target'
+                                    : ' targets'
+                            }
+                        `;
+
+                    }
+
+            },
+
+
+            grid: {
+
+                left:
+                    20,
+
+                right:
+                    25,
+
+                top:
+                    20,
+
+                bottom:
+                    30,
+
+                containLabel:
+                    true
+
+            },
+
+
+            xAxis: {
+
+                type:
+                    'category',
+
+                data:
+                    rows.map(
+                        row =>
+                            row.year
+                    ),
+
+                axisLine: {
+
+                    lineStyle: {
+
+                        color:
+                            '#dfe5e1'
+
+                    }
+
+                },
+
+                axisTick: {
+
+                    show:
+                        false
+
+                },
+
+                axisLabel: {
+
+                    color:
+                        '#5f6863',
+
+                    fontSize:
+                        11
+
+                }
+
+            },
+
+
+            yAxis: {
+
+                type:
+                    'value',
+
+                minInterval:
+                    1,
+
+                axisLine: {
+
+                    show:
+                        false
+
+                },
+
+                axisTick: {
+
+                    show:
+                        false
+
+                },
+
+                splitLine: {
+
+                    lineStyle: {
+
+                        color:
+                            '#edf0ee'
+
+                    }
+
+                }
+
+            },
+
+
+            series: [
+
+                {
+
+                    name:
+                        'Targets',
+
+                    type:
+                        'bar',
+
+                    data:
+                        rows.map(
+                            row =>
+                                row.count
+                        ),
+
+                    barWidth:
+                        28,
+
+                    itemStyle: {
+
+                        color:
+                            '#0f6e56',
+
+                        borderRadius:
+                            [5, 5, 0, 0]
+
+                    },
+
+                    label: {
+
+                        show:
+                            true,
+
+                        position:
+                            'top',
+
+                        color:
+                            '#39413d',
+
+                        fontSize:
+                            11,
+
+                        fontWeight:
+                            600
+
+                    }
+
+                }
+
+            ]
+
+        });
+
+    }
 /*
 |--------------------------------------------------------------------------
 | Expose to interactive map
@@ -14072,6 +14629,10 @@ document.addEventListener(
         initPolicyDrawer();
         initPolicyLibrary();
         renderPolicyCoverageMatrix();
+
+        initTargetTimelineChart();
+
+        updateTargetKpis();
 
     }
 );
