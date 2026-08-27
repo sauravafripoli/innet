@@ -1754,58 +1754,7 @@ window.INETTThemeUrl =
 
             </section>
 
-            <!-- =========================================================
-                INITIATIVE DETAIL DRAWER
-            ========================================================== -->
-
-            <div
-                id="initiative-drawer-backdrop"
-                class="energy-drawer-backdrop"
-            ></div>
-
-            <aside
-                id="initiative-drawer"
-                class="energy-initiative-drawer"
-                aria-hidden="true"
-            >
-
-                <div class="energy-drawer-header">
-
-                    <div>
-                        <span class="energy-section-eyebrow">
-                            Initiative profile
-                        </span>
-
-                        <h2 id="initiative-drawer-title">
-                            Initiative
-                        </h2>
-
-                        <span
-                            id="initiative-drawer-id"
-                            class="energy-drawer-id"
-                        ></span>
-                    </div>
-
-                   <button
-                        type="button"
-                        class="energy-drawer-close"
-                        id="initiative-drawer-close"
-                        aria-label="Close initiative profile"
-                    >
-                        &times;
-                    </button>
-
-                </div>
-
-
-                <div
-                    id="initiative-drawer-content"
-                    class="energy-drawer-content"
-                >
-                    <!-- JS inserts initiative details here -->
-                </div>
-
-            </aside>
+            
 
         </div>
 
@@ -2239,64 +2188,6 @@ window.INETTThemeUrl =
 
 
 
-            <!-- =========================================================
-                ACTOR DETAIL DRAWER
-            ========================================================== -->
-
-            <div
-                id="actor-drawer-backdrop"
-                class="energy-drawer-backdrop"
-            ></div>
-
-            <aside
-                id="actor-drawer"
-                class="energy-initiative-drawer"
-                aria-hidden="true"
-            >
-
-                <div class="energy-drawer-header">
-
-                    <div>
-
-                        <span class="energy-section-eyebrow">
-                            Actor profile
-                        </span>
-
-                        <h2 id="actor-drawer-title">
-                            Actor
-                        </h2>
-
-                        <span
-                            id="actor-drawer-id"
-                            class="energy-drawer-id"
-                        ></span>
-
-                    </div>
-
-
-                    <button
-                        type="button"
-                        id="actor-drawer-close"
-                        class="energy-drawer-close"
-                        aria-label="Close actor profile"
-                    >
-                        &times;
-                    </button>
-
-                </div>
-
-
-                <div
-                    id="actor-drawer-content"
-                    class="energy-drawer-content"
-                >
-                    <!-- JS inserts actor profile here -->
-                </div>
-
-            </aside>
-
-
-
         </div>
 
 
@@ -2510,106 +2401,178 @@ window.INETTThemeUrl =
                     </div>
 
 
-                        <div class="energy-finance-flow-row">
+                                           <!-- =================================================
+                         FINANCE FLOW
+                    ================================================== -->
 
-                            <div class="energy-chart-panel energy-finance-flow-panel">
+                    <div class="energy-finance-flow-row">
 
-                                <div class="energy-chart-header">
+                        <div class="energy-chart-panel energy-finance-flow-panel">
 
-                                    <div>
+                            <div class="energy-chart-header">
 
-                                        <div class="energy-heading-with-help">
+                                <div>
 
-                                            <h3>
-                                                Finance flow
-                                            </h3>
+                                    <div class="energy-heading-with-help">
 
-                                            <button
-                                                type="button"
-                                                class="energy-help-tooltip"
-                                                aria-label="How to read the finance flow"
+                                        <h3>
+                                            Finance flow
+                                        </h3>
+
+                                        <button
+                                            type="button"
+                                            class="energy-help-tooltip"
+                                            aria-label="How to read the finance flow"
+                                        >
+                                            ?
+
+                                            <span
+                                                class="
+                                                    energy-help-tooltip-content
+                                                    energy-finance-help
+                                                "
                                             >
-                                                ?
 
-                                                <span
-                                                    class="
-                                                        energy-help-tooltip-content
-                                                        energy-finance-help
-                                                    "
-                                                >
+                                                <strong>
+                                                    How to read this chart
+                                                </strong>
 
-                                                    <strong>
-                                                        How to read this chart
-                                                    </strong>
-
-                                                    <span>
-                                                        Read the flow from
-                                                        <b>left to right:</b>
-                                                        Provider → Recipient → Initiative.
-                                                    </span>
-
-                                                    <span>
-                                                        <b>Providers</b> are the institutions
-                                                        supplying or mobilising finance.
-                                                    </span>
-
-                                                    <span>
-                                                        <b>Recipients</b> are the institutions
-                                                        receiving or administering that finance.
-                                                    </span>
-
-                                                    <span>
-                                                        <b>Initiatives</b> show what the finance
-                                                        is linked to in the INETT dataset.
-                                                    </span>
-
-                                                    <span>
-                                                        <b>Thicker flows</b> represent larger
-                                                        USD amounts.
-                                                    </span>
-
-                                                    <span>
-                                                        Hover over a node or connection to inspect
-                                                        its details and value.
-                                                    </span>
-
-                                                    <span>
-                                                        Only <b>aggregation-eligible</b> records
-                                                        are included. Non-additive records are
-                                                        excluded to avoid double counting.
-                                                    </span>
-
+                                                <span>
+                                                    Read the flow from
+                                                    <b>left to right:</b>
+                                                    Provider → Recipient → Initiative.
                                                 </span>
 
-                                            </button>
+                                                <span>
+                                                    <b>Providers</b> supply or
+                                                    mobilise finance.
+                                                </span>
 
-                                        </div>
+                                                <span>
+                                                    <b>Recipients</b> receive or
+                                                    administer that finance.
+                                                </span>
 
+                                                <span>
+                                                    <b>Initiatives</b> show what
+                                                    the finance is linked to.
+                                                </span>
 
-                                        <p>
-                                            Aggregation-eligible finance from providers
-                                            through recipients to linked initiatives.
-                                        </p>
+                                                <span>
+                                                    Flow widths use a compressed
+                                                    visual scale. Hover to see
+                                                    the actual USD value.
+                                                </span>
 
-                                        
+                                            </span>
+
+                                        </button>
 
                                     </div>
 
+
+                                    <p>
+                                        Aggregation-eligible finance from
+                                        providers through recipients to
+                                        linked initiatives.
+                                    </p>
+
                                 </div>
 
+                            </div>
 
-                                <div
-                                    id="finance-flow-chart"
-                                    class="
-                                        energy-chart
-                                        energy-finance-flow-chart
-                                    "
-                                ></div>
+
+                            <div
+                                id="finance-flow-chart"
+                                class="
+                                    energy-chart
+                                    energy-finance-flow-chart
+                                "
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         HOW TO READ FINANCE
+                    ================================================== -->
+
+                    <div class="energy-finance-guide">
+
+                        <div class="energy-finance-guide-title">
+
+                            <span class="energy-finance-guide-icon">
+                                ?
+                            </span>
+
+                            <div>
+
+                                <strong>
+                                    How to read this
+                                </strong>
+
+                                <span>
+                                    Understanding the finance visuals
+                                </span>
 
                             </div>
 
                         </div>
 
+
+                        <div class="energy-finance-guide-item">
+
+                            <strong>
+                                Finance by subsector
+                            </strong>
+
+                            <p>
+                                Shows aggregation-eligible finance
+                                grouped by subsector. Bar length
+                                represents the USD amount, while
+                                labels show each subsector's share
+                                and number of eligible records.
+                            </p>
+
+                        </div>
+
+
+                        <div class="energy-finance-guide-item">
+
+                            <strong>
+                                Finance flow
+                            </strong>
+
+                            <p>
+                                Read from left to right:
+                                <b>
+                                    Providers → Recipients → Initiatives.
+                                </b>
+                                Flow widths use a compressed visual
+                                scale so both large and small flows
+                                remain readable. Hover for the actual
+                                USD value.
+                            </p>
+
+                        </div>
+
+
+                        <div class="energy-finance-guide-item">
+
+                            <strong>
+                                Why some records are excluded
+                            </strong>
+
+                            <p>
+                                Records marked as non-additive are
+                                excluded from totals and finance-flow
+                                visualisation to avoid double counting
+                                broader or overlapping commitments.
+                            </p>
+
+                        </div>
 
                     </div>
 
@@ -2617,14 +2580,13 @@ window.INETTThemeUrl =
 
             </section>
 
-
         </div>
-
 
 
         <!-- =================================================
              TAB 5 — POLICIES
         ================================================== -->
+    
 
         <div
             class="energy-tab-panel"
@@ -3018,6 +2980,125 @@ window.INETTThemeUrl =
 
 
     </div>
+
+            <!-- =================================================
+             GLOBAL DETAIL DRAWERS
+        ================================================== -->
+
+
+        <!-- =================================================
+             INITIATIVE DETAIL DRAWER
+        ================================================== -->
+
+        <div
+            id="initiative-drawer-backdrop"
+            class="energy-drawer-backdrop"
+        ></div>
+
+        <aside
+            id="initiative-drawer"
+            class="energy-initiative-drawer"
+            aria-hidden="true"
+        >
+
+            <div class="energy-drawer-header">
+
+                <div>
+
+                    <span class="energy-section-eyebrow">
+                        Initiative profile
+                    </span>
+
+                    <h2 id="initiative-drawer-title">
+                        Initiative
+                    </h2>
+
+                    <span
+                        id="initiative-drawer-id"
+                        class="energy-drawer-id"
+                    ></span>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="energy-drawer-close"
+                    id="initiative-drawer-close"
+                    aria-label="Close initiative profile"
+                >
+                    &times;
+                </button>
+
+            </div>
+
+
+            <div
+                id="initiative-drawer-content"
+                class="energy-drawer-content"
+            >
+                <!-- JS inserts initiative details here -->
+            </div>
+
+        </aside>
+
+
+
+        <!-- =================================================
+             ACTOR DETAIL DRAWER
+        ================================================== -->
+
+        <div
+            id="actor-drawer-backdrop"
+            class="energy-drawer-backdrop"
+        ></div>
+
+        <aside
+            id="actor-drawer"
+            class="energy-initiative-drawer"
+            aria-hidden="true"
+        >
+
+            <div class="energy-drawer-header">
+
+                <div>
+
+                    <span class="energy-section-eyebrow">
+                        Actor profile
+                    </span>
+
+                    <h2 id="actor-drawer-title">
+                        Actor
+                    </h2>
+
+                    <span
+                        id="actor-drawer-id"
+                        class="energy-drawer-id"
+                    ></span>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="actor-drawer-close"
+                    class="energy-drawer-close"
+                    aria-label="Close actor profile"
+                >
+                    &times;
+                </button>
+
+            </div>
+
+
+            <div
+                id="actor-drawer-content"
+                class="energy-drawer-content"
+            >
+                <!-- JS inserts actor profile here -->
+            </div>
+
+        </aside>
 
 
 </main>

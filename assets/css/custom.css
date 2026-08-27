@@ -2131,3 +2131,123 @@ button.energy-list-item:hover {
     }
 
 }
+
+.energy-finance-guide {
+    display: grid;
+
+    grid-template-columns:
+        0.7fr
+        1fr
+        1fr
+        1fr;
+
+    gap: 0;
+
+    margin-top: 24px;
+
+    border: 1px solid #dfe5e1;
+
+    border-radius: 12px;
+
+    background: #ffffff;
+
+    overflow: hidden;
+}
+
+
+.energy-finance-guide > div {
+    padding: 22px 24px;
+}
+
+
+.energy-finance-guide > div + div {
+    border-left: 1px solid #edf0ee;
+}
+
+
+.energy-finance-guide-title {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    background: #f7faf8;
+}
+
+
+.energy-finance-guide-title strong {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #17211c;
+
+    font-size: 15px;
+}
+
+
+.energy-finance-guide-title span {
+    color: #747d78;
+
+    font-size: 11px;
+}
+
+
+.energy-finance-guide-icon {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 34px;
+    height: 34px;
+
+    flex: 0 0 34px;
+
+    border: 1px solid #b9cbc3;
+
+    border-radius: 50%;
+
+    color: #0f6e56;
+
+    font-size: 15px;
+    font-weight: 700;
+}
+
+
+.energy-finance-guide-item strong {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #24332c;
+
+    font-size: 13px;
+}
+
+
+.energy-finance-guide-item p {
+    margin: 0;
+
+    color: #606b65;
+
+    font-size: 12px;
+
+    line-height: 1.6;
+}
+
+
+@media (max-width: 900px) {
+
+    .energy-finance-guide {
+        grid-template-columns: 1fr;
+    }
+
+
+    .energy-finance-guide > div + div {
+        border-left: 0;
+        border-top: 1px solid #edf0ee;
+    }
+
+}

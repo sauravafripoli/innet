@@ -3753,7 +3753,7 @@
 
         /*
         ----------------------------------------------------------
-        Eligible finance records only
+        Eligible finance only
         ----------------------------------------------------------
         */
 
@@ -3773,12 +3773,6 @@
             );
 
 
-        /*
-        ----------------------------------------------------------
-        Node + link collections
-        ----------------------------------------------------------
-        */
-
         const nodes =
             new Map();
 
@@ -3789,14 +3783,26 @@
 
         /*
         ----------------------------------------------------------
-        Add a node once
+        Statistics for richer node tooltips
+        ----------------------------------------------------------
+        */
+
+        const providerStats = {};
+        const recipientStats = {};
+        const initiativeStats = {};
+
+
+        /*
+        ----------------------------------------------------------
+        Add node
         ----------------------------------------------------------
         */
 
         function addNode(
             id,
             name,
-            type
+            type,
+            entityId
         ) {
 
             if (!id) {
@@ -3804,32 +3810,69 @@
             }
 
 
-            if (!nodes.has(id)) {
+            if (nodes.has(id)) {
+                return;
+            }
 
-                nodes.set(
-                    id,
-                    {
 
-                        name:
-                            id,
+            let color =
+                '#7564a8';
 
-                        displayName:
-                            name,
 
-                        nodeType:
-                            type
+            if (type === 'Provider') {
 
-                    }
-                );
+                color =
+                    '#0f6e56';
+
+            } else if (type === 'Recipient') {
+
+                color =
+                    '#3e7f96';
 
             }
+
+
+            nodes.set(
+                id,
+                {
+
+                    name:
+                        id,
+
+                    displayName:
+                        name,
+
+                    nodeType:
+                        type,
+
+                    entityId:
+                        entityId || '',
+
+                    itemStyle: {
+
+                        color:
+                            color,
+
+                        borderColor:
+                            '#ffffff',
+
+                        borderWidth:
+                            1
+
+                    }
+
+                }
+            );
 
         }
 
 
         /*
         ----------------------------------------------------------
-        Add / aggregate links
+        Add finance link
+
+        actualValue = true USD amount
+        value       = later converted to visual scale
         ----------------------------------------------------------
         */
 
@@ -3861,6 +3904,7 @@
                 links.set(
                     key,
                     {
+
                         source:
                             source,
 
@@ -3872,6 +3916,7 @@
 
                         value:
                             0
+
                     }
                 );
 
@@ -3890,7 +3935,7 @@
 
         /*
         ----------------------------------------------------------
-        Build Provider → Recipient → Initiative relationships
+        Build network
         ----------------------------------------------------------
         */
 
@@ -3904,10 +3949,31 @@
                     );
 
 
+                const providerActorId =
+                    String(
+                        record.provider_actor_id
+                        || ''
+                    );
+
+
+                const recipientActorId =
+                    String(
+                        record.recipient_actor_id
+                        || ''
+                    );
+
+
+                const linkedInitiativeId =
+                    String(
+                        record.linked_initiative_id
+                        || ''
+                    );
+
+
                 const providerId =
                     'provider:'
                     + (
-                        record.provider_actor_id
+                        providerActorId
                         || 'unknown'
                     );
 
@@ -3915,7 +3981,7 @@
                 const recipientId =
                     'recipient:'
                     + (
-                        record.recipient_actor_id
+                        recipientActorId
                         || 'unknown'
                     );
 
@@ -3923,7 +3989,7 @@
                 const initiativeId =
                     'initiative:'
                     + (
-                        record.linked_initiative_id
+                        linkedInitiativeId
                         || record.finance_id
                     );
 
@@ -3942,30 +4008,191 @@
 
                 const initiativeName =
                     record.initiative_name
-                    || record.linked_initiative_id
+                    || linkedInitiativeId
                     || 'Unlinked finance';
 
+
+                /*
+                --------------------------------------------------
+                Provider statistics
+                --------------------------------------------------
+                */
+
+                if (!providerStats[providerId]) {
+
+                    providerStats[providerId] = {
+
+                        total:
+                            0,
+
+                        recipients:
+                            new Set(),
+
+                        records:
+                            0
+
+                    };
+
+                }
+
+
+                providerStats[
+                    providerId
+                ].total +=
+                    amount;
+
+
+                providerStats[
+                    providerId
+                ].recipients.add(
+                    recipientId
+                );
+
+
+                providerStats[
+                    providerId
+                ].records++;
+
+
+                /*
+                --------------------------------------------------
+                Recipient statistics
+                --------------------------------------------------
+                */
+
+                if (!recipientStats[recipientId]) {
+
+                    recipientStats[recipientId] = {
+
+                        total:
+                            0,
+
+                        providers:
+                            new Set(),
+
+                        initiatives:
+                            new Set(),
+
+                        records:
+                            0
+
+                    };
+
+                }
+
+
+                recipientStats[
+                    recipientId
+                ].total +=
+                    amount;
+
+
+                recipientStats[
+                    recipientId
+                ].providers.add(
+                    providerId
+                );
+
+
+                recipientStats[
+                    recipientId
+                ].initiatives.add(
+                    initiativeId
+                );
+
+
+                recipientStats[
+                    recipientId
+                ].records++;
+
+
+                /*
+                --------------------------------------------------
+                Initiative statistics
+                --------------------------------------------------
+                */
+
+                if (!initiativeStats[initiativeId]) {
+
+                    initiativeStats[initiativeId] = {
+
+                        total:
+                            0,
+
+                        providers:
+                            new Set(),
+
+                        recipients:
+                            new Set(),
+
+                        records:
+                            0
+
+                    };
+
+                }
+
+
+                initiativeStats[
+                    initiativeId
+                ].total +=
+                    amount;
+
+
+                initiativeStats[
+                    initiativeId
+                ].providers.add(
+                    providerId
+                );
+
+
+                initiativeStats[
+                    initiativeId
+                ].recipients.add(
+                    recipientId
+                );
+
+
+                initiativeStats[
+                    initiativeId
+                ].records++;
+
+
+                /*
+                --------------------------------------------------
+                Nodes
+                --------------------------------------------------
+                */
 
                 addNode(
                     providerId,
                     providerName,
-                    'Provider'
+                    'Provider',
+                    providerActorId
                 );
 
 
                 addNode(
                     recipientId,
                     recipientName,
-                    'Recipient'
+                    'Recipient',
+                    recipientActorId
                 );
 
 
                 addNode(
                     initiativeId,
                     initiativeName,
-                    'Initiative'
+                    'Initiative',
+                    linkedInitiativeId
                 );
 
+
+                /*
+                --------------------------------------------------
+                Links
+                --------------------------------------------------
+                */
 
                 addLink(
                     providerId,
@@ -3991,15 +4218,17 @@
         const linkData =
             [...links.values()];
 
+
+        /*
+        ----------------------------------------------------------
+        Compressed visual scale
+
+        Real USD remains in actualValue.
+        ----------------------------------------------------------
+        */
+
         linkData.forEach(
             link => {
-
-                /*
-                Visual compression only.
-
-                Actual USD value remains stored
-                in link.actualValue.
-                */
 
                 link.value =
                     Math.sqrt(
@@ -4060,7 +4289,7 @@
 
         /*
         ----------------------------------------------------------
-        Render Sankey
+        Render
         ----------------------------------------------------------
         */
 
@@ -4084,10 +4313,10 @@
                         'text',
 
                     left:
-                        42,
+                        45,
 
                     top:
-                        8,
+                        7,
 
                     style: {
 
@@ -4101,7 +4330,7 @@
                             700,
 
                         fill:
-                            '#66716b'
+                            '#53615a'
 
                     }
 
@@ -4117,7 +4346,7 @@
                         '47%',
 
                     top:
-                        8,
+                        7,
 
                     style: {
 
@@ -4131,7 +4360,7 @@
                             700,
 
                         fill:
-                            '#66716b'
+                            '#53615a'
 
                     }
 
@@ -4144,10 +4373,10 @@
                         'text',
 
                     right:
-                        85,
+                        95,
 
                     top:
-                        8,
+                        7,
 
                     style: {
 
@@ -4161,7 +4390,7 @@
                             700,
 
                         fill:
-                            '#66716b'
+                            '#53615a'
 
                     }
 
@@ -4172,7 +4401,7 @@
 
             /*
             ------------------------------------------------------
-            Tooltips
+            Tooltip
             ------------------------------------------------------
             */
 
@@ -4181,6 +4410,9 @@
                 trigger:
                     'item',
 
+                confine:
+                    true,
+
                 formatter:
                     function (
                         params
@@ -4188,7 +4420,7 @@
 
                         /*
                         ------------------------------------------
-                        Connection tooltip
+                        Flow tooltip
                         ------------------------------------------
                         */
 
@@ -4241,6 +4473,12 @@
                                         params.data.actualValue
                                     )}
                                 </strong>
+
+                                <br>
+
+                                <span style="color:#78817c;">
+                                    Aggregation-eligible finance
+                                </span>
                             `;
 
                         }
@@ -4256,20 +4494,230 @@
                             params.data;
 
 
+                        if (
+                            node.nodeType
+                            === 'Provider'
+                        ) {
+
+                            const stats =
+                                providerStats[
+                                    node.name
+                                ];
+
+
+                            return `
+                                <strong>
+                                    ${escapeEnergyHtml(
+                                        node.displayName
+                                    )}
+                                </strong>
+
+                                <br>
+
+                                Provider
+
+                                <br><br>
+
+                                Finance supplied:
+                                <strong>
+                                    ${formatMoney(
+                                        stats?.total || 0
+                                    )}
+                                </strong>
+
+                                <br>
+
+                                Recipients:
+                                <strong>
+                                    ${
+                                        stats
+                                            ?.recipients
+                                            ?.size
+                                        || 0
+                                    }
+                                </strong>
+
+                                <br>
+
+                                Finance records:
+                                <strong>
+                                    ${
+                                        stats
+                                            ?.records
+                                        || 0
+                                    }
+                                </strong>
+
+                                ${
+                                    node.entityId
+                                        ? `
+                                            <br><br>
+                                            <span style="color:#66716b;">
+                                                Click to view actor profile
+                                            </span>
+                                        `
+                                        : ''
+                                }
+                            `;
+
+                        }
+
+
+                        if (
+                            node.nodeType
+                            === 'Recipient'
+                        ) {
+
+                            const stats =
+                                recipientStats[
+                                    node.name
+                                ];
+
+
+                            return `
+                                <strong>
+                                    ${escapeEnergyHtml(
+                                        node.displayName
+                                    )}
+                                </strong>
+
+                                <br>
+
+                                Recipient
+
+                                <br><br>
+
+                                Finance received:
+                                <strong>
+                                    ${formatMoney(
+                                        stats?.total || 0
+                                    )}
+                                </strong>
+
+                                <br>
+
+                                Providers:
+                                <strong>
+                                    ${
+                                        stats
+                                            ?.providers
+                                            ?.size
+                                        || 0
+                                    }
+                                </strong>
+
+                                <br>
+
+                                Linked initiatives:
+                                <strong>
+                                    ${
+                                        stats
+                                            ?.initiatives
+                                            ?.size
+                                        || 0
+                                    }
+                                </strong>
+
+                                ${
+                                    node.entityId
+                                        ? `
+                                            <br><br>
+                                            <span style="color:#66716b;">
+                                                Click to view actor profile
+                                            </span>
+                                        `
+                                        : ''
+                                }
+                            `;
+
+                        }
+
+
+                        /*
+                        ------------------------------------------
+                        Initiative tooltip
+                        ------------------------------------------
+                        */
+
+                        const stats =
+                            initiativeStats[
+                                node.name
+                            ];
+
+
+                        const initiative =
+                            node.entityId
+                                ? initiativeById[
+                                    node.entityId
+                                ]
+                                : null;
+
+
                         return `
                             <strong>
                                 ${escapeEnergyHtml(
                                     node.displayName
-                                    || node.name
                                 )}
                             </strong>
 
                             <br>
 
-                            ${escapeEnergyHtml(
-                                node.nodeType
-                                || ''
-                            )}
+                            Initiative
+
+                            <br><br>
+
+                            Linked finance:
+                            <strong>
+                                ${formatMoney(
+                                    stats?.total || 0
+                                )}
+                            </strong>
+
+                            ${
+                                initiative
+                                    ?.primary_subsector
+                                    ? `
+                                        <br>
+
+                                        Subsector:
+                                        <strong>
+                                            ${escapeEnergyHtml(
+                                                initiative
+                                                    .primary_subsector
+                                            )}
+                                        </strong>
+                                    `
+                                    : ''
+                            }
+
+                            ${
+                                initiative
+                                    ?.standard_status
+                                    ? `
+                                        <br>
+
+                                        Status:
+                                        <strong>
+                                            ${escapeEnergyHtml(
+                                                initiative
+                                                    .standard_status
+                                            )}
+                                        </strong>
+                                    `
+                                    : ''
+                            }
+
+                            ${
+                                node.entityId
+                                    ? `
+                                        <br><br>
+
+                                        <span style="color:#66716b;">
+                                            Click to view initiative profile
+                                        </span>
+                                    `
+                                    : ''
+                            }
                         `;
 
                     }
@@ -4284,50 +4732,36 @@
                     type:
                         'sankey',
 
-
                     data:
                         nodeData,
-
 
                     links:
                         linkData,
 
 
-                    /*
-                    --------------------------------------------------
-                    Layout
-                    --------------------------------------------------
-                    */
-
                     left:
                         45,
 
                     right:
-                        220,
+                        235,
 
                     top:
-                        50,
+                        48,
 
                     bottom:
-                        30,
+                        25,
 
 
                     nodeWidth:
                         18,
 
                     nodeGap:
-                        20,
+                        19,
 
 
                     draggable:
                         true,
 
-
-                    /*
-                    --------------------------------------------------
-                    Hover behaviour
-                    --------------------------------------------------
-                    */
 
                     emphasis: {
 
@@ -4336,12 +4770,6 @@
 
                     },
 
-
-                    /*
-                    --------------------------------------------------
-                    Connections
-                    --------------------------------------------------
-                    */
 
                     lineStyle: {
 
@@ -4352,30 +4780,27 @@
                             0.5,
 
                         opacity:
-                            0.32
+                            0.3
 
                     },
 
 
-                    /*
-                    --------------------------------------------------
-                    Labels
-                    --------------------------------------------------
-                    */
-
                     label: {
+
+                        color:
+                            '#34403a',
 
                         fontSize:
                             11,
 
-                        color:
-                            '#39413d',
+                        lineHeight:
+                            15,
 
                         distance:
-                            8,
+                            9,
 
                         width:
-                            190,
+                            205,
 
                         overflow:
                             'truncate',
@@ -4403,6 +4828,83 @@
             ]
 
         });
+
+
+        /*
+        ----------------------------------------------------------
+        Click interactions
+
+        Provider / recipient → Actor drawer
+        Initiative           → Initiative drawer
+        ----------------------------------------------------------
+        */
+
+        chart.off(
+            'click'
+        );
+
+
+        chart.on(
+            'click',
+            function (
+                params
+            ) {
+
+                if (
+                    params.dataType
+                    !== 'node'
+                ) {
+                    return;
+                }
+
+
+                const node =
+                    params.data;
+
+
+                if (
+                    node.nodeType
+                    === 'Initiative'
+                    &&
+                    node.entityId
+                    &&
+                    typeof openInitiativeDrawer
+                        === 'function'
+                ) {
+
+                    openInitiativeDrawer(
+                        node.entityId
+                    );
+
+
+                    return;
+
+                }
+
+
+                if (
+                    (
+                        node.nodeType
+                        === 'Provider'
+                        ||
+                        node.nodeType
+                        === 'Recipient'
+                    )
+                    &&
+                    node.entityId
+                    &&
+                    typeof openActorDrawer
+                        === 'function'
+                ) {
+
+                    openActorDrawer(
+                        node.entityId
+                    );
+
+                }
+
+            }
+        );
 
     }
 
