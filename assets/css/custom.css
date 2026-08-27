@@ -3044,3 +3044,303 @@ button.energy-list-item:hover {
     }
 
 }
+
+/* ==========================================================
+   TARGET PROFILE DRAWER
+========================================================== */
+
+.energy-target-profile-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    margin-bottom: 24px;
+}
+
+
+.energy-target-tag {
+    display: inline-flex;
+    align-items: center;
+
+    min-height: 28px;
+
+    padding: 5px 10px;
+
+    border: 1px solid #dce4df;
+    border-radius: 999px;
+
+    background: #f5f8f6;
+
+    color: #405049;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+.energy-target-tag.is-year {
+    background: #eaf4ef;
+    border-color: #cfe4da;
+
+    color: #0f6e56;
+}
+
+
+.energy-target-profile-section {
+    padding: 28px 0;
+
+    border-top: 1px solid #e6ebe8;
+}
+
+
+.energy-target-profile-section h3 {
+    margin: 0 0 20px;
+
+    color: #171b19;
+
+    font-size: 22px;
+    line-height: 1.2;
+}
+
+
+.energy-target-profile-block {
+    margin-top: 20px;
+}
+
+
+.energy-target-profile-label,
+.energy-target-profile-block > span {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #707975;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 0.04em;
+
+    text-transform: uppercase;
+}
+
+
+.energy-target-profile-block p {
+    margin: 0;
+
+    color: #252c28;
+
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+
+/* Baseline → target */
+
+.energy-target-value-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 12px;
+}
+
+
+.energy-target-value-grid > div {
+    padding: 18px;
+
+    border: 1px solid #e0e6e2;
+    border-radius: 10px;
+
+    background: #f8faf9;
+}
+
+
+.energy-target-value-grid span,
+.energy-target-value-grid small {
+    display: block;
+
+    color: #707975;
+
+    font-size: 11px;
+}
+
+
+.energy-target-value-grid strong {
+    display: block;
+
+    margin: 7px 0;
+
+    color: #17221d;
+
+    font-size: 22px;
+    line-height: 1.15;
+}
+
+
+/* Observation */
+
+.energy-target-latest-observation {
+    padding: 20px;
+
+    border: 1px solid #dce6e1;
+    border-radius: 12px;
+
+    background: #f7faf8;
+}
+
+
+.energy-target-observation-heading,
+.energy-target-verification {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+}
+
+
+.energy-target-observation-heading span,
+.energy-target-verification span {
+    color: #707975;
+
+    font-size: 11px;
+}
+
+
+.energy-target-observation-heading strong,
+.energy-target-verification strong {
+    color: #39433e;
+
+    font-size: 11px;
+}
+
+
+.energy-target-observation-value {
+    margin: 18px 0;
+
+    color: #0f6e56;
+
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+
+.energy-target-verification {
+    padding-top: 14px;
+
+    border-top: 1px solid #e1e7e4;
+}
+
+
+.energy-target-observation-note {
+    margin: 16px 0 0;
+
+    color: #4d5752;
+
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+
+.energy-target-no-evidence {
+    padding: 20px;
+
+    border: 1px dashed #d6ddda;
+    border-radius: 10px;
+
+    background: #fafbfa;
+}
+
+
+.energy-target-no-evidence strong {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #39413d;
+}
+
+
+.energy-target-no-evidence p {
+    margin: 0;
+
+    color: #707975;
+
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+
+/* Observation history */
+
+.energy-target-history-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding: 14px 0;
+
+    border-bottom: 1px solid #edf0ee;
+}
+
+
+.energy-target-history-row > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+
+.energy-target-history-row span {
+    color: #737b77;
+
+    font-size: 11px;
+}
+
+
+.energy-target-history-row > strong {
+    color: #17221d;
+
+    font-size: 13px;
+}
+
+
+.energy-drawer-source-link {
+    display: inline-block;
+
+    margin-top: 14px;
+
+    color: #0f6e56;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    text-decoration: none;
+}
+
+
+.energy-drawer-source-link:hover {
+    text-decoration: underline;
+}
+
+
+.energy-target-row {
+    cursor: pointer;
+}
+
+
+.energy-target-row:hover {
+    background: #f5f8f6;
+}
+
+
+@media (max-width: 520px) {
+
+    .energy-target-value-grid {
+        grid-template-columns: 1fr;
+    }
+
+}

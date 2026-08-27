@@ -3265,6 +3265,110 @@ window.INETTThemeUrl =
 
                 </div>
                 <!-- closes .energy-target-analysis-grid -->
+
+                <!-- =========================================================
+                    TARGET LIBRARY
+                ========================================================== -->
+
+                <div class="energy-panel energy-target-library-panel">
+
+                    <div class="energy-section-header">
+
+                        <div>
+
+                            <span class="energy-section-eyebrow">
+                                Library
+                            </span>
+
+                            <h2>
+                                Target library
+                            </h2>
+
+                            <p class="energy-section-description">
+                                Browse tracked targets, indicators, frameworks
+                                and milestone years.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="energy-directory-toolbar">
+
+                        <input
+                            type="search"
+                            id="target-library-search"
+                            class="energy-directory-search"
+                            placeholder="Search target, framework or indicator..."
+                            autocomplete="off"
+                        >
+
+
+                        <span
+                            id="target-library-count"
+                            class="energy-directory-count"
+                        >
+                            0 targets
+                        </span>
+
+                    </div>
+
+
+                    <div class="energy-table-wrap">
+
+                        <table class="energy-table energy-target-table">
+
+                            <thead>
+
+                                <tr>
+                                    <th>Target</th>
+                                    <th>Framework</th>
+                                    <th>Subsector</th>
+                                    <th>Target year</th>
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="target-library-body"></tbody>
+
+                        </table>
+
+                    </div>
+
+
+                    <div class="energy-pagination">
+
+                        <button
+                            type="button"
+                            id="target-library-prev"
+                            class="energy-pagination-button"
+                        >
+                            Previous
+                        </button>
+
+
+                        <span
+                            id="target-library-page-info"
+                            class="energy-pagination-info"
+                        >
+                            Page 1 of 1
+                        </span>
+
+
+                        <button
+                            type="button"
+                            id="target-library-next"
+                            class="energy-pagination-button"
+                        >
+                            Next
+                        </button>
+
+                    </div>
+
+                </div>
+
             </div>
 
             </section>
@@ -3447,6 +3551,60 @@ window.INETTThemeUrl =
             >
                 <!-- JS inserts policy profile here -->
             </div>
+
+        </aside>
+
+        <!-- =================================================
+            TARGET DETAIL DRAWER
+        ================================================== -->
+
+        <div
+            id="target-drawer-backdrop"
+            class="energy-drawer-backdrop"
+        ></div>
+
+
+        <aside
+            id="target-drawer"
+            class="energy-initiative-drawer"
+            aria-hidden="true"
+        >
+
+            <div class="energy-drawer-header">
+
+                <div>
+
+                    <span class="energy-drawer-eyebrow">
+                        Target profile
+                    </span>
+
+                    <h2 id="target-drawer-title">
+                        Target
+                    </h2>
+
+                    <p id="target-drawer-id">
+                        —
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="target-drawer-close"
+                    class="energy-drawer-close"
+                    aria-label="Close target profile"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div
+                id="target-drawer-content"
+                class="energy-drawer-content"
+            ></div>
 
         </aside>
 

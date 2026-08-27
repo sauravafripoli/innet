@@ -7346,6 +7346,9 @@
         updateTargetTimelineChart();
         updateTargetMonitoringCoverage();
 
+        targetLibraryPage = 1;
+        renderTargetLibrary();
+
         document.dispatchEvent(
             new CustomEvent(
                 'inett:filtersChanged',
@@ -8018,6 +8021,13 @@
 
     let policyLibrarySearch ='';
 
+    let targetLibraryPage = 1;
+
+
+    const targetLibraryPageSize = 10;
+
+    let targetLibrarySearch = '';
+
 
     function formatExplorerMoney(value) {
 
@@ -8106,6 +8116,7 @@
         );
 
     }
+
 
 
 /* ==========================================================
@@ -15131,6 +15142,1047 @@
 
     }
 
+    /* ==========================================================
+        TARGET LIBRARY
+    ========================================================== */
+
+    function renderTargetLibrary() {
+
+        const body =
+            document.getElementById(
+                'target-library-body'
+            );
+
+
+        const count =
+            document.getElementById(
+                'target-library-count'
+            );
+
+
+        const pageInfo =
+            document.getElementById(
+                'target-library-page-info'
+            );
+
+
+        const previousButton =
+            document.getElementById(
+                'target-library-prev'
+            );
+
+
+        const nextButton =
+            document.getElementById(
+                'target-library-next'
+            );
+
+
+        if (!body) {
+            return;
+        }
+
+
+        let targets =
+            getFilteredTargets();
+
+
+        const search =
+            normalizeFilterValue(
+                targetLibrarySearch
+            );
+
+
+        if (search) {
+
+            targets =
+                targets.filter(
+                    target => {
+
+                        const haystack =
+                            [
+                                target.target_id,
+                                target.target_statement,
+                                target.framework,
+                                target.subsector,
+                                target.indicator,
+                                target.unit,
+                                target.conditionality,
+                                target.target_year
+                            ]
+                            .filter(Boolean)
+                            .join(' ')
+                            .toLowerCase();
+
+
+                        return haystack.includes(
+                            search
+                        );
+
+                    }
+                );
+
+        }
+
+
+        targets =
+            [...targets]
+                .sort(
+                    (a, b) => {
+
+                        const yearDifference =
+                            Number(
+                                a.target_year || 9999
+                            )
+                            -
+                            Number(
+                                b.target_year || 9999
+                            );
+
+
+                        if (yearDifference !== 0) {
+                            return yearDifference;
+                        }
+
+
+                        return String(
+                            a.target_statement
+                            || ''
+                        )
+                        .localeCompare(
+                            String(
+                                b.target_statement
+                                || ''
+                            )
+                        );
+
+                    }
+                );
+
+
+        const totalRows =
+            targets.length;
+
+
+        const totalPages =
+            Math.max(
+                1,
+                Math.ceil(
+                    totalRows
+                    / targetLibraryPageSize
+                )
+            );
+
+
+        if (
+            targetLibraryPage
+            > totalPages
+        ) {
+
+            targetLibraryPage =
+                totalPages;
+
+        }
+
+
+        const startIndex =
+            (
+                targetLibraryPage
+                - 1
+            )
+            * targetLibraryPageSize;
+
+
+        const visibleTargets =
+            targets.slice(
+                startIndex,
+                startIndex
+                + targetLibraryPageSize
+            );
+
+
+        if (count) {
+
+            count.textContent =
+                totalRows.toLocaleString()
+                + (
+                    totalRows === 1
+                        ? ' target'
+                        : ' targets'
+                );
+
+        }
+
+
+        if (!visibleTargets.length) {
+
+            body.innerHTML = `
+
+                <tr>
+
+                    <td colspan="4">
+                        No targets match the current filters.
+                    </td>
+
+                </tr>
+
+            `;
+
+        } else {
+
+            body.innerHTML =
+                visibleTargets
+                    .map(
+                        target => {
+
+                            return `
+
+                                <tr
+                                    class="energy-target-row"
+                                    data-target-id="${escapeEnergyHtml(
+                                        target.target_id
+                                    )}"
+                                >
+
+                                    <td>
+
+                                        <strong>
+                                            ${escapeEnergyHtml(
+                                                target.target_statement
+                                                || target.target_id
+                                            )}
+                                        </strong>
+
+                                        <small>
+                                            ${escapeEnergyHtml(
+                                                target.indicator
+                                                || ''
+                                            )}
+                                        </small>
+
+                                    </td>
+
+
+                                    <td>
+                                        ${escapeEnergyHtml(
+                                            target.framework
+                                            || '—'
+                                        )}
+                                    </td>
+
+
+                                    <td>
+                                        ${escapeEnergyHtml(
+                                            target.subsector
+                                            || '—'
+                                        )}
+                                    </td>
+
+
+                                    <td>
+                                        ${escapeEnergyHtml(
+                                            target.target_year
+                                            || '—'
+                                        )}
+                                    </td>
+
+                                </tr>
+
+                            `;
+
+                        }
+                    )
+                    .join('');
+
+        }
+
+
+        if (pageInfo) {
+
+            pageInfo.textContent =
+                totalRows
+                    ? `Page ${targetLibraryPage} of ${totalPages}`
+                    : 'Page 0 of 0';
+
+        }
+
+
+        if (previousButton) {
+
+            previousButton.disabled =
+                (
+                    !totalRows
+                    ||
+                    targetLibraryPage <= 1
+                );
+
+        }
+
+
+        if (nextButton) {
+
+            nextButton.disabled =
+                (
+                    !totalRows
+                    ||
+                    targetLibraryPage >= totalPages
+                );
+
+        }
+
+    }
+
+    function initTargetLibrary() {
+
+        const search =
+            document.getElementById(
+                'target-library-search'
+            );
+
+
+        const previousButton =
+            document.getElementById(
+                'target-library-prev'
+            );
+
+
+        const nextButton =
+            document.getElementById(
+                'target-library-next'
+            );
+
+
+        if (search) {
+
+            search.addEventListener(
+                'input',
+                function () {
+
+                    targetLibrarySearch =
+                        this.value
+                        || '';
+
+
+                    targetLibraryPage =
+                        1;
+
+
+                    renderTargetLibrary();
+
+                }
+            );
+
+        }
+
+
+        if (previousButton) {
+
+            previousButton.addEventListener(
+                'click',
+                function () {
+
+                    if (
+                        targetLibraryPage
+                        <= 1
+                    ) {
+                        return;
+                    }
+
+
+                    targetLibraryPage--;
+
+
+                    renderTargetLibrary();
+
+                }
+            );
+
+        }
+
+
+        if (nextButton) {
+
+            nextButton.addEventListener(
+                'click',
+                function () {
+
+                    targetLibraryPage++;
+
+
+                    renderTargetLibrary();
+
+                }
+            );
+
+        }
+
+        const body =
+            document.getElementById(
+                'target-library-body'
+            );
+
+
+        if (body) {
+
+            body.addEventListener(
+                'click',
+                function (event) {
+
+                    const row =
+                        event.target.closest(
+                            '.energy-target-row'
+                        );
+
+
+                    if (!row) {
+                        return;
+                    }
+
+
+                    openTargetDrawer(
+                        row.dataset.targetId
+                    );
+
+                }
+            );
+
+        }
+
+        renderTargetLibrary();
+
+    }
+
+    /* ==========================================================
+    TARGET DRAWER EVENTS
+    ========================================================== */
+
+        function initTargetDrawer() {
+
+            const closeButton =
+                document.getElementById(
+                    'target-drawer-close'
+                );
+
+
+            const backdrop =
+                document.getElementById(
+                    'target-drawer-backdrop'
+                );
+
+
+            if (closeButton) {
+
+                closeButton.addEventListener(
+                    'click',
+                    closeTargetDrawer
+                );
+
+            }
+
+
+            if (backdrop) {
+
+                backdrop.addEventListener(
+                    'click',
+                    closeTargetDrawer
+                );
+
+            }
+
+        }
+
+/* ==========================================================
+   TARGET PROFILE DRAWER
+========================================================== */
+
+    function openTargetDrawer(
+        targetId
+    ) {
+
+        const drawer =
+            document.getElementById(
+                'target-drawer'
+            );
+
+
+        const backdrop =
+            document.getElementById(
+                'target-drawer-backdrop'
+            );
+
+
+        const title =
+            document.getElementById(
+                'target-drawer-title'
+            );
+
+
+        const idElement =
+            document.getElementById(
+                'target-drawer-id'
+            );
+
+
+        const content =
+            document.getElementById(
+                'target-drawer-content'
+            );
+
+
+        if (
+            !drawer
+            ||
+            !backdrop
+            ||
+            !content
+        ) {
+            return;
+        }
+
+
+        const targets =
+            data.all_targets
+            || [];
+
+
+        const target =
+            targets.find(
+                item =>
+                    String(
+                        item.target_id
+                    )
+                    ===
+                    String(
+                        targetId
+                    )
+            );
+
+
+        if (!target) {
+            return;
+        }
+
+
+        const observations =
+            (
+                data.target_observations
+                || []
+            )
+            .filter(
+                observation =>
+                    String(
+                        observation.target_id
+                    )
+                    ===
+                    String(
+                        target.target_id
+                    )
+            )
+            .sort(
+                (a, b) =>
+                    String(
+                        b.observation_date
+                        || ''
+                    )
+                    .localeCompare(
+                        String(
+                            a.observation_date
+                            || ''
+                        )
+                    )
+            );
+
+
+        const latestObservation =
+            observations[0]
+            || null;
+
+
+        if (title) {
+
+            title.textContent =
+                target.target_statement
+                || 'Target';
+
+        }
+
+
+        if (idElement) {
+
+            idElement.textContent =
+                target.target_id
+                || '—';
+
+        }
+
+
+        const formatTargetValue =
+            function (
+                value,
+                unit
+            ) {
+
+                if (
+                    value === null
+                    ||
+                    value === undefined
+                    ||
+                    value === ''
+                ) {
+                    return '—';
+                }
+
+
+                return (
+                    Number(value)
+                        .toLocaleString()
+                    +
+                    (
+                        unit
+                            ? ' ' + unit
+                            : ''
+                    )
+                );
+
+            };
+
+
+        const sourceLink =
+            target.source_url
+                ? `
+                    <a
+                        href="${escapeEnergyHtml(
+                            target.source_url
+                        )}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="energy-drawer-source-link"
+                    >
+                        View source ↗
+                    </a>
+                `
+                : '';
+
+
+        content.innerHTML = `
+
+            <section class="energy-target-profile-summary">
+
+                <div class="energy-target-profile-tags">
+
+                    ${
+                        target.subsector
+                            ? `
+                                <span class="energy-target-tag">
+                                    ${escapeEnergyHtml(
+                                        target.subsector
+                                    )}
+                                </span>
+                            `
+                            : ''
+                    }
+
+                    ${
+                        target.framework
+                            ? `
+                                <span class="energy-target-tag">
+                                    ${escapeEnergyHtml(
+                                        target.framework
+                                    )}
+                                </span>
+                            `
+                            : ''
+                    }
+
+                    ${
+                        target.target_year
+                            ? `
+                                <span class="energy-target-tag is-year">
+                                    ${escapeEnergyHtml(
+                                        target.target_year
+                                    )}
+                                </span>
+                            `
+                            : ''
+                    }
+
+                </div>
+
+
+                ${
+                    target.indicator
+                        ? `
+                            <div class="energy-target-profile-block">
+
+                                <span class="energy-target-profile-label">
+                                    Indicator
+                                </span>
+
+                                <p>
+                                    ${escapeEnergyHtml(
+                                        target.indicator
+                                    )}
+                                </p>
+
+                            </div>
+                        `
+                        : ''
+                }
+
+            </section>
+
+
+            <section class="energy-target-profile-section">
+
+                <h3>
+                    Target
+                </h3>
+
+
+                <div class="energy-target-value-grid">
+
+                    <div>
+
+                        <span>
+                            Baseline
+                        </span>
+
+                        <strong>
+                            ${formatTargetValue(
+                                target.baseline_value,
+                                target.unit
+                            )}
+                        </strong>
+
+                        ${
+                            target.baseline_year
+                                ? `
+                                    <small>
+                                        ${escapeEnergyHtml(
+                                            target.baseline_year
+                                        )}
+                                    </small>
+                                `
+                                : ''
+                        }
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Target
+                        </span>
+
+                        <strong>
+                            ${formatTargetValue(
+                                target.target_value,
+                                target.unit
+                            )}
+                        </strong>
+
+                        ${
+                            target.target_year
+                                ? `
+                                    <small>
+                                        by ${escapeEnergyHtml(
+                                            target.target_year
+                                        )}
+                                    </small>
+                                `
+                                : ''
+                        }
+
+                    </div>
+
+                </div>
+
+
+                ${
+                    target.conditionality
+                        ? `
+                            <div class="energy-target-profile-block">
+
+                                <span class="energy-target-profile-label">
+                                    Conditionality
+                                </span>
+
+                                <p>
+                                    ${escapeEnergyHtml(
+                                        target.conditionality
+                                    )}
+                                </p>
+
+                            </div>
+                        `
+                        : ''
+                }
+
+            </section>
+
+
+            <section class="energy-target-profile-section">
+
+                <h3>
+                    Monitoring
+                </h3>
+
+
+                ${
+                    latestObservation
+                        ? `
+
+                            <div class="energy-target-latest-observation">
+
+                                <div class="energy-target-observation-heading">
+
+                                    <span>
+                                        Latest observation
+                                    </span>
+
+                                    <strong>
+                                        ${escapeEnergyHtml(
+                                            latestObservation.observation_date
+                                            || 'Date unavailable'
+                                        )}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="energy-target-observation-value">
+
+                                    ${formatTargetValue(
+                                        latestObservation.actual_value,
+                                        latestObservation.unit
+                                        || target.unit
+                                    )}
+
+                                </div>
+
+
+                                ${
+                                    latestObservation.verification_status
+                                        ? `
+                                            <div class="energy-target-verification">
+
+                                                <span>
+                                                    Evidence status
+                                                </span>
+
+                                                <strong>
+                                                    ${escapeEnergyHtml(
+                                                        latestObservation.verification_status
+                                                    )}
+                                                </strong>
+
+                                            </div>
+                                        `
+                                        : ''
+                                }
+
+
+                                ${
+                                    latestObservation.observation_note
+                                        ? `
+                                            <p class="energy-target-observation-note">
+                                                ${escapeEnergyHtml(
+                                                    latestObservation.observation_note
+                                                )}
+                                            </p>
+                                        `
+                                        : ''
+                                }
+
+                            </div>
+
+                        `
+                        : `
+
+                            <div class="energy-target-no-evidence">
+
+                                <strong>
+                                    No recorded observation
+                                </strong>
+
+                                <p>
+                                    No monitoring evidence is currently
+                                    recorded for this target in the dataset.
+                                </p>
+
+                            </div>
+
+                        `
+                }
+
+            </section>
+
+
+            ${
+                observations.length > 1
+                    ? `
+
+                        <section class="energy-target-profile-section">
+
+                            <h3>
+                                Observation history
+                            </h3>
+
+
+                            <div class="energy-target-observation-history">
+
+                                ${observations
+                                    .map(
+                                        observation => `
+
+                                            <div class="energy-target-history-row">
+
+                                                <div>
+
+                                                    <strong>
+                                                        ${escapeEnergyHtml(
+                                                            observation.observation_date
+                                                            || '—'
+                                                        )}
+                                                    </strong>
+
+                                                    <span>
+                                                        ${escapeEnergyHtml(
+                                                            observation.verification_status
+                                                            || 'Status unavailable'
+                                                        )}
+                                                    </span>
+
+                                                </div>
+
+
+                                                <strong>
+
+                                                    ${formatTargetValue(
+                                                        observation.actual_value,
+                                                        observation.unit
+                                                        || target.unit
+                                                    )}
+
+                                                </strong>
+
+                                            </div>
+
+                                        `
+                                    )
+                                    .join('')
+                                }
+
+                            </div>
+
+                        </section>
+
+                    `
+                    : ''
+            }
+
+
+            <section class="energy-target-profile-section">
+
+                <h3>
+                    Source
+                </h3>
+
+
+                ${
+                    target.source_citation
+                        ? `
+                            <p>
+                                ${escapeEnergyHtml(
+                                    target.source_citation
+                                )}
+                            </p>
+                        `
+                        : `
+                            <p>
+                                Source citation unavailable.
+                            </p>
+                        `
+                }
+
+
+                ${sourceLink}
+
+            </section>
+
+        `;
+
+
+        drawer.classList.add(
+            'active'
+        );
+
+
+        backdrop.classList.add(
+            'active'
+        );
+
+
+        drawer.setAttribute(
+            'aria-hidden',
+            'false'
+        );
+
+
+        document.body.classList.add(
+            'energy-drawer-open'
+        );
+
+    }
+
+
+    function closeTargetDrawer() {
+
+        const drawer =
+            document.getElementById(
+                'target-drawer'
+            );
+
+
+        const backdrop =
+            document.getElementById(
+                'target-drawer-backdrop'
+            );
+
+
+        if (drawer) {
+
+            drawer.classList.remove(
+                'active'
+            );
+
+
+            drawer.setAttribute(
+                'aria-hidden',
+                'true'
+            );
+
+        }
+
+
+        if (backdrop) {
+
+            backdrop.classList.remove(
+                'active'
+            );
+
+        }
+
+
+        document.body.classList.remove(
+            'energy-drawer-open'
+        );
+
+    }
+
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -15210,6 +16262,8 @@ document.addEventListener(
         initTargetSubsectorChart();
         updateTargetKpis();
         updateTargetMonitoringCoverage();
+        initTargetLibrary();
+        initTargetDrawer();
 
     }
 );
