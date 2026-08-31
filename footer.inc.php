@@ -168,7 +168,15 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script src="<?php get_theme_url(); ?>/assets/js/energy-dashboard.js"></script>
+<script src="<?php get_theme_url(); ?>/assets/js/energy-core.js"></script>
+<script src="<?php get_theme_url(); ?>/assets/js/energy-filters.js"></script>
+<script src="<?php get_theme_url(); ?>/assets/js/energy-overview.js"></script>
+<script src="<?php get_theme_url(); ?>/assets/js/energy-geography.js"></script>
+<script src="<?php get_theme_url(); ?>/assets/js/energy-actors.js"></script>
+<script src="<?php get_theme_url(); ?>/assets/js/energy-finance.js"></script>
+<script src="<?php get_theme_url(); ?>/assets/js/energy-policies.js"></script>
+<script src="<?php get_theme_url(); ?>/assets/js/energy-targets.js"></script>
+<script src="<?php get_theme_url(); ?>/assets/js/energy-init.js"></script>
 
 
 </body>
